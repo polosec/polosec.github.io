@@ -216,7 +216,7 @@
     Copyright &copy;
     
     
-    2016-2021
+    2020-2021
     Polo
   </div>
   <div class="footer-right">
@@ -234,10 +234,20 @@
       </ul>
     </nav>
   </div>
-  <span id="busuanzi_container_site_pv">
-    本站总访问量<span id="busuanzi_value_site_pv"></span>次
-</span>
-<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js">
+  
+<link rel="stylesheet" href="/css/jquery.fancybox.min.css" media="all">  
+<!-- fancybox大图查看 需jq -->
+<script src="https://cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"></script>
+<script type="text/javascript" src="/js/jquery.fancybox.min.js"></script>
+<script>
+  $('[data-fancybox="images"]').fancybox({//可选
+    thumbs : {
+      autoStart : true //缩略图
+    }
+  });
+  $('[data-fancybox]').fancybox({//启用函数，必须
+    //protect: true //图片右键不能下载，可选
+  });
 </script>
 </footer>
 
