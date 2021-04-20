@@ -1040,7 +1040,7 @@ body {
   margin-right: 16px;
   min-width: 100px;
   color: #908d8d;
-  font-size: 14px;
+  font-size: 15px;
 }
 @media (min-width: 480px) {
   .post-list .post-item {
@@ -1065,7 +1065,7 @@ article header .posttitle {
   margin-top: 0;
   margin-bottom: 0;
   text-transform: none;
-  font-size: 1.5em;
+  font-size: 2em;
   line-height: 1.25;
 }
 article header .meta {
@@ -1138,7 +1138,7 @@ article .content blockquote:before {
 article .content blockquote footer {
   margin: line-height 0;
   color: #908d8d;
-  font-size: 12px;
+  font-size: 15px;
 }
 article .content blockquote footer a {
   background-image: linear-gradient(transparent, transparent 5px, #908d8d 5px, #908d8d);
