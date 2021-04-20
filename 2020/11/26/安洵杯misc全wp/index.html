@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="密码学 爆破SECRET是不知道的 flag是md5(SECRET).hexdigest() 已知部分flag为 1d0g3&amp;#123;71b2b5616**2a4639**7d979**de964c&amp;#125;  cipher是sha256加密后的flag，其摘要为 0596d989a2938e16bcc5d6f89ce709ad9f64d36316ab80408cb6b89b3d7f064a">
+<meta property="og:type" content="article">
+<meta property="og:title" content="安洵杯misc全wp">
+<meta property="og:url" content="https://polosec.github.io/2020/11/26/%E5%AE%89%E6%B4%B5%E6%9D%AFmisc%E5%85%A8wp/index.html">
+<meta property="og:site_name" content="Polo&#39;s Blog">
+<meta property="og:description" content="密码学 爆破SECRET是不知道的 flag是md5(SECRET).hexdigest() 已知部分flag为 1d0g3&amp;#123;71b2b5616**2a4639**7d979**de964c&amp;#125;  cipher是sha256加密后的flag，其摘要为 0596d989a2938e16bcc5d6f89ce709ad9f64d36316ab80408cb6b89b3d7f064a">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://cdn.polowong.top/static/images/misc2.png">
+<meta property="og:image" content="http://cdn.polowong.top/static/images/misc4.png">
+<meta property="article:published_time" content="2020-11-26T09:42:26.000Z">
+<meta property="article:modified_time" content="2020-11-26T09:42:44.965Z">
+<meta property="article:author" content="Polo">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://cdn.polowong.top/static/images/misc2.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>安洵杯misc全wp</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" "Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="上一篇 " href="/2020/11/30/comprehensive-traffic-analysis/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="下一篇 " href="/2020/11/23/%E5%B1%B1%E4%B8%9C%E7%9C%81%E6%96%B0%E4%B8%80%E4%BB%A3%E6%94%BB%E9%98%B2%E8%B5%9Bwp/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部 " href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章 " href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://polosec.github.io/2020/11/26/%E5%AE%89%E6%B4%B5%E6%9D%AFmisc%E5%85%A8wp/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://polosec.github.io/2020/11/26/%E5%AE%89%E6%B4%B5%E6%9D%AFmisc%E5%85%A8wp/&text=安洵杯misc全wp"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://polosec.github.io/2020/11/26/%E5%AE%89%E6%B4%B5%E6%9D%AFmisc%E5%85%A8wp/&title=安洵杯misc全wp"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://polosec.github.io/2020/11/26/%E5%AE%89%E6%B4%B5%E6%9D%AFmisc%E5%85%A8wp/&is_video=false&description=安洵杯misc全wp"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=安洵杯misc全wp&body=Check out this article: https://polosec.github.io/2020/11/26/%E5%AE%89%E6%B4%B5%E6%9D%AFmisc%E5%85%A8wp/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://polosec.github.io/2020/11/26/%E5%AE%89%E6%B4%B5%E6%9D%AFmisc%E5%85%A8wp/&title=安洵杯misc全wp"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://polosec.github.io/2020/11/26/%E5%AE%89%E6%B4%B5%E6%9D%AFmisc%E5%85%A8wp/&title=安洵杯misc全wp"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://polosec.github.io/2020/11/26/%E5%AE%89%E6%B4%B5%E6%9D%AFmisc%E5%85%A8wp/&title=安洵杯misc全wp"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://polosec.github.io/2020/11/26/%E5%AE%89%E6%B4%B5%E6%9D%AFmisc%E5%85%A8wp/&title=安洵杯misc全wp"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://polosec.github.io/2020/11/26/%E5%AE%89%E6%B4%B5%E6%9D%AFmisc%E5%85%A8wp/&name=安洵杯misc全wp&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://polosec.github.io/2020/11/26/%E5%AE%89%E6%B4%B5%E6%9D%AFmisc%E5%85%A8wp/&t=安洵杯misc全wp"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%AF%86%E7%A0%81%E5%AD%A6-%E7%88%86%E7%A0%B4"><span class="toc-number">1.</span> <span class="toc-text">密码学 爆破</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#misc"><span class="toc-number">2.</span> <span class="toc-text">misc</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AD%BE%E5%88%B0"><span class="toc-number">2.1.</span> <span class="toc-text">签到</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%8E%8B%E7%89%8C%E7%89%B9%E5%B7%A5"><span class="toc-number">2.2.</span> <span class="toc-text">王牌特工</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#misc3"><span class="toc-number">2.3.</span> <span class="toc-text">misc3</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#misc4"><span class="toc-number">2.4.</span> <span class="toc-text">misc4</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">3.</span> <span class="toc-text">总结</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        安洵杯misc全wp
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">Polo</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2020-11-26T09:42:26.000Z" itemprop="datePublished">2020-11-26</time>
+        
+      
+    </div>
+
+
+      
+
+      
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="密码学-爆破"><a href="#密码学-爆破" class="headerlink" title="密码学 爆破"></a>密码学 爆破</h1><p>SECRET是不知道的</p>
+<p>flag是md5(SECRET).hexdigest()</p>
+<p>已知部分flag为</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">d0g3&#123;71b2b5616**2a4639**7d979**de964c&#125;</span><br></pre></td></tr></table></figure>
+
+<p>cipher是sha256加密后的flag，其摘要为</p>
+<p>0596d989a2938e16bcc5d6f89ce709ad9f64d36316ab80408cb6b89b3d7f064a</p>
+<p>现在不知道secret。</p>
+<p>str1=”71b2b5616”</p>
+<p>str2=”2a4639”</p>
+<p>str3=”7d979”</p>
+<p>str4=”de964c”</p>
+<p>str1 2 3 4 之间分别有两位不知道 爆破的话需要爆破16^6次。</p>
+<p>直接爆破</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span>  hashlib</span><br><span class="line">broken_flag= <span class="string">&#x27;71b2b5616**2a4639**7d979**de964c&#x27;</span></span><br><span class="line">str1=<span class="string">&quot;d0g3&#123;71b2b5616&quot;</span></span><br><span class="line">str2=<span class="string">&quot;2a4639&quot;</span></span><br><span class="line">str3=<span class="string">&quot;7d979&quot;</span></span><br><span class="line">str4=<span class="string">&quot;de964c&#125;&quot;</span></span><br><span class="line">cipher=<span class="string">&#x27;0596d989a2938e16bcc5d6f89ce709ad9f64d36316ab80408cb6b89b3d7f064a&#x27;</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">getdigest</span>(<span class="params">content</span>):</span></span><br><span class="line">    <span class="keyword">return</span>  hashlib.sha256(content).hexdigest()</span><br><span class="line">alphabet=<span class="string">&quot;1234567890abcdef&quot;</span></span><br><span class="line"><span class="keyword">for</span> a <span class="keyword">in</span> alphabet:</span><br><span class="line">    <span class="keyword">for</span> b <span class="keyword">in</span> alphabet:</span><br><span class="line">        <span class="keyword">for</span> c <span class="keyword">in</span> alphabet:</span><br><span class="line">            <span class="keyword">for</span> d <span class="keyword">in</span> alphabet:</span><br><span class="line">                <span class="keyword">for</span> e <span class="keyword">in</span> alphabet:</span><br><span class="line">                    <span class="keyword">for</span> f <span class="keyword">in</span> alphabet:</span><br><span class="line">                        string=str1+a+b+str2+c+d+str3+e+f+str4</span><br><span class="line">                        <span class="keyword">if</span> getdigest(string)==cipher:</span><br><span class="line">                            <span class="built_in">print</span> string</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="misc"><a href="#misc" class="headerlink" title="misc"></a>misc</h1><h2 id="签到"><a href="#签到" class="headerlink" title="签到"></a>签到</h2><p>扫码套娃，然后得到一个flag.docx，里面一串乱码，而且公众号也提示了不是emojidecode，但是这玩意除了emojidecode还能是啥？</p>
+<p>因为我的word2016无法显示emoji，然后我换成rar解压，在xml里面看到了emoji，放到在线解密工具即可。（师傅们直接复制过去就完事了）</p>
+<h2 id="王牌特工"><a href="#王牌特工" class="headerlink" title="王牌特工"></a>王牌特工</h2><p>这道题一开始没啥思路，然后file看一下是ext3格式。网上搜了一篇教程就差不多出来了。</p>
+<p><a target="_blank" rel="noopener" href="https://blog.ihomura.cn/2018/08/03/WriteUp-ext3-%E6%96%87%E4%BB%B6%E6%81%A2%E5%A4%8D-HZ-file/">https://blog.ihomura.cn/2018/08/03/WriteUp-ext3-%E6%96%87%E4%BB%B6%E6%81%A2%E5%A4%8D-HZ-file/</a></p>
+<p>工具：fsstat，ext3grep，veracrypt。</p>
+<p>装ext3grep的时候，报错了按照网上说的做增添一些东西，我这还会报错，把最后报错的那一行注释掉就完事儿了。</p>
+<p>首先使用fsstat看镜像信息。</p>
+<p>fsstat findme</p>
+<p>其中root directory比较重要（我也不知道为什么）</p>
+<p>接下来使用ext3grep查看文件信息。</p>
+<p>ext3grep –inode 2 findme</p>
+<img src="http://cdn.polowong.top/static/images/misc2.png">
+
+<p>恢复这个东西</p>
+<p>ext3grep –restore-file .coolboy.swp findme </p>
+<p>vim -r .coolboy.swp</p>
+<p>新建一个目录/root/coolboy 恢复完会放到这里面，base64解码后的内容为：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">真的密码:this_is_a_true_key</span><br></pre></td></tr></table></figure>
+
+<p>用这个密码使用veracrypt去挂载flagbox，就可以获得flag。</p>
+<h2 id="misc3"><a href="#misc3" class="headerlink" title="misc3"></a>misc3</h2><p>一开始是hardzip，有个密码1，看文件比较短尝试CRC32爆破，爆破完的密码拼起来就是easyzip的解压密码。</p>
+<p>解压下来easyzip，</p>
+<p>通过伪加密拿到redeme.txt，尝试明文攻击。</p>
+<p>这里需要注意的是，使用明文攻击需要保证待破解压缩包里只有一个文件，也就是已知文件。因为这里面有一个伪加密，其他文件的压缩算法可能与已知文件的不一致，所以为了保证顺利进行，需要将其他文件删除（这道题所需要，其他情况下如果加密方式都一样的话就不用删除。）</p>
+<h2 id="misc4"><a href="#misc4" class="headerlink" title="misc4"></a>misc4</h2><p>npmtxt打开一看啥也不懂，010editor打开一看有看不懂的东西，搜了搜16进制慢慢搜就搜到了0宽隐写。</p>
+<p>把那一串复制到<a target="_blank" rel="noopener" href="https://yuanfux.github.io/zero-width-web/">https://yuanfux.github.io/zero-width-web/</a> </p>
+<p>decode就可以获得解压密码</p>
+<p>RealV1siBle</p>
+<img src="http://cdn.polowong.top/static/images/misc4.png">
+
+<p>打开是张图，silenteye一把梭出来flag。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>这次比赛觉得web比较难，ssti没做出来比较上心。最近打算深度学习ssti相关内容，争取下次做出来！</p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%AF%86%E7%A0%81%E5%AD%A6-%E7%88%86%E7%A0%B4"><span class="toc-number">1.</span> <span class="toc-text">密码学 爆破</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#misc"><span class="toc-number">2.</span> <span class="toc-text">misc</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AD%BE%E5%88%B0"><span class="toc-number">2.1.</span> <span class="toc-text">签到</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%8E%8B%E7%89%8C%E7%89%B9%E5%B7%A5"><span class="toc-number">2.2.</span> <span class="toc-text">王牌特工</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#misc3"><span class="toc-number">2.3.</span> <span class="toc-text">misc3</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#misc4"><span class="toc-number">2.4.</span> <span class="toc-text">misc4</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">3.</span> <span class="toc-text">总结</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://polosec.github.io/2020/11/26/%E5%AE%89%E6%B4%B5%E6%9D%AFmisc%E5%85%A8wp/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://polosec.github.io/2020/11/26/%E5%AE%89%E6%B4%B5%E6%9D%AFmisc%E5%85%A8wp/&text=安洵杯misc全wp"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://polosec.github.io/2020/11/26/%E5%AE%89%E6%B4%B5%E6%9D%AFmisc%E5%85%A8wp/&title=安洵杯misc全wp"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://polosec.github.io/2020/11/26/%E5%AE%89%E6%B4%B5%E6%9D%AFmisc%E5%85%A8wp/&is_video=false&description=安洵杯misc全wp"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=安洵杯misc全wp&body=Check out this article: https://polosec.github.io/2020/11/26/%E5%AE%89%E6%B4%B5%E6%9D%AFmisc%E5%85%A8wp/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://polosec.github.io/2020/11/26/%E5%AE%89%E6%B4%B5%E6%9D%AFmisc%E5%85%A8wp/&title=安洵杯misc全wp"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://polosec.github.io/2020/11/26/%E5%AE%89%E6%B4%B5%E6%9D%AFmisc%E5%85%A8wp/&title=安洵杯misc全wp"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://polosec.github.io/2020/11/26/%E5%AE%89%E6%B4%B5%E6%9D%AFmisc%E5%85%A8wp/&title=安洵杯misc全wp"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://polosec.github.io/2020/11/26/%E5%AE%89%E6%B4%B5%E6%9D%AFmisc%E5%85%A8wp/&title=安洵杯misc全wp"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://polosec.github.io/2020/11/26/%E5%AE%89%E6%B4%B5%E6%9D%AFmisc%E5%85%A8wp/&name=安洵杯misc全wp&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://polosec.github.io/2020/11/26/%E5%AE%89%E6%B4%B5%E6%9D%AFmisc%E5%85%A8wp/&t=安洵杯misc全wp"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2016-2021
+    Polo
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+ 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script> 
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script> 
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Umami Analytics -->
+
+<!-- Disqus Comments -->
+
+
+</body>
+</html>

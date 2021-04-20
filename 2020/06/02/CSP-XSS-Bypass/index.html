@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="参考链接：https:&#x2F;&#x2F;www.zhihu.com&#x2F;question&#x2F;21979782https:&#x2F;&#x2F;xz.aliyun.com&#x2F;t&#x2F;5084#toc-2https:&#x2F;&#x2F;www.cnblogs.com&#x2F;thenbz3&#x2F;p&#x2F;11863641.html CSP的概念CSP 是 Content Security Policy 的缩写，即内容安全策略。CSP旨在减少XSS攻击，具体原理是通过设置resp">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CSP-XSS Bypass">
+<meta property="og:url" content="https://polosec.github.io/2020/06/02/CSP-XSS-Bypass/index.html">
+<meta property="og:site_name" content="Polo&#39;s Blog">
+<meta property="og:description" content="参考链接：https:&#x2F;&#x2F;www.zhihu.com&#x2F;question&#x2F;21979782https:&#x2F;&#x2F;xz.aliyun.com&#x2F;t&#x2F;5084#toc-2https:&#x2F;&#x2F;www.cnblogs.com&#x2F;thenbz3&#x2F;p&#x2F;11863641.html CSP的概念CSP 是 Content Security Policy 的缩写，即内容安全策略。CSP旨在减少XSS攻击，具体原理是通过设置resp">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://cdn.polowong.top/static/images/csp1.png">
+<meta property="article:published_time" content="2020-06-02T07:25:59.000Z">
+<meta property="article:modified_time" content="2020-06-02T16:09:24.912Z">
+<meta property="article:author" content="Polo">
+<meta property="article:tag" content="web">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://cdn.polowong.top/static/images/csp1.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>CSP-XSS Bypass</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" "Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="上一篇 " href="/2020/06/06/%E6%81%B6%E8%87%AD%E6%95%B0%E6%8D%AE%E5%8C%85/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="下一篇 " href="/2020/06/01/frp%E5%86%85%E7%BD%91%E7%A9%BF%E9%80%8F/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部 " href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章 " href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://polosec.github.io/2020/06/02/CSP-XSS-Bypass/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://polosec.github.io/2020/06/02/CSP-XSS-Bypass/&text=CSP-XSS Bypass"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://polosec.github.io/2020/06/02/CSP-XSS-Bypass/&title=CSP-XSS Bypass"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://polosec.github.io/2020/06/02/CSP-XSS-Bypass/&is_video=false&description=CSP-XSS Bypass"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=CSP-XSS Bypass&body=Check out this article: https://polosec.github.io/2020/06/02/CSP-XSS-Bypass/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://polosec.github.io/2020/06/02/CSP-XSS-Bypass/&title=CSP-XSS Bypass"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://polosec.github.io/2020/06/02/CSP-XSS-Bypass/&title=CSP-XSS Bypass"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://polosec.github.io/2020/06/02/CSP-XSS-Bypass/&title=CSP-XSS Bypass"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://polosec.github.io/2020/06/02/CSP-XSS-Bypass/&title=CSP-XSS Bypass"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://polosec.github.io/2020/06/02/CSP-XSS-Bypass/&name=CSP-XSS Bypass&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://polosec.github.io/2020/06/02/CSP-XSS-Bypass/&t=CSP-XSS Bypass"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#CSP%E7%9A%84%E6%A6%82%E5%BF%B5"><span class="toc-number">1.</span> <span class="toc-text">CSP的概念</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#CSP%E7%A4%BA%E4%BE%8B"><span class="toc-number">2.</span> <span class="toc-text">CSP示例</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#CSP%E7%BB%95%E8%BF%87"><span class="toc-number">3.</span> <span class="toc-text">CSP绕过</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#CSP-BYPASS%E5%AE%9E%E4%BE%8B"><span class="toc-number">4.</span> <span class="toc-text">CSP BYPASS实例</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">5.</span> <span class="toc-text">总结</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        CSP-XSS Bypass
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">Polo</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2020-06-02T07:25:59.000Z" itemprop="datePublished">2020-06-02</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/web/" rel="tag">web</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <p>参考链接：<br><a target="_blank" rel="noopener" href="https://www.zhihu.com/question/21979782">https://www.zhihu.com/question/21979782</a><br><a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/5084#toc-2">https://xz.aliyun.com/t/5084#toc-2</a><br><a target="_blank" rel="noopener" href="https://www.cnblogs.com/thenbz3/p/11863641.html">https://www.cnblogs.com/thenbz3/p/11863641.html</a></p>
+<h1 id="CSP的概念"><a href="#CSP的概念" class="headerlink" title="CSP的概念"></a>CSP的概念</h1><p>CSP 是 Content Security Policy 的缩写，即内容安全策略。CSP旨在减少XSS攻击，具体原理是通过设置response header或者在页面中使用meta标签规定受信任的、可执行的JS、图片、iframe、style来源。<br>任何不符合CSP规则的资源都将无法被加载。</p>
+<h1 id="CSP示例"><a href="#CSP示例" class="headerlink" title="CSP示例"></a>CSP示例</h1><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Content-Security-Policy: script-src &#x27;self&#x27;; object-src &#x27;none&#x27;; </span><br><span class="line">style-src cdn.example.org third-party.org; child-src https:</span><br></pre></td></tr></table></figure>
+<p>资源限制类型（引用）：<br>script-src：外部脚本 指定了允许从哪里加载JS脚本<br>style-src：样式表<br>img-src：图像<br>media-src：媒体文件（音频和视频）<br>font-src：字体文件<br>object-src：插件（比如 Flash）<br>child-src：框架<br>frame-ancestors：嵌入的外部资源<br>connect-src：HTTP 连接（通过 XHR、WebSockets、EventSource等）<br>worker-src：worker脚本<br>manifest-src：manifest 文件<br>default-src ‘self’ 该属性值为self时只允许本站资源加载。设置了这个就为上述属性设置了默认值‘self’<br>上述属性如果不明确指定的话则默认范围是*，即允许所有。<br>script-src属性里面 设置unsafe-inline 允许内嵌的脚本及样式 不写这个默认不允许。<br>script-src属性里面 设置unsafe-eval   允许通过字符串动态创建的脚本执行，比如 eval，setTimeout 等。不写这个默认不允许。<br>script-src ‘nonce-EDNnf03nceIOfn39fn3e9h3sdfa’ 这句话的意思是说只允许nonce值为EDNnf03nceIOfn39fn3e9h3sdfa的脚本执行。(<script nonce="EDNnf03nceIOfn39fn3e9h3sdfa">xxx</script>) 同理也可以设置hash值。</p>
+<h1 id="CSP绕过"><a href="#CSP绕过" class="headerlink" title="CSP绕过"></a>CSP绕过</h1><p>CSP绕过我只使用过一种方法，就是Location.href，其他的方法暂时没有尝试过，在 <a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/5084#toc-2">https://xz.aliyun.com/t/5084#toc-2</a> 这篇文章里面写的挺多的，可以仔细阅读。<br>另外一种我感觉有意思的绕过就是CRLF注入绕过，在CSP之前找到CRLF注入点来两个CRLF把CSP挤到body里面。。高，实在是高</p>
+<h1 id="CSP-BYPASS实例"><a href="#CSP-BYPASS实例" class="headerlink" title="CSP BYPASS实例"></a>CSP BYPASS实例</h1><p>这道题是CSICN_华东北赛区_WEB2 在buuoj有复现。<br>其他的点我看网上都说的差不多了 唯独CSP Bypass说的不详细，这里我详细说一下CSP绕过，其他的不仔细说，就简要说一下如何成功拿到flag。<br>有个投稿和反馈，说了管理员会查看，猜测XSS拿cookie。提交申请时需要爆破md5，好说，写脚本即可。<br>先尝试随便投稿<br>投稿后查看页面，发现存在CSP，所以需要绕过csp。<br>接下来进行XSS，由于过滤了很多关键字，所以考虑HTML实体编码—把字母转ascii并在前面加上&amp;#后面加上;<br><svg>标签可以嵌入JS代码。<br>直接用XSS平台的payload的话会这样：</p>
+<img src="http://cdn.polowong.top/static/images/csp1.png">
+<p>接下来使用location.href绕过。<br>爆破完md5后管理员点击完在XSS平台就收到cookie啦。<br>接下来是联合注入，最后一句话是-1 union select 1,2,flagg  from ciscn.flag，得到flag</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>这道题时隔一年才弄明白CSP是怎么回事，属实我的问题，继续学习，继续努力。</p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#CSP%E7%9A%84%E6%A6%82%E5%BF%B5"><span class="toc-number">1.</span> <span class="toc-text">CSP的概念</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#CSP%E7%A4%BA%E4%BE%8B"><span class="toc-number">2.</span> <span class="toc-text">CSP示例</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#CSP%E7%BB%95%E8%BF%87"><span class="toc-number">3.</span> <span class="toc-text">CSP绕过</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#CSP-BYPASS%E5%AE%9E%E4%BE%8B"><span class="toc-number">4.</span> <span class="toc-text">CSP BYPASS实例</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">5.</span> <span class="toc-text">总结</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://polosec.github.io/2020/06/02/CSP-XSS-Bypass/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://polosec.github.io/2020/06/02/CSP-XSS-Bypass/&text=CSP-XSS Bypass"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://polosec.github.io/2020/06/02/CSP-XSS-Bypass/&title=CSP-XSS Bypass"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://polosec.github.io/2020/06/02/CSP-XSS-Bypass/&is_video=false&description=CSP-XSS Bypass"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=CSP-XSS Bypass&body=Check out this article: https://polosec.github.io/2020/06/02/CSP-XSS-Bypass/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://polosec.github.io/2020/06/02/CSP-XSS-Bypass/&title=CSP-XSS Bypass"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://polosec.github.io/2020/06/02/CSP-XSS-Bypass/&title=CSP-XSS Bypass"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://polosec.github.io/2020/06/02/CSP-XSS-Bypass/&title=CSP-XSS Bypass"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://polosec.github.io/2020/06/02/CSP-XSS-Bypass/&title=CSP-XSS Bypass"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://polosec.github.io/2020/06/02/CSP-XSS-Bypass/&name=CSP-XSS Bypass&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://polosec.github.io/2020/06/02/CSP-XSS-Bypass/&t=CSP-XSS Bypass"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2016-2021
+    Polo
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+ 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script> 
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script> 
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Umami Analytics -->
+
+<!-- Disqus Comments -->
+
+
+</body>
+</html>

@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="前言打聊城的比赛，又白给了，拿了参与奖，做出来两个misc，剩下两个misc都做了快一半，没思路了，特来复现。 webweb1打开之后是一个登陆页面，查看源码发现了测试账号test&#x2F;test 查看robots.txt 发现php.php 发现是phpinfo。 登录之后发现可能存在LFI，然后上了下扫描器，扫到了一些文件，尝试包含info.php，得到源码，然后发现了include了templat">
+<meta property="og:type" content="article">
+<meta property="og:title" content="山东省新一代攻防赛wp">
+<meta property="og:url" content="https://polosec.github.io/2020/11/23/%E5%B1%B1%E4%B8%9C%E7%9C%81%E6%96%B0%E4%B8%80%E4%BB%A3%E6%94%BB%E9%98%B2%E8%B5%9Bwp/index.html">
+<meta property="og:site_name" content="Polo&#39;s Blog">
+<meta property="og:description" content="前言打聊城的比赛，又白给了，拿了参与奖，做出来两个misc，剩下两个misc都做了快一半，没思路了，特来复现。 webweb1打开之后是一个登陆页面，查看源码发现了测试账号test&#x2F;test 查看robots.txt 发现php.php 发现是phpinfo。 登录之后发现可能存在LFI，然后上了下扫描器，扫到了一些文件，尝试包含info.php，得到源码，然后发现了include了templat">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://cdn.polowong.top/static/images/qrcode.png">
+<meta property="article:published_time" content="2020-11-23T14:01:58.000Z">
+<meta property="article:modified_time" content="2020-11-26T09:53:35.018Z">
+<meta property="article:author" content="Polo">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://cdn.polowong.top/static/images/qrcode.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>山东省新一代攻防赛wp</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" "Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="上一篇 " href="/2020/11/26/%E5%AE%89%E6%B4%B5%E6%9D%AFmisc%E5%85%A8wp/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="下一篇 " href="/2020/11/17/%E5%8F%96%E8%AF%81%E4%B8%93%E9%A2%98/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部 " href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章 " href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://polosec.github.io/2020/11/23/%E5%B1%B1%E4%B8%9C%E7%9C%81%E6%96%B0%E4%B8%80%E4%BB%A3%E6%94%BB%E9%98%B2%E8%B5%9Bwp/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://polosec.github.io/2020/11/23/%E5%B1%B1%E4%B8%9C%E7%9C%81%E6%96%B0%E4%B8%80%E4%BB%A3%E6%94%BB%E9%98%B2%E8%B5%9Bwp/&text=山东省新一代攻防赛wp"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://polosec.github.io/2020/11/23/%E5%B1%B1%E4%B8%9C%E7%9C%81%E6%96%B0%E4%B8%80%E4%BB%A3%E6%94%BB%E9%98%B2%E8%B5%9Bwp/&title=山东省新一代攻防赛wp"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://polosec.github.io/2020/11/23/%E5%B1%B1%E4%B8%9C%E7%9C%81%E6%96%B0%E4%B8%80%E4%BB%A3%E6%94%BB%E9%98%B2%E8%B5%9Bwp/&is_video=false&description=山东省新一代攻防赛wp"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=山东省新一代攻防赛wp&body=Check out this article: https://polosec.github.io/2020/11/23/%E5%B1%B1%E4%B8%9C%E7%9C%81%E6%96%B0%E4%B8%80%E4%BB%A3%E6%94%BB%E9%98%B2%E8%B5%9Bwp/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://polosec.github.io/2020/11/23/%E5%B1%B1%E4%B8%9C%E7%9C%81%E6%96%B0%E4%B8%80%E4%BB%A3%E6%94%BB%E9%98%B2%E8%B5%9Bwp/&title=山东省新一代攻防赛wp"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://polosec.github.io/2020/11/23/%E5%B1%B1%E4%B8%9C%E7%9C%81%E6%96%B0%E4%B8%80%E4%BB%A3%E6%94%BB%E9%98%B2%E8%B5%9Bwp/&title=山东省新一代攻防赛wp"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://polosec.github.io/2020/11/23/%E5%B1%B1%E4%B8%9C%E7%9C%81%E6%96%B0%E4%B8%80%E4%BB%A3%E6%94%BB%E9%98%B2%E8%B5%9Bwp/&title=山东省新一代攻防赛wp"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://polosec.github.io/2020/11/23/%E5%B1%B1%E4%B8%9C%E7%9C%81%E6%96%B0%E4%B8%80%E4%BB%A3%E6%94%BB%E9%98%B2%E8%B5%9Bwp/&title=山东省新一代攻防赛wp"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://polosec.github.io/2020/11/23/%E5%B1%B1%E4%B8%9C%E7%9C%81%E6%96%B0%E4%B8%80%E4%BB%A3%E6%94%BB%E9%98%B2%E8%B5%9Bwp/&name=山东省新一代攻防赛wp&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://polosec.github.io/2020/11/23/%E5%B1%B1%E4%B8%9C%E7%9C%81%E6%96%B0%E4%B8%80%E4%BB%A3%E6%94%BB%E9%98%B2%E8%B5%9Bwp/&t=山东省新一代攻防赛wp"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#web"><span class="toc-number">2.</span> <span class="toc-text">web</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#web1"><span class="toc-number">2.1.</span> <span class="toc-text">web1</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#web2-web3"><span class="toc-number">2.2.</span> <span class="toc-text">web2 web3</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%8D%E4%BC%9A-%E8%B7%9F%E5%AE%98%E6%96%B9%E7%9A%84%E6%80%9D%E8%B7%AF%E6%B2%A1%E5%A4%8D%E7%8E%B0%E5%87%BA%E6%9D%A5%EF%BC%8C%E7%AD%89wp%E3%80%82"><span class="toc-number">2.2.1.</span> <span class="toc-text">不会 跟官方的思路没复现出来，等wp。</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#misc"><span class="toc-number">3.</span> <span class="toc-text">misc</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#ez-decode"><span class="toc-number">3.1.</span> <span class="toc-text">ez_decode</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#qr-code"><span class="toc-number">3.2.</span> <span class="toc-text">qr_code:</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#relax"><span class="toc-number">3.3.</span> <span class="toc-text">relax</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#base64"><span class="toc-number">3.4.</span> <span class="toc-text">base64</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        山东省新一代攻防赛wp
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">Polo</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2020-11-23T14:01:58.000Z" itemprop="datePublished">2020-11-23</time>
+        
+      
+    </div>
+
+
+      
+
+      
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>打聊城的比赛，又白给了，拿了参与奖，做出来两个misc，剩下两个misc都做了快一半，没思路了，特来复现。</p>
+<h1 id="web"><a href="#web" class="headerlink" title="web"></a>web</h1><h2 id="web1"><a href="#web1" class="headerlink" title="web1"></a>web1</h2><p>打开之后是一个登陆页面，查看源码发现了测试账号test/test</p>
+<p>查看robots.txt 发现php.php 发现是phpinfo。</p>
+<p>登录之后发现可能存在LFI，然后上了下扫描器，扫到了一些文件，尝试包含info.php，得到源码，然后发现了include了template/info.html，于是访问。查看源码发现了hint m4nageee.php。然后读manage的源码，在源码中发现包含了2333.html，于是访问。</p>
+<p>查看源码时发现了php代码，尝试PHP session文件包含。</p>
+<p>但是需要session的存放位置，于是通过扫描到的php.php查看session日志的存放位置/var/lib/php5，遂包含之。</p>
+<p>在m4nageee里面写nickname到session文件里面，利用LFI包含getshell。</p>
+<p>当前我的phpsessid为0u335c2ud2h9gjq0lq6nos1i72</p>
+<p>所以session文件就是/var/lib/php5/sess_0u335c2ud2h9gjq0lq6nos1i72,包含即可。</p>
+<p>nikename里面写</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"> <span class="meta">&lt;?php</span> system(<span class="string">&quot;cat fla*&quot;</span>)； <span class="meta">?&gt;</span></span><br><span class="line"> 即可绕过对flag的过滤</span><br><span class="line"></span><br><span class="line">或者这样写</span><br><span class="line"></span><br><span class="line"><span class="meta">&lt;?php</span> system(<span class="string">&quot;cat fl\ag_0ba7bc92fcd57e337ebb9e74308c811f&quot;</span>); <span class="meta">?&gt;</span></span><br><span class="line"></span><br><span class="line">等等。。</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+
+<h2 id="web2-web3"><a href="#web2-web3" class="headerlink" title="web2 web3"></a>web2 web3</h2><p>题目提示使用sqlmap注入，但是我注入巨拉跨。。而且数据库是sqlite的，我只会一点mysql的注入。。当时没做出来，赛后复现下。</p>
+<p>这题是使用cookie注入。我明确地知道自己不会用sqlmap进行cookie注入。</p>
+<h3 id="不会-跟官方的思路没复现出来，等wp。"><a href="#不会-跟官方的思路没复现出来，等wp。" class="headerlink" title="不会 跟官方的思路没复现出来，等wp。"></a>不会 跟官方的思路没复现出来，等wp。</h3><p>这里放下济大师傅的web2 web3的payload：</p>
+<p>Cookie: PHPSESSID=da55nb2kgsge2luvc5m53k5r90; username=test; password=test’ OR 1=1 LIMIT 1 OFFSET 1 – </p>
+<p>password=test’ OR 1=1 LIMIT 1 OFFSET 1 – ; userinfo=eyJ1c2VybmFtZSI6InRlc3QiLCJwYXNzd29yZCI6InRlc3QnIE9SIDE9MSBMSU1JVCAxIE9GRlNFVCAxIC0tICJ9Cg%3D%3D</p>
+<h1 id="misc"><a href="#misc" class="headerlink" title="misc"></a>misc</h1><h2 id="ez-decode"><a href="#ez-decode" class="headerlink" title="ez_decode"></a>ez_decode</h2><p>简单的编码转换：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&amp;#54;&amp;#54;&amp;#54;&amp;#99;&amp;#54;&amp;#49;&amp;#54;&amp;#55;&amp;#55;&amp;#98;&amp;#54;&amp;#54;&amp;#51;&amp;#57;&amp;#54;&amp;#52;&amp;#54;&amp;#54;&amp;#51;&amp;#53;&amp;#51;&amp;#52;&amp;#51;&amp;#48;&amp;#51;&amp;#49;&amp;#51;&amp;#48;&amp;#51;&amp;#48;&amp;#51;&amp;#56;&amp;#51;&amp;#51;&amp;#54;&amp;#50;&amp;#51;&amp;#48;&amp;#54;&amp;#54;&amp;#51;&amp;#49;&amp;#54;&amp;#54;&amp;#51;&amp;#50;&amp;#51;&amp;#51;&amp;#54;&amp;#49;&amp;#51;&amp;#51;&amp;#54;&amp;#53;&amp;#54;&amp;#49;&amp;#54;&amp;#53;&amp;#54;&amp;#51;&amp;#54;&amp;#51;&amp;#51;&amp;#53;&amp;#54;&amp;#52;&amp;#51;&amp;#53;&amp;#54;&amp;#49;&amp;#51;&amp;#55;&amp;#54;&amp;#51;&amp;#55;&amp;#100;</span><br></pre></td></tr></table></figure>
+
+<p>html实体编码-&gt;hexo2string-&gt;flag</p>
+<p>flag{f9df54010083b0f1f23a3eaecc5d5a7c}</p>
+<h2 id="qr-code"><a href="#qr-code" class="headerlink" title="qr_code:"></a>qr_code:</h2><img src="http://cdn.polowong.top/static/images/qrcode.png">
+
+<p>打开很多二维码，盲猜扫出来内容转0和1</p>
+<p>比赛的时候有个简单的读二维码的工具，但是批量不会写脚本。。就读了两个，看哪个是0哪个是1，然后bin2ascii就可以了。</p>
+<p>用脚本的做法：</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#  -*-coding:utf8 -*-</span></span><br><span class="line"><span class="keyword">import</span>  os</span><br><span class="line"><span class="keyword">import</span>  zxing</span><br><span class="line"><span class="keyword">import</span> binascii</span><br><span class="line"><span class="keyword">import</span> base64</span><br><span class="line">reader=zxing.BarCodeReader()</span><br><span class="line">asc=<span class="string">&#x27;&#x27;</span></span><br><span class="line">path=<span class="string">&quot;C:\\Users\\Administrator\\Desktop\\聊城\\qrcode&quot;</span></span><br><span class="line">files=os.listdir(path)</span><br><span class="line"><span class="keyword">for</span> i  <span class="keyword">in</span>  <span class="built_in">range</span> (<span class="number">0</span>,<span class="built_in">len</span>(files)-<span class="number">1</span>):</span><br><span class="line">    <span class="comment"># try:</span></span><br><span class="line">    <span class="comment">#         content=reader.decode(file).raw</span></span><br><span class="line">    <span class="comment">#         if content==&quot;zero&quot;:</span></span><br><span class="line">    <span class="comment">#             asc+=str(0) #这是识别二维码的方法</span></span><br><span class="line">    <span class="comment">#         if content==&quot;one&quot;:</span></span><br><span class="line">    <span class="comment">#             asc+=str(1)</span></span><br><span class="line">    <span class="comment"># except:</span></span><br><span class="line">    <span class="comment">#     pass</span></span><br><span class="line">    size=os.path.getsize(<span class="built_in">str</span>(i)+<span class="string">&quot;.png&quot;</span>)</span><br><span class="line">   <span class="comment">#这是使用filesize做的方法</span></span><br><span class="line">    <span class="keyword">if</span> size==<span class="number">3409</span>:</span><br><span class="line">        asc+=<span class="string">&#x27;0&#x27;</span></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        asc+=<span class="string">&#x27;1&#x27;</span></span><br><span class="line">asc=<span class="built_in">int</span>(asc,base=<span class="number">2</span>)</span><br><span class="line"><span class="built_in">print</span>(asc)</span><br><span class="line">asc=<span class="built_in">hex</span>(asc)</span><br><span class="line">asc=asc[<span class="number">2</span>:]</span><br><span class="line"><span class="built_in">print</span>(binascii.a2b_hex(asc).decode())</span><br></pre></td></tr></table></figure>
+
+<p>flag{duyoulikeit}</p>
+<h2 id="relax"><a href="#relax" class="headerlink" title="relax"></a>relax</h2><p>打开是个.flag结尾的文件，丢进010editor看见是PK开头，考虑zip，解压出来一个flag.txt 一个音频。</p>
+<p>flagtxt里面的base64解出来啥也不是，于是继续看音频。</p>
+<p>考虑音频隐写，在文件详细信息里面发现了一串base64,解码后打开mp3stego，输入这个密码，得到了一串fakeflag：</p>
+<p>fakeflag{same_length_with_true_flaghh}</p>
+<p>和真的长的一样呢，真真假假</p>
+<p>后面就没思路了。</p>
+<p>后来看师傅的wp说需要讲该字符串与之前解出来啥也不是的base64异或就可以得到flag。草。</p>
+<p>上脚本：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span>  base64</span><br><span class="line"><span class="keyword">with</span> <span class="built_in">open</span>(<span class="string">&quot;flag.txt&quot;</span>) <span class="keyword">as</span>  f:</span><br><span class="line">    str1=f.readline()</span><br><span class="line">str1=base64.b64decode(str1)</span><br><span class="line">fakeflag=<span class="string">&quot;fakeflag&#123;same_length_with_true_flaghh&#125;&quot;</span>.encode()</span><br><span class="line">flag=<span class="string">&quot;&quot;</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span> (<span class="built_in">len</span>(fakeflag)):</span><br><span class="line">    tmp=fakeflag[i]^str1[i]</span><br><span class="line">    flag+=<span class="built_in">chr</span>(tmp)</span><br><span class="line"><span class="built_in">print</span>( flag)</span><br></pre></td></tr></table></figure>
+
+<p>这里需要注意的是：encode()方法是str类型提供的，将其转换为byte类型。decode（）方法是将byte类型转化为str类型。之前我都是出错了就直接瞎encode，decode，咋对咋弄。。今天终于知道了。</p>
+<p>flag：flag{9ff3a239027a7089237686b384862d33}</p>
+<h2 id="base64"><a href="#base64" class="headerlink" title="base64"></a>base64</h2><p>base64套娃，光想着basecrack，结果直接卡死。。就是没想起来自己写脚本。</p>
+<p>附上hxd的脚本</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> base64</span><br><span class="line"><span class="keyword">with</span> <span class="built_in">open</span> (<span class="string">&quot;base.txt&quot;</span>,<span class="string">&quot;rb&quot;</span>) <span class="keyword">as</span>  f:</span><br><span class="line">    content=f.read()</span><br><span class="line"><span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        content=base64.b16decode(content).decode()</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;b16&quot;</span>)</span><br><span class="line">        <span class="built_in">print</span>(content)</span><br><span class="line">    <span class="keyword">except</span>:</span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            content=base64.b32decode(content).decode()</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&quot;b32&quot;</span>)</span><br><span class="line">            <span class="built_in">print</span>(content)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">except</span>:</span><br><span class="line">            <span class="keyword">try</span>:</span><br><span class="line">                content=base64.b64decode(content).decode()</span><br><span class="line">                <span class="built_in">print</span>(<span class="string">&quot;b64&quot;</span>)</span><br><span class="line">                <span class="built_in">print</span>(content)</span><br><span class="line"></span><br><span class="line">            <span class="keyword">except</span>:</span><br><span class="line">                <span class="keyword">try</span>:</span><br><span class="line">                    content=base64.b85decode(content).decode()</span><br><span class="line">                    <span class="built_in">print</span>(<span class="string">&quot;b85&quot;</span>)</span><br><span class="line">                    <span class="built_in">print</span>(content)</span><br><span class="line"></span><br><span class="line">                <span class="keyword">except</span>:</span><br><span class="line">                    <span class="keyword">break</span>;</span><br></pre></td></tr></table></figure>
+
+<p>flag:flag{4b057431c3ee0c4f56d4dad18c352375}</p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#web"><span class="toc-number">2.</span> <span class="toc-text">web</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#web1"><span class="toc-number">2.1.</span> <span class="toc-text">web1</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#web2-web3"><span class="toc-number">2.2.</span> <span class="toc-text">web2 web3</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%8D%E4%BC%9A-%E8%B7%9F%E5%AE%98%E6%96%B9%E7%9A%84%E6%80%9D%E8%B7%AF%E6%B2%A1%E5%A4%8D%E7%8E%B0%E5%87%BA%E6%9D%A5%EF%BC%8C%E7%AD%89wp%E3%80%82"><span class="toc-number">2.2.1.</span> <span class="toc-text">不会 跟官方的思路没复现出来，等wp。</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#misc"><span class="toc-number">3.</span> <span class="toc-text">misc</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#ez-decode"><span class="toc-number">3.1.</span> <span class="toc-text">ez_decode</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#qr-code"><span class="toc-number">3.2.</span> <span class="toc-text">qr_code:</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#relax"><span class="toc-number">3.3.</span> <span class="toc-text">relax</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#base64"><span class="toc-number">3.4.</span> <span class="toc-text">base64</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://polosec.github.io/2020/11/23/%E5%B1%B1%E4%B8%9C%E7%9C%81%E6%96%B0%E4%B8%80%E4%BB%A3%E6%94%BB%E9%98%B2%E8%B5%9Bwp/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://polosec.github.io/2020/11/23/%E5%B1%B1%E4%B8%9C%E7%9C%81%E6%96%B0%E4%B8%80%E4%BB%A3%E6%94%BB%E9%98%B2%E8%B5%9Bwp/&text=山东省新一代攻防赛wp"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://polosec.github.io/2020/11/23/%E5%B1%B1%E4%B8%9C%E7%9C%81%E6%96%B0%E4%B8%80%E4%BB%A3%E6%94%BB%E9%98%B2%E8%B5%9Bwp/&title=山东省新一代攻防赛wp"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://polosec.github.io/2020/11/23/%E5%B1%B1%E4%B8%9C%E7%9C%81%E6%96%B0%E4%B8%80%E4%BB%A3%E6%94%BB%E9%98%B2%E8%B5%9Bwp/&is_video=false&description=山东省新一代攻防赛wp"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=山东省新一代攻防赛wp&body=Check out this article: https://polosec.github.io/2020/11/23/%E5%B1%B1%E4%B8%9C%E7%9C%81%E6%96%B0%E4%B8%80%E4%BB%A3%E6%94%BB%E9%98%B2%E8%B5%9Bwp/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://polosec.github.io/2020/11/23/%E5%B1%B1%E4%B8%9C%E7%9C%81%E6%96%B0%E4%B8%80%E4%BB%A3%E6%94%BB%E9%98%B2%E8%B5%9Bwp/&title=山东省新一代攻防赛wp"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://polosec.github.io/2020/11/23/%E5%B1%B1%E4%B8%9C%E7%9C%81%E6%96%B0%E4%B8%80%E4%BB%A3%E6%94%BB%E9%98%B2%E8%B5%9Bwp/&title=山东省新一代攻防赛wp"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://polosec.github.io/2020/11/23/%E5%B1%B1%E4%B8%9C%E7%9C%81%E6%96%B0%E4%B8%80%E4%BB%A3%E6%94%BB%E9%98%B2%E8%B5%9Bwp/&title=山东省新一代攻防赛wp"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://polosec.github.io/2020/11/23/%E5%B1%B1%E4%B8%9C%E7%9C%81%E6%96%B0%E4%B8%80%E4%BB%A3%E6%94%BB%E9%98%B2%E8%B5%9Bwp/&title=山东省新一代攻防赛wp"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://polosec.github.io/2020/11/23/%E5%B1%B1%E4%B8%9C%E7%9C%81%E6%96%B0%E4%B8%80%E4%BB%A3%E6%94%BB%E9%98%B2%E8%B5%9Bwp/&name=山东省新一代攻防赛wp&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://polosec.github.io/2020/11/23/%E5%B1%B1%E4%B8%9C%E7%9C%81%E6%96%B0%E4%B8%80%E4%BB%A3%E6%94%BB%E9%98%B2%E8%B5%9Bwp/&t=山东省新一代攻防赛wp"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2016-2021
+    Polo
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+ 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script> 
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script> 
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Umami Analytics -->
+
+<!-- Disqus Comments -->
+
+
+</body>
+</html>

@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="二层交换与三层交换的问题其实是偶然看到的，看某校夏令营经验贴看到有提问这个问题，正好我不会，记录一下。参考链接：https:&#x2F;&#x2F;zhuanlan.zhihu.com&#x2F;p&#x2F;64455461https:&#x2F;&#x2F;blog.csdn.net&#x2F;Apollon_krj&#x2F;article&#x2F;details&#x2F;82086174https:&#x2F;&#x2F;blog.csdn.net&#x2F;lycb_gz&#x2F;article&#x2F;details&#x2F;878">
+<meta property="og:type" content="article">
+<meta property="og:title" content="二层交换and三层交换">
+<meta property="og:url" content="https://polosec.github.io/2020/04/20/%E4%BA%8C%E5%B1%82%E4%BA%A4%E6%8D%A2and%E4%B8%89%E5%B1%82%E4%BA%A4%E6%8D%A2/index.html">
+<meta property="og:site_name" content="Polo&#39;s Blog">
+<meta property="og:description" content="二层交换与三层交换的问题其实是偶然看到的，看某校夏令营经验贴看到有提问这个问题，正好我不会，记录一下。参考链接：https:&#x2F;&#x2F;zhuanlan.zhihu.com&#x2F;p&#x2F;64455461https:&#x2F;&#x2F;blog.csdn.net&#x2F;Apollon_krj&#x2F;article&#x2F;details&#x2F;82086174https:&#x2F;&#x2F;blog.csdn.net&#x2F;lycb_gz&#x2F;article&#x2F;details&#x2F;878">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-04-20T12:31:24.000Z">
+<meta property="article:modified_time" content="2020-04-20T14:10:10.080Z">
+<meta property="article:author" content="Polo">
+<meta property="article:tag" content="web">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>二层交换and三层交换</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" "Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="上一篇 " href="/2020/04/20/c-memset/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="下一篇 " href="/2020/04/17/php-unserialize/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部 " href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章 " href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://polosec.github.io/2020/04/20/%E4%BA%8C%E5%B1%82%E4%BA%A4%E6%8D%A2and%E4%B8%89%E5%B1%82%E4%BA%A4%E6%8D%A2/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://polosec.github.io/2020/04/20/%E4%BA%8C%E5%B1%82%E4%BA%A4%E6%8D%A2and%E4%B8%89%E5%B1%82%E4%BA%A4%E6%8D%A2/&text=二层交换and三层交换"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://polosec.github.io/2020/04/20/%E4%BA%8C%E5%B1%82%E4%BA%A4%E6%8D%A2and%E4%B8%89%E5%B1%82%E4%BA%A4%E6%8D%A2/&title=二层交换and三层交换"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://polosec.github.io/2020/04/20/%E4%BA%8C%E5%B1%82%E4%BA%A4%E6%8D%A2and%E4%B8%89%E5%B1%82%E4%BA%A4%E6%8D%A2/&is_video=false&description=二层交换and三层交换"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=二层交换and三层交换&body=Check out this article: https://polosec.github.io/2020/04/20/%E4%BA%8C%E5%B1%82%E4%BA%A4%E6%8D%A2and%E4%B8%89%E5%B1%82%E4%BA%A4%E6%8D%A2/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://polosec.github.io/2020/04/20/%E4%BA%8C%E5%B1%82%E4%BA%A4%E6%8D%A2and%E4%B8%89%E5%B1%82%E4%BA%A4%E6%8D%A2/&title=二层交换and三层交换"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://polosec.github.io/2020/04/20/%E4%BA%8C%E5%B1%82%E4%BA%A4%E6%8D%A2and%E4%B8%89%E5%B1%82%E4%BA%A4%E6%8D%A2/&title=二层交换and三层交换"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://polosec.github.io/2020/04/20/%E4%BA%8C%E5%B1%82%E4%BA%A4%E6%8D%A2and%E4%B8%89%E5%B1%82%E4%BA%A4%E6%8D%A2/&title=二层交换and三层交换"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://polosec.github.io/2020/04/20/%E4%BA%8C%E5%B1%82%E4%BA%A4%E6%8D%A2and%E4%B8%89%E5%B1%82%E4%BA%A4%E6%8D%A2/&title=二层交换and三层交换"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://polosec.github.io/2020/04/20/%E4%BA%8C%E5%B1%82%E4%BA%A4%E6%8D%A2and%E4%B8%89%E5%B1%82%E4%BA%A4%E6%8D%A2/&name=二层交换and三层交换&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://polosec.github.io/2020/04/20/%E4%BA%8C%E5%B1%82%E4%BA%A4%E6%8D%A2and%E4%B8%89%E5%B1%82%E4%BA%A4%E6%8D%A2/&t=二层交换and三层交换"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%8C%E5%B1%82%E4%BA%A4%E6%8D%A2%E4%B8%8E%E4%B8%89%E5%B1%82%E4%BA%A4%E6%8D%A2%E7%9A%84%E9%97%AE%E9%A2%98%E5%85%B6%E5%AE%9E%E6%98%AF%E5%81%B6%E7%84%B6%E7%9C%8B%E5%88%B0%E7%9A%84%EF%BC%8C%E7%9C%8B%E6%9F%90%E6%A0%A1%E5%A4%8F%E4%BB%A4%E8%90%A5%E7%BB%8F%E9%AA%8C%E8%B4%B4%E7%9C%8B%E5%88%B0%E6%9C%89%E6%8F%90%E9%97%AE%E8%BF%99%E4%B8%AA%E9%97%AE%E9%A2%98%EF%BC%8C%E6%AD%A3%E5%A5%BD%E6%88%91%E4%B8%8D%E4%BC%9A%EF%BC%8C%E8%AE%B0%E5%BD%95%E4%B8%80%E4%B8%8B%E3%80%82"><span class="toc-number">1.</span> <span class="toc-text">二层交换与三层交换的问题其实是偶然看到的，看某校夏令营经验贴看到有提问这个问题，正好我不会，记录一下。</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%94%A8%E5%88%B0%E7%9A%84%E7%9F%A5%E8%AF%86%E7%82%B9"><span class="toc-number">1.1.</span> <span class="toc-text">用到的知识点</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E5%B1%82%E4%BA%A4%E6%8D%A2"><span class="toc-number">1.2.</span> <span class="toc-text">二层交换</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E5%B1%82%E4%BA%A4%E6%8D%A2"><span class="toc-number">1.3.</span> <span class="toc-text">三层交换</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E5%B1%82%E4%BA%A4%E6%8D%A2%E8%B7%A8%E7%BD%91%E6%AE%B5%E9%80%9A%E4%BF%A1"><span class="toc-number">1.4.</span> <span class="toc-text">三层交换跨网段通信</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#arp%E5%85%A80%E5%92%8C%E5%85%A8f%E7%9A%84%E9%97%AE%E9%A2%98"><span class="toc-number">1.5.</span> <span class="toc-text">arp全0和全f的问题</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        二层交换and三层交换
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">Polo</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2020-04-20T12:31:24.000Z" itemprop="datePublished">2020-04-20</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/web/" rel="tag">web</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="二层交换与三层交换的问题其实是偶然看到的，看某校夏令营经验贴看到有提问这个问题，正好我不会，记录一下。"><a href="#二层交换与三层交换的问题其实是偶然看到的，看某校夏令营经验贴看到有提问这个问题，正好我不会，记录一下。" class="headerlink" title="二层交换与三层交换的问题其实是偶然看到的，看某校夏令营经验贴看到有提问这个问题，正好我不会，记录一下。"></a>二层交换与三层交换的问题其实是偶然看到的，看某校夏令营经验贴看到有提问这个问题，正好我不会，记录一下。</h1><p>参考链接：<br><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/64455461">https://zhuanlan.zhihu.com/p/64455461</a><br><a target="_blank" rel="noopener" href="https://blog.csdn.net/Apollon_krj/article/details/82086174">https://blog.csdn.net/Apollon_krj/article/details/82086174</a><br><a target="_blank" rel="noopener" href="https://blog.csdn.net/lycb_gz/article/details/8780851">https://blog.csdn.net/lycb_gz/article/details/8780851</a><br>二层交换机工作在数据链路层，根据MAC地址对帧进行转发；<br>三层交换机工作在网络层，对于跨网段的通信，可以做到一次路由，多次交换。</p>
+<h2 id="用到的知识点"><a href="#用到的知识点" class="headerlink" title="用到的知识点"></a>用到的知识点</h2><p>在说二三层转发之前先总结一下用到的知识点，虽然我学过一遍计算机网络，但自认为学的很菜。。有些地方都忘了。。甚至某协议首部某字段还没记住23333<br>1.ARP<br>ARP协议是由IP地址获得MAC地址，假设两台主机在同一网段，A向B发消息，A知道B的IP地址 但是不知道B的mac地址，所以在局域网内发个广播，目的MAC全为F，意思就是：“谁的IP地址为192.168.2.2？赶紧把mac地址告诉我”<br>局域网内其他主机看到这条消息后发现目的ip不是自己的，于是丢弃；B看到后发现是找的自己，于是把自己的mac地址发给了A，于此同时B在自己的ARP表中记录下A的IP与MAC地址的映射关系。<br>A收到B发的消息后也把B的IP与MAC的映射关系记录到自己的ARP表中。。这就是一次简单的ARP请求<br>2.跨网段通信<br>假设A和B不在一个网段，通信过程应该是这样：<br>先和子网掩码相与，发现不在一个网段，然后找自己的网关，把数据发给网关让网关代为转发；在这个过程中如果不知道网关的MAC就来一次ARP。发送给网关后，查一下路由表，看看下一跳该发到哪了，就这样一直转发，查找下一跳，转发。。无限套娃。套到最后节点，发现目的IP在自己的网段，先看看ARP表有没有记录，没有的话发一次ARP请求，有的话就直接把请求发给目的IP了。<br>3.ARP表 mac表<br>二层交换机维护MAC表，主机维护ARP表</p>
+<h2 id="二层交换"><a href="#二层交换" class="headerlink" title="二层交换"></a>二层交换</h2><p>二层交换是数据链路层的交换，根据mac地址交换。二层交换通信不能跨网段（比如vlan）。<br>二层交换机维护的MAC表是端口和MAC地址的映射关系。</p>
+<h2 id="三层交换"><a href="#三层交换" class="headerlink" title="三层交换"></a>三层交换</h2><p>三层交换又被叫做一次路由，多次交换。<br>这是啥意思？<br>先说一个简单的：<br>假设一台三层交换机划分了vlan1和vlan2，a在vlan1，b在vlan2，a第一次给b发数据的时候还是正常走路由表，等整个过程结束后三层交换机会记录下一条数据，包括了A和B的mac地址端口等相关信息，下次A和B通信的时候直接根据这条数据通过二层转发了，就不用再走路由了。<br>of course,事情没有那么简单，too simple,sometimes naive!<br>上面这句话就图一乐，就像面试问TCP 三次握手的时候你说“客户端发请求，服务器响应，客户端再发一个请求，建立连接。”一样，太不专业了。<br>好的 接下来说个复杂的。</p>
+<h2 id="三层交换跨网段通信"><a href="#三层交换跨网段通信" class="headerlink" title="三层交换跨网段通信"></a>三层交换跨网段通信</h2><p>主机A和B在同一个交换机，但是在不同vlan。观察a和b的通信过程<br>初始化，a发现b和自己不一个网段并且不知道网关的mac，广播一个ARP，目的是找到网关的MAC。<br>网关收到ARP请求后把自己的mac地址发给a，并且在自己的arp表中记录a端口和mac的映射关系。<br>然后把A的IP地址（作为“目的IP地址”）、MAC地址（作为“下一跳MAC地址”），以及与交换机直接相连的端口号等信息下发到三层交换机ASIC芯片中的三层硬件转发表。此时在三层硬件转发表中就有了第一个转发表项，即A的转发表项。<br>A收到网关的应答后，把目的地址修改问网关的mac，并且把数据包发给网关<br>网关收到请求后，先在三层硬件转发表中查找与B有关表项，由于是第一次通信，所以没有，然后进行路由。<br>CPU根据目的地址在router table中查找next hop，发现了直连的主机b，然后在自己的arp表中查b的mac，没有查到，于是发个广播：找B的mac。<br>B收到ARP请求后把自己的mac发给交换机，自己也缓存下。<br>交换机收到b的mac后，在自己的arp表中记录下ip与mac的映射；在三层硬件转发表中新增一项： B的IP地址、MAC地址、进入交换机的端口号等信息。<br>这样就完成了第一次A和B的通信，三层交换机的硬件转发表中多了两项：分别是<br>A的IP A的port A的mac A的vlan 。。。<br>B的IP B的PORT B的MAC B的VLAN 。。。<br>等下次有别的主机想和A或者B通信的时候，由于表中有记录，直接走表中记录的端口转发过去就可以了。<br>即 一次路由，多次交换~（首尾呼应2333</p>
+<h2 id="arp全0和全f的问题"><a href="#arp全0和全f的问题" class="headerlink" title="arp全0和全f的问题"></a>arp全0和全f的问题</h2><p>在网络层的ARP协议（TCP/IP模型）不知道目的mac，所以把目的mac置0；到了数据链路层置为全F 意为广播帧–数据链路层不认识ip。<br>如果有错误欢迎提出，共同进步</p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%8C%E5%B1%82%E4%BA%A4%E6%8D%A2%E4%B8%8E%E4%B8%89%E5%B1%82%E4%BA%A4%E6%8D%A2%E7%9A%84%E9%97%AE%E9%A2%98%E5%85%B6%E5%AE%9E%E6%98%AF%E5%81%B6%E7%84%B6%E7%9C%8B%E5%88%B0%E7%9A%84%EF%BC%8C%E7%9C%8B%E6%9F%90%E6%A0%A1%E5%A4%8F%E4%BB%A4%E8%90%A5%E7%BB%8F%E9%AA%8C%E8%B4%B4%E7%9C%8B%E5%88%B0%E6%9C%89%E6%8F%90%E9%97%AE%E8%BF%99%E4%B8%AA%E9%97%AE%E9%A2%98%EF%BC%8C%E6%AD%A3%E5%A5%BD%E6%88%91%E4%B8%8D%E4%BC%9A%EF%BC%8C%E8%AE%B0%E5%BD%95%E4%B8%80%E4%B8%8B%E3%80%82"><span class="toc-number">1.</span> <span class="toc-text">二层交换与三层交换的问题其实是偶然看到的，看某校夏令营经验贴看到有提问这个问题，正好我不会，记录一下。</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%94%A8%E5%88%B0%E7%9A%84%E7%9F%A5%E8%AF%86%E7%82%B9"><span class="toc-number">1.1.</span> <span class="toc-text">用到的知识点</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E5%B1%82%E4%BA%A4%E6%8D%A2"><span class="toc-number">1.2.</span> <span class="toc-text">二层交换</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E5%B1%82%E4%BA%A4%E6%8D%A2"><span class="toc-number">1.3.</span> <span class="toc-text">三层交换</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E5%B1%82%E4%BA%A4%E6%8D%A2%E8%B7%A8%E7%BD%91%E6%AE%B5%E9%80%9A%E4%BF%A1"><span class="toc-number">1.4.</span> <span class="toc-text">三层交换跨网段通信</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#arp%E5%85%A80%E5%92%8C%E5%85%A8f%E7%9A%84%E9%97%AE%E9%A2%98"><span class="toc-number">1.5.</span> <span class="toc-text">arp全0和全f的问题</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://polosec.github.io/2020/04/20/%E4%BA%8C%E5%B1%82%E4%BA%A4%E6%8D%A2and%E4%B8%89%E5%B1%82%E4%BA%A4%E6%8D%A2/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://polosec.github.io/2020/04/20/%E4%BA%8C%E5%B1%82%E4%BA%A4%E6%8D%A2and%E4%B8%89%E5%B1%82%E4%BA%A4%E6%8D%A2/&text=二层交换and三层交换"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://polosec.github.io/2020/04/20/%E4%BA%8C%E5%B1%82%E4%BA%A4%E6%8D%A2and%E4%B8%89%E5%B1%82%E4%BA%A4%E6%8D%A2/&title=二层交换and三层交换"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://polosec.github.io/2020/04/20/%E4%BA%8C%E5%B1%82%E4%BA%A4%E6%8D%A2and%E4%B8%89%E5%B1%82%E4%BA%A4%E6%8D%A2/&is_video=false&description=二层交换and三层交换"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=二层交换and三层交换&body=Check out this article: https://polosec.github.io/2020/04/20/%E4%BA%8C%E5%B1%82%E4%BA%A4%E6%8D%A2and%E4%B8%89%E5%B1%82%E4%BA%A4%E6%8D%A2/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://polosec.github.io/2020/04/20/%E4%BA%8C%E5%B1%82%E4%BA%A4%E6%8D%A2and%E4%B8%89%E5%B1%82%E4%BA%A4%E6%8D%A2/&title=二层交换and三层交换"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://polosec.github.io/2020/04/20/%E4%BA%8C%E5%B1%82%E4%BA%A4%E6%8D%A2and%E4%B8%89%E5%B1%82%E4%BA%A4%E6%8D%A2/&title=二层交换and三层交换"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://polosec.github.io/2020/04/20/%E4%BA%8C%E5%B1%82%E4%BA%A4%E6%8D%A2and%E4%B8%89%E5%B1%82%E4%BA%A4%E6%8D%A2/&title=二层交换and三层交换"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://polosec.github.io/2020/04/20/%E4%BA%8C%E5%B1%82%E4%BA%A4%E6%8D%A2and%E4%B8%89%E5%B1%82%E4%BA%A4%E6%8D%A2/&title=二层交换and三层交换"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://polosec.github.io/2020/04/20/%E4%BA%8C%E5%B1%82%E4%BA%A4%E6%8D%A2and%E4%B8%89%E5%B1%82%E4%BA%A4%E6%8D%A2/&name=二层交换and三层交换&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://polosec.github.io/2020/04/20/%E4%BA%8C%E5%B1%82%E4%BA%A4%E6%8D%A2and%E4%B8%89%E5%B1%82%E4%BA%A4%E6%8D%A2/&t=二层交换and三层交换"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2016-2021
+    Polo
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+ 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script> 
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script> 
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Umami Analytics -->
+
+<!-- Disqus Comments -->
+
+
+</body>
+</html>

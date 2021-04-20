@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="取证需要用到的工具： volatility、注册表分析工具（WRR）、AXIOM等。 例题分析湖湘杯misc首先看一下imageinfo 1volatility -f 用户名注册表.vmem  imageinfo  选择一个supported  profile，这里选第一个不行，所以选第二个Win2003SP2x86 先扫一下pslist volatility -f 用户名注册表.vmem  –p">
+<meta property="og:type" content="article">
+<meta property="og:title" content="取证专题">
+<meta property="og:url" content="https://polosec.github.io/2020/11/17/%E5%8F%96%E8%AF%81%E4%B8%93%E9%A2%98/index.html">
+<meta property="og:site_name" content="Polo&#39;s Blog">
+<meta property="og:description" content="取证需要用到的工具： volatility、注册表分析工具（WRR）、AXIOM等。 例题分析湖湘杯misc首先看一下imageinfo 1volatility -f 用户名注册表.vmem  imageinfo  选择一个supported  profile，这里选第一个不行，所以选第二个Win2003SP2x86 先扫一下pslist volatility -f 用户名注册表.vmem  –p">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://cdn.polowong.top/static/images/hxbmisc1.jpg">
+<meta property="og:image" content="http://cdn.polowong.top/static/images/hxbmisc2.jpg">
+<meta property="article:published_time" content="2020-11-17T03:49:09.000Z">
+<meta property="article:modified_time" content="2020-11-17T04:32:36.606Z">
+<meta property="article:author" content="Polo">
+<meta property="article:tag" content="取证">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://cdn.polowong.top/static/images/hxbmisc1.jpg">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>取证专题</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" "Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="上一篇 " href="/2020/11/23/%E5%B1%B1%E4%B8%9C%E7%9C%81%E6%96%B0%E4%B8%80%E4%BB%A3%E6%94%BB%E9%98%B2%E8%B5%9Bwp/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="下一篇 " href="/2020/11/09/1104%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部 " href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章 " href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://polosec.github.io/2020/11/17/%E5%8F%96%E8%AF%81%E4%B8%93%E9%A2%98/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://polosec.github.io/2020/11/17/%E5%8F%96%E8%AF%81%E4%B8%93%E9%A2%98/&text=取证专题"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://polosec.github.io/2020/11/17/%E5%8F%96%E8%AF%81%E4%B8%93%E9%A2%98/&title=取证专题"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://polosec.github.io/2020/11/17/%E5%8F%96%E8%AF%81%E4%B8%93%E9%A2%98/&is_video=false&description=取证专题"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=取证专题&body=Check out this article: https://polosec.github.io/2020/11/17/%E5%8F%96%E8%AF%81%E4%B8%93%E9%A2%98/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://polosec.github.io/2020/11/17/%E5%8F%96%E8%AF%81%E4%B8%93%E9%A2%98/&title=取证专题"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://polosec.github.io/2020/11/17/%E5%8F%96%E8%AF%81%E4%B8%93%E9%A2%98/&title=取证专题"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://polosec.github.io/2020/11/17/%E5%8F%96%E8%AF%81%E4%B8%93%E9%A2%98/&title=取证专题"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://polosec.github.io/2020/11/17/%E5%8F%96%E8%AF%81%E4%B8%93%E9%A2%98/&title=取证专题"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://polosec.github.io/2020/11/17/%E5%8F%96%E8%AF%81%E4%B8%93%E9%A2%98/&name=取证专题&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://polosec.github.io/2020/11/17/%E5%8F%96%E8%AF%81%E4%B8%93%E9%A2%98/&t=取证专题"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BE%8B%E9%A2%98%E5%88%86%E6%9E%90"><span class="toc-number">1.</span> <span class="toc-text">例题分析</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B9%96%E6%B9%98%E6%9D%AFmisc"><span class="toc-number">1.1.</span> <span class="toc-text">湖湘杯misc</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E9%93%BE%E6%8E%A5"><span class="toc-number">2.</span> <span class="toc-text">参考链接</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        取证专题
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">Polo</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2020-11-17T03:49:09.000Z" itemprop="datePublished">2020-11-17</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/%E5%8F%96%E8%AF%81/" rel="tag">取证</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <p>取证需要用到的工具：</p>
+<p>volatility、注册表分析工具（WRR）、AXIOM等。</p>
+<h1 id="例题分析"><a href="#例题分析" class="headerlink" title="例题分析"></a>例题分析</h1><h2 id="湖湘杯misc"><a href="#湖湘杯misc" class="headerlink" title="湖湘杯misc"></a>湖湘杯misc</h2><p>首先看一下imageinfo</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">volatility -f 用户名注册表.vmem  imageinfo</span><br></pre></td></tr></table></figure>
+
+<p>选择一个supported  profile，这里选第一个不行，所以选第二个Win2003SP2x86</p>
+<p>先扫一下pslist</p>
+<p>volatility -f 用户名注册表.vmem  –profile=Win2003SP2x86 pslist</p>
+<p>除了winlogon.exe之外没啥收获，然后扫一下网络，也没啥收获。</p>
+<p>后面尝试扫描connscan，cmdscan，notepad。</p>
+<p>在扫notepad的时候发现了一些东西，于是尝试扫一下后缀为.txt的文件，看看有没有收获。</p>
+<img src="http://cdn.polowong.top/static/images/hxbmisc1.jpg">
+
+<p>发现了一个file.txt，尝试dump到本地。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">volatility -f 用户名注册表.vmem  --profile&#x3D;Win2003SP2x86 dumpfiles -Q 0x000000000412cde0 -D .&#x2F;</span><br></pre></td></tr></table></figure>
+
+<p>dump下来的文件内容为</p>
+<p>什么？计算机又被不知名账户登录了？明明在计算机管理中没有这个用户，为什么还会被这个用户登录呢？电脑跟前的你能帮我找到原因吗？flag为该用户的用户名以及密码的md5值。</p>
+<p>格式：md5(用户名:密码）</p>
+<p>下面考虑在注册表中找一下隐藏用户。</p>
+<p>首先看一下注册表。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">volatility -f 用户名注册表.vmem  --profile&#x3D;Win2003SP2x86 hivelist volatility -f 用户名注册表.vmem  --profile&#x3D;Win2003SP2x86 hivelist</span><br></pre></td></tr></table></figure>
+
+<p>发现了SAM表。SAM表是存储了电脑登录用户相关信息的表，尝试dump出SAM表。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">volatility -f 用户名注册表.vmem  --profile&#x3D;Win2003SP2x86 dumpregistry -D .&#x2F;</span><br></pre></td></tr></table></figure>
+
+<p>然后使用注册表分析工具打开。</p>
+<img src="http://cdn.polowong.top/static/images/hxbmisc2.jpg">
+
+<p>可以看到很多隐藏账户，一个个看看是否有last logon 这个属性。</p>
+<p>最后找到了用户 FHREhpe，然后再回到volatility里面hashdump 出来关于他的账号密码。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">volatility -f 用户名注册表.vmem  --profile&#x3D;Win2003SP2x86 hashdump | grep FHREhpe</span><br><span class="line">有如下数据：</span><br><span class="line">FHREhpe$:1171:70fdb8f853bd427d7584248b8d2c9f9e:f3cf477fc3ea6ec0b3b5887616dd4506:::</span><br></pre></td></tr></table></figure>
+
+<p>  <em>Windows</em>系统下的<em>hash</em>密码格式为：用户名称*:RID:LM-HASH<em>值</em>:NT-HASH*值 </p>
+<p>获得NT HASH值后可以去md5网站解密，解密后的密码是NIAIWOMA</p>
+<p>然后将其MD5加密后即可获得flag。</p>
+<h1 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h1><p><a target="_blank" rel="noopener" href="https://bbs.ichunqiu.com/thread-59102-1-1.html">https://bbs.ichunqiu.com/thread-59102-1-1.html</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.sqlsec.com/2019/11/winhash.html">https://www.sqlsec.com/2019/11/winhash.html</a></p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BE%8B%E9%A2%98%E5%88%86%E6%9E%90"><span class="toc-number">1.</span> <span class="toc-text">例题分析</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B9%96%E6%B9%98%E6%9D%AFmisc"><span class="toc-number">1.1.</span> <span class="toc-text">湖湘杯misc</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E9%93%BE%E6%8E%A5"><span class="toc-number">2.</span> <span class="toc-text">参考链接</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://polosec.github.io/2020/11/17/%E5%8F%96%E8%AF%81%E4%B8%93%E9%A2%98/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://polosec.github.io/2020/11/17/%E5%8F%96%E8%AF%81%E4%B8%93%E9%A2%98/&text=取证专题"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://polosec.github.io/2020/11/17/%E5%8F%96%E8%AF%81%E4%B8%93%E9%A2%98/&title=取证专题"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://polosec.github.io/2020/11/17/%E5%8F%96%E8%AF%81%E4%B8%93%E9%A2%98/&is_video=false&description=取证专题"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=取证专题&body=Check out this article: https://polosec.github.io/2020/11/17/%E5%8F%96%E8%AF%81%E4%B8%93%E9%A2%98/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://polosec.github.io/2020/11/17/%E5%8F%96%E8%AF%81%E4%B8%93%E9%A2%98/&title=取证专题"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://polosec.github.io/2020/11/17/%E5%8F%96%E8%AF%81%E4%B8%93%E9%A2%98/&title=取证专题"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://polosec.github.io/2020/11/17/%E5%8F%96%E8%AF%81%E4%B8%93%E9%A2%98/&title=取证专题"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://polosec.github.io/2020/11/17/%E5%8F%96%E8%AF%81%E4%B8%93%E9%A2%98/&title=取证专题"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://polosec.github.io/2020/11/17/%E5%8F%96%E8%AF%81%E4%B8%93%E9%A2%98/&name=取证专题&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://polosec.github.io/2020/11/17/%E5%8F%96%E8%AF%81%E4%B8%93%E9%A2%98/&t=取证专题"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2016-2021
+    Polo
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+ 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script> 
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script> 
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Umami Analytics -->
+
+<!-- Disqus Comments -->
+
+
+</body>
+</html>

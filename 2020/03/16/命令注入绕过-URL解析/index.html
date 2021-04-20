@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="题目环境：ctfhub-综合命令注入致敬、参考：回车&amp;换行 题目分析123456789101112131415&lt;?php$res &#x3D; FALSE;if (isset($_GET[&amp;#x27;ip&amp;#x27;]) &amp;&amp; $_GET[&amp;#x27;ip&amp;#x27;]) &amp;#123;    $ip &#x3D; $_GET[&amp;#x27;ip&amp;#x27;];    $m &#x3D; [];">
+<meta property="og:type" content="article">
+<meta property="og:title" content="命令注入绕过&amp;URL解析">
+<meta property="og:url" content="https://polosec.github.io/2020/03/16/%E5%91%BD%E4%BB%A4%E6%B3%A8%E5%85%A5%E7%BB%95%E8%BF%87-URL%E8%A7%A3%E6%9E%90/index.html">
+<meta property="og:site_name" content="Polo&#39;s Blog">
+<meta property="og:description" content="题目环境：ctfhub-综合命令注入致敬、参考：回车&amp;换行 题目分析123456789101112131415&lt;?php$res &#x3D; FALSE;if (isset($_GET[&amp;#x27;ip&amp;#x27;]) &amp;&amp; $_GET[&amp;#x27;ip&amp;#x27;]) &amp;#123;    $ip &#x3D; $_GET[&amp;#x27;ip&amp;#x27;];    $m &#x3D; [];">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://polosec.github.io/img/rc1.png">
+<meta property="article:published_time" content="2020-03-16T12:09:50.000Z">
+<meta property="article:modified_time" content="2020-03-16T14:35:05.694Z">
+<meta property="article:author" content="Polo">
+<meta property="article:tag" content="web">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://polosec.github.io/img/rc1.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>命令注入绕过&amp;URL解析</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" "Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="上一篇 " href="/2020/03/17/%E5%A0%86%E5%8F%A0%E6%B3%A8%E5%85%A5/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="下一篇 " href="/2020/03/14/buu%E7%99%BB%E5%BD%95%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部 " href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章 " href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://polosec.github.io/2020/03/16/%E5%91%BD%E4%BB%A4%E6%B3%A8%E5%85%A5%E7%BB%95%E8%BF%87-URL%E8%A7%A3%E6%9E%90/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://polosec.github.io/2020/03/16/%E5%91%BD%E4%BB%A4%E6%B3%A8%E5%85%A5%E7%BB%95%E8%BF%87-URL%E8%A7%A3%E6%9E%90/&text=命令注入绕过&amp;URL解析"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://polosec.github.io/2020/03/16/%E5%91%BD%E4%BB%A4%E6%B3%A8%E5%85%A5%E7%BB%95%E8%BF%87-URL%E8%A7%A3%E6%9E%90/&title=命令注入绕过&amp;URL解析"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://polosec.github.io/2020/03/16/%E5%91%BD%E4%BB%A4%E6%B3%A8%E5%85%A5%E7%BB%95%E8%BF%87-URL%E8%A7%A3%E6%9E%90/&is_video=false&description=命令注入绕过&amp;URL解析"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=命令注入绕过&amp;URL解析&body=Check out this article: https://polosec.github.io/2020/03/16/%E5%91%BD%E4%BB%A4%E6%B3%A8%E5%85%A5%E7%BB%95%E8%BF%87-URL%E8%A7%A3%E6%9E%90/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://polosec.github.io/2020/03/16/%E5%91%BD%E4%BB%A4%E6%B3%A8%E5%85%A5%E7%BB%95%E8%BF%87-URL%E8%A7%A3%E6%9E%90/&title=命令注入绕过&amp;URL解析"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://polosec.github.io/2020/03/16/%E5%91%BD%E4%BB%A4%E6%B3%A8%E5%85%A5%E7%BB%95%E8%BF%87-URL%E8%A7%A3%E6%9E%90/&title=命令注入绕过&amp;URL解析"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://polosec.github.io/2020/03/16/%E5%91%BD%E4%BB%A4%E6%B3%A8%E5%85%A5%E7%BB%95%E8%BF%87-URL%E8%A7%A3%E6%9E%90/&title=命令注入绕过&amp;URL解析"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://polosec.github.io/2020/03/16/%E5%91%BD%E4%BB%A4%E6%B3%A8%E5%85%A5%E7%BB%95%E8%BF%87-URL%E8%A7%A3%E6%9E%90/&title=命令注入绕过&amp;URL解析"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://polosec.github.io/2020/03/16/%E5%91%BD%E4%BB%A4%E6%B3%A8%E5%85%A5%E7%BB%95%E8%BF%87-URL%E8%A7%A3%E6%9E%90/&name=命令注入绕过&amp;URL解析&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://polosec.github.io/2020/03/16/%E5%91%BD%E4%BB%A4%E6%B3%A8%E5%85%A5%E7%BB%95%E8%BF%87-URL%E8%A7%A3%E6%9E%90/&t=命令注入绕过&amp;URL解析"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E9%A2%98%E7%9B%AE%E7%8E%AF%E5%A2%83%EF%BC%9Actfhub-%E7%BB%BC%E5%90%88%E5%91%BD%E4%BB%A4%E6%B3%A8%E5%85%A5"><span class="toc-number">1.</span> <span class="toc-text">题目环境：ctfhub-综合命令注入</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A2%98%E7%9B%AE%E5%88%86%E6%9E%90"><span class="toc-number">1.1.</span> <span class="toc-text">题目分析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B3%A8%E6%84%8F%E5%86%85%E5%AE%B9%EF%BC%9A%E8%BF%99%E9%87%8C%E6%8D%A2%E8%A1%8C%E7%AC%A6%E9%9C%80%E8%A6%81%E6%B3%A8%E6%84%8F%E3%80%82%E6%8D%A2%E8%A1%8C%E7%AC%A6%E7%9A%84URL%E7%BC%96%E7%A0%81%E4%B8%BA-0a-%E9%87%87%E7%94%A8GET%E6%96%B9%E5%BC%8F%E3%80%82%E6%89%80%E4%BB%A5%E9%9C%80%E8%A6%81%E4%BD%A0%E7%9B%B4%E6%8E%A5%E4%BD%BF%E7%94%A8GET%E6%96%B9%E5%BC%8F%E6%8F%90%E4%BA%A4%E6%95%B0%E6%8D%AE%EF%BC%8C%E8%80%8C%E4%B8%8D%E8%83%BD%E5%9C%A8%E8%BE%93%E5%85%A5%E6%A1%86%E8%BE%93%E5%85%A5%E6%95%B0%E6%8D%AE%E3%80%82%E5%9B%A0%E4%B8%BA%E5%9C%A8%E8%BE%93%E5%85%A5%E6%A1%86%E8%BE%93%E5%85%A5%E6%95%B0%E6%8D%AE%E5%90%8E%EF%BC%8C%E6%B5%8F%E8%A7%88%E5%99%A8%E4%BC%9A%E8%87%AA%E5%8A%A8%E8%BF%9B%E8%A1%8C%E4%B8%80%E6%AC%A1urlencode-%E7%9A%84%E8%BF%87%E7%A8%8B%EF%BC%8C%E4%BC%9A%E6%8A%8A-0a%E5%86%8D%E6%AC%A1url%E7%BC%96%E7%A0%81%E6%88%90%E5%88%AB%E7%9A%84%E3%80%82%E8%BF%99%E5%B0%B1%E4%B8%8D%E6%98%AF%E6%88%91%E4%BB%AC%E6%83%B3%E8%A6%81%E7%9A%84%E4%BA%86%E3%80%82%E6%89%80%E4%BB%A5%E5%8F%AF%E4%BB%A5%E7%94%A8hackbar%E6%88%96%E8%80%85burp%E7%9B%B4%E6%8E%A5%E7%94%A8get%E6%96%B9%E5%BC%8F%E6%8F%90%E4%BA%A4%E3%80%82"><span class="toc-number">1.2.</span> <span class="toc-text">注意内容：这里换行符需要注意。换行符的URL编码为%0a,采用GET方式。所以需要你直接使用GET方式提交数据，而不能在输入框输入数据。因为在输入框输入数据后，浏览器会自动进行一次urlencode()的过程，会把%0a再次url编码成别的。这就不是我们想要的了。所以可以用hackbar或者burp直接用get方式提交。</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B8%B8%E8%A7%81%E5%91%BD%E4%BB%A4%E6%B3%A8%E5%85%A5%E7%BB%95%E8%BF%87%E5%A7%BF%E5%8A%BF"><span class="toc-number">1.3.</span> <span class="toc-text">常见命令注入绕过姿势</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%88%E7%9C%8B%E8%87%B4%E6%95%AC%E3%80%81%E5%8F%82%E8%80%83%E9%93%BE%E6%8E%A5%E4%B8%AD%E7%9A%84%E5%9B%9E%E8%BD%A6-amp-%E6%8D%A2%E8%A1%8C%E3%80%82"><span class="toc-number">1.3.1.</span> <span class="toc-text">先看致敬、参考链接中的回车&amp;换行。</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#URL%E7%BC%96%E7%A0%81%E8%A7%84%E5%88%99"><span class="toc-number">1.3.2.</span> <span class="toc-text">URL编码规则</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#URL%E7%BC%96%E7%A0%81-%E8%A7%A3%E7%A0%81%E6%97%B6%E9%97%B4%E8%8A%82%E7%82%B9"><span class="toc-number">1.3.3.</span> <span class="toc-text">URL编码&#x2F;解码时间节点</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9F%9F%E5%90%8D%E8%A7%A3%E6%9E%90"><span class="toc-number">1.4.</span> <span class="toc-text">域名解析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BF%9B%E8%A1%8CTCP%E8%BF%9E%E6%8E%A5-%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B"><span class="toc-number">1.5.</span> <span class="toc-text">进行TCP连接(三次握手)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%A2%E6%88%B7%E7%AB%AF%E5%8F%91%E9%80%81HTTP%E8%AF%B7%E6%B1%82"><span class="toc-number">1.6.</span> <span class="toc-text">客户端发送HTTP请求</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%93%8D%E5%BA%94HTTP%E8%AF%B7%E6%B1%82"><span class="toc-number">1.7.</span> <span class="toc-text">服务器响应HTTP请求</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B5%8F%E8%A7%88%E5%99%A8%E6%98%BE%E7%A4%BAhtml%E9%A1%B5%E9%9D%A2"><span class="toc-number">1.8.</span> <span class="toc-text">浏览器显示html页面</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A1%B5%E9%9D%A2%E5%8A%A0%E8%BD%BD%E5%AE%8C%E6%88%90"><span class="toc-number">1.9.</span> <span class="toc-text">页面加载完成</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        命令注入绕过&amp;URL解析
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">Polo</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2020-03-16T12:09:50.000Z" itemprop="datePublished">2020-03-16</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/web/" rel="tag">web</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="题目环境：ctfhub-综合命令注入"><a href="#题目环境：ctfhub-综合命令注入" class="headerlink" title="题目环境：ctfhub-综合命令注入"></a>题目环境：ctfhub-综合命令注入</h1><p>致敬、参考：<a target="_blank" rel="noopener" href="https://blog.csdn.net/lusanshui/article/details/86492410?depth_1-utm_source=distribute.pc_relevant.none-task&utm_source=distribute.pc_relevant.none-task">回车&amp;换行</a></p>
+<h2 id="题目分析"><a href="#题目分析" class="headerlink" title="题目分析"></a>题目分析</h2><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line"><span class="variable">$res</span> = <span class="literal">FALSE</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (<span class="keyword">isset</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;ip&#x27;</span>]) &amp;&amp; <span class="variable">$_GET</span>[<span class="string">&#x27;ip&#x27;</span>]) &#123;</span><br><span class="line">    <span class="variable">$ip</span> = <span class="variable">$_GET</span>[<span class="string">&#x27;ip&#x27;</span>];</span><br><span class="line">    <span class="variable">$m</span> = [];</span><br><span class="line">    <span class="keyword">if</span> (!preg_match_all(<span class="string">&quot;/(\||&amp;|;| |\/|cat|flag|ctfhub)/&quot;</span>, <span class="variable">$ip</span>, <span class="variable">$m</span>)) &#123;</span><br><span class="line">        <span class="variable">$cmd</span> = <span class="string">&quot;ping -c 4 <span class="subst">&#123;$ip&#125;</span>&quot;</span>;</span><br><span class="line">        exec(<span class="variable">$cmd</span>, <span class="variable">$res</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="variable">$res</span> = <span class="variable">$m</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+<p>通过阅读源码发现，过滤了| &amp; ; 空格 / cat flag ctfhub这几个关键字。不绕过的话根本日不进去。接下来考虑绕过<br>首先先ls一下看看里面有啥。想ls，首先要把分隔符绕过了才能ls。这里采用URL编码,即%0a代表换行符。尝试：<img src="/img/rc1.png"><br>成功。接下来我们需要做的是查看flag_is_here文件夹有啥。（或许不是文件夹）<br>这里由于过滤了flag字段和空格，所以可以采用fl\ag这种形式绕过flag，采用${IFS}绕过空格过滤。payload:ip=127.0.0.1%0als${IFS}fl\ag_is_here<br>之后得到结果flag_5145112918545.php。下一步就应该康康这里面有什么了。假设当前目录为/，我们需要读取/flag_is_here/flag_5145112918545.php文件的内容。<br>继续分析。由于过滤了路径分隔符\，考虑采用综合命令：先cd进入flag_is_here文件夹，然后cat flag_5145112918545.php文件，当然，针对cat的绕过有很多方法 比如ca\t 或者直接sort flag_5145112918545.php<br>payload:ip=127.0.0.1%0acd${IFS}fl\ag_is_here%0aca\t${IFS}fl\ag_5145112918545.php<br>或者把ca\t换成sort。一样</p>
+<h2 id="注意内容：这里换行符需要注意。换行符的URL编码为-0a-采用GET方式。所以需要你直接使用GET方式提交数据，而不能在输入框输入数据。因为在输入框输入数据后，浏览器会自动进行一次urlencode-的过程，会把-0a再次url编码成别的。这就不是我们想要的了。所以可以用hackbar或者burp直接用get方式提交。"><a href="#注意内容：这里换行符需要注意。换行符的URL编码为-0a-采用GET方式。所以需要你直接使用GET方式提交数据，而不能在输入框输入数据。因为在输入框输入数据后，浏览器会自动进行一次urlencode-的过程，会把-0a再次url编码成别的。这就不是我们想要的了。所以可以用hackbar或者burp直接用get方式提交。" class="headerlink" title="注意内容：这里换行符需要注意。换行符的URL编码为%0a,采用GET方式。所以需要你直接使用GET方式提交数据，而不能在输入框输入数据。因为在输入框输入数据后，浏览器会自动进行一次urlencode()的过程，会把%0a再次url编码成别的。这就不是我们想要的了。所以可以用hackbar或者burp直接用get方式提交。"></a>注意内容：这里换行符需要注意。换行符的URL编码为%0a,采用GET方式。所以需要你直接使用GET方式提交数据，而不能在输入框输入数据。因为在输入框输入数据后，浏览器会自动进行一次urlencode()的过程，会把%0a再次url编码成别的。这就不是我们想要的了。所以可以用hackbar或者burp直接用get方式提交。</h2><h2 id="常见命令注入绕过姿势"><a href="#常见命令注入绕过姿势" class="headerlink" title="常见命令注入绕过姿势"></a>常见命令注入绕过姿势</h2><h3 id="先看致敬、参考链接中的回车-amp-换行。"><a href="#先看致敬、参考链接中的回车-amp-换行。" class="headerlink" title="先看致敬、参考链接中的回车&amp;换行。"></a>先看致敬、参考链接中的回车&amp;换行。</h3><p>command1 &amp;&amp; command2 cmd1成功执行后执行cmd2<br>command1 | command2 只执行command2<br>cmd1 || cmd2 cmd1不成功执行则执行cmd2<br>command1 &amp; command2 先执行command2后执行command1<br>空格绕过（以、为分界）：&lt;、&lt;&gt;、${IFS}、$IFS$9<br>$IFS 代表分隔符，$9代表当前系统shell进程中的第九个参数持有者，始终为空字符串。<br>比如：cat ${IFS}filename ===cat $IFS$9filename ===cat filenmae<br>;绕过：<br>首先要知道;代表连续指令，简单地说就是用;可以把多条指令写一行然后分别执行。<br>绕过方法：使用%0a编码绕过。<br>原理：<br>假设原命令为cmd1;cmd2;cmd3\n<br>使用%0a绕过后：cmd1%0acmd2%0acmd3%0a  ==&gt;cmd1\ncmd2\ncmd3\n 注意理解换行符的概念。就知道为什么这样可以绕过了。（粗暴的理解:一个\n就代表\n前面的命令执行一次）<br>黑名单字符绕过：<br>a=fl;b=ag;$a$b  -&gt;flag<br>cat ca\t -&gt;cat<br>或者用别的方法。比如可以用sort/head/tail/strings 替换cat<br>#URL解析全过程<br>什么是URL<br><a target="_blank" rel="noopener" href="https://blog.csdn.net/simplebam/article/details/72644094">区分URL\URI</a><br>URL统一资源定位符，用于互联网上不同的资源的标识，就像不同的人有不同的身份证一样。<br>URL包括协议、域名、路径、参数、查询等。<br>比如：<a href="http://polosec.github.io/index.html">http://polosec.github.io/index.html</a></p>
+<h3 id="URL编码规则"><a href="#URL编码规则" class="headerlink" title="URL编码规则"></a>URL编码规则</h3><p>Url编码通常也被称为百分号编码，编码方式非常简单，使用%百分号加上两位的字符——0123456789ABCDEF——代表一个字节的十六进制形式。Url编码默认使用的字符集是US-ASCII。例如a在US-ASCII码中对应的字节是0x61，那么Url编码之后得到的就是%61，我们在地址栏上输入 <a target="_blank" rel="noopener" href="http://g.cn/search?q=abc">http://g.cn/search?q=%61%62%63</a> ，实际上就等同于在google上搜索abc了。又如@符号在ASCII字符集中对应的字节为0x40，经过Url编码之后得到的是%40。<br>对于非ASCII字符，需要使用ASCII字符集的超集进行编码得到相应的字节，然后对每个字节执行百分号编码。对于Unicode字符，RFC文档建议使用utf-8对其进行编码得到相应的字节，然后对每个字节执行百分号编码。如”中文”使用UTF-8字符集得到的字节为0xE4 0xB8 0xAD 0xE6 0x96 0x87，经过Url编码之后得到”%E4%B8%AD%E6%96%87”。</p>
+<h3 id="URL编码-解码时间节点"><a href="#URL编码-解码时间节点" class="headerlink" title="URL编码/解码时间节点"></a>URL编码/解码时间节点</h3><p>发送请求的时候客户端会自动编码，服务器端接受到请求后会自动解码；然后编码发送给客户端；客户端再解码。<br>关于二次编码/二次解码的问题：<a target="_blank" rel="noopener" href="https://www.cnblogs.com/xzwblog/p/6932870.html">二次编码&amp;二次解码</a>用来解决中文编码后乱码的问题</p>
+<h2 id="域名解析"><a href="#域名解析" class="headerlink" title="域名解析"></a>域名解析</h2><p>输入URL按回车后，首先进行的是域名解析操作。首先查看缓存：依次查找浏览器内部缓存、本机hosts文件、本地路由器缓存、然后是ISP提供商的缓存。<br>如果缓存都没有的话，则本地DNS服务器向根域名服务器进行迭代查询，查询到结果后返回给主机。<a target="_blank" rel="noopener" href="https://www.cnblogs.com/qingdaofu/p/7399670.html">递归查询、迭代查询</a></p>
+<h2 id="进行TCP连接-三次握手"><a href="#进行TCP连接-三次握手" class="headerlink" title="进行TCP连接(三次握手)"></a>进行TCP连接(三次握手)</h2><p>获取到服务器IP地址后，浏览器会以一个随机端口向服务器的80(默认)端口发起TCP连接请求。</p>
+<h2 id="客户端发送HTTP请求"><a href="#客户端发送HTTP请求" class="headerlink" title="客户端发送HTTP请求"></a>客户端发送HTTP请求</h2><p>建立连接后，浏览器发送一个HTTP请求。请求包含请求头和请求正文。请求头一般包括请求方法，资源路径，HTTP协议版本、cookie、host、accept等字段。请求正文则是客户端发送的信息。</p>
+<h2 id="服务器响应HTTP请求"><a href="#服务器响应HTTP请求" class="headerlink" title="服务器响应HTTP请求"></a>服务器响应HTTP请求</h2><p>HTTP响应包括了状态行、响应头、响应正文。<br>状态行标识了http协议版本与状态码。<br>响应头包含了一些字段。比如set-cookie,date,allow,content-encoding等字段。以K:V形式出现。</p>
+<h2 id="浏览器显示html页面"><a href="#浏览器显示html页面" class="headerlink" title="浏览器显示html页面"></a>浏览器显示html页面</h2><p>1.加载解析HTML，开始构建DOM树。<br>2.遇到CSS外链，异步加载解析CSS，构建CSS规则树。<br>3.遇到script标签，如果是普通JS标签则同步加载并执行，阻塞页面渲染，如果标签上有defer/async属性则异步加载JS资源。设置defer的JS资源会在DOMContentLoaded事件之前执行；设置了async的JS资源加载完就执行。<br>4.合并DOM树和CSS规则树生成render树。<br>5.布局render树，计算各元素的尺寸、位置等，在内存上生成Bitmap。<br>6.渲染render树，将内存上的Bitmap绘制到屏幕上。</p>
+<h2 id="页面加载完成"><a href="#页面加载完成" class="headerlink" title="页面加载完成"></a>页面加载完成</h2>
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E9%A2%98%E7%9B%AE%E7%8E%AF%E5%A2%83%EF%BC%9Actfhub-%E7%BB%BC%E5%90%88%E5%91%BD%E4%BB%A4%E6%B3%A8%E5%85%A5"><span class="toc-number">1.</span> <span class="toc-text">题目环境：ctfhub-综合命令注入</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A2%98%E7%9B%AE%E5%88%86%E6%9E%90"><span class="toc-number">1.1.</span> <span class="toc-text">题目分析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B3%A8%E6%84%8F%E5%86%85%E5%AE%B9%EF%BC%9A%E8%BF%99%E9%87%8C%E6%8D%A2%E8%A1%8C%E7%AC%A6%E9%9C%80%E8%A6%81%E6%B3%A8%E6%84%8F%E3%80%82%E6%8D%A2%E8%A1%8C%E7%AC%A6%E7%9A%84URL%E7%BC%96%E7%A0%81%E4%B8%BA-0a-%E9%87%87%E7%94%A8GET%E6%96%B9%E5%BC%8F%E3%80%82%E6%89%80%E4%BB%A5%E9%9C%80%E8%A6%81%E4%BD%A0%E7%9B%B4%E6%8E%A5%E4%BD%BF%E7%94%A8GET%E6%96%B9%E5%BC%8F%E6%8F%90%E4%BA%A4%E6%95%B0%E6%8D%AE%EF%BC%8C%E8%80%8C%E4%B8%8D%E8%83%BD%E5%9C%A8%E8%BE%93%E5%85%A5%E6%A1%86%E8%BE%93%E5%85%A5%E6%95%B0%E6%8D%AE%E3%80%82%E5%9B%A0%E4%B8%BA%E5%9C%A8%E8%BE%93%E5%85%A5%E6%A1%86%E8%BE%93%E5%85%A5%E6%95%B0%E6%8D%AE%E5%90%8E%EF%BC%8C%E6%B5%8F%E8%A7%88%E5%99%A8%E4%BC%9A%E8%87%AA%E5%8A%A8%E8%BF%9B%E8%A1%8C%E4%B8%80%E6%AC%A1urlencode-%E7%9A%84%E8%BF%87%E7%A8%8B%EF%BC%8C%E4%BC%9A%E6%8A%8A-0a%E5%86%8D%E6%AC%A1url%E7%BC%96%E7%A0%81%E6%88%90%E5%88%AB%E7%9A%84%E3%80%82%E8%BF%99%E5%B0%B1%E4%B8%8D%E6%98%AF%E6%88%91%E4%BB%AC%E6%83%B3%E8%A6%81%E7%9A%84%E4%BA%86%E3%80%82%E6%89%80%E4%BB%A5%E5%8F%AF%E4%BB%A5%E7%94%A8hackbar%E6%88%96%E8%80%85burp%E7%9B%B4%E6%8E%A5%E7%94%A8get%E6%96%B9%E5%BC%8F%E6%8F%90%E4%BA%A4%E3%80%82"><span class="toc-number">1.2.</span> <span class="toc-text">注意内容：这里换行符需要注意。换行符的URL编码为%0a,采用GET方式。所以需要你直接使用GET方式提交数据，而不能在输入框输入数据。因为在输入框输入数据后，浏览器会自动进行一次urlencode()的过程，会把%0a再次url编码成别的。这就不是我们想要的了。所以可以用hackbar或者burp直接用get方式提交。</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B8%B8%E8%A7%81%E5%91%BD%E4%BB%A4%E6%B3%A8%E5%85%A5%E7%BB%95%E8%BF%87%E5%A7%BF%E5%8A%BF"><span class="toc-number">1.3.</span> <span class="toc-text">常见命令注入绕过姿势</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%88%E7%9C%8B%E8%87%B4%E6%95%AC%E3%80%81%E5%8F%82%E8%80%83%E9%93%BE%E6%8E%A5%E4%B8%AD%E7%9A%84%E5%9B%9E%E8%BD%A6-amp-%E6%8D%A2%E8%A1%8C%E3%80%82"><span class="toc-number">1.3.1.</span> <span class="toc-text">先看致敬、参考链接中的回车&amp;换行。</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#URL%E7%BC%96%E7%A0%81%E8%A7%84%E5%88%99"><span class="toc-number">1.3.2.</span> <span class="toc-text">URL编码规则</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#URL%E7%BC%96%E7%A0%81-%E8%A7%A3%E7%A0%81%E6%97%B6%E9%97%B4%E8%8A%82%E7%82%B9"><span class="toc-number">1.3.3.</span> <span class="toc-text">URL编码&#x2F;解码时间节点</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9F%9F%E5%90%8D%E8%A7%A3%E6%9E%90"><span class="toc-number">1.4.</span> <span class="toc-text">域名解析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BF%9B%E8%A1%8CTCP%E8%BF%9E%E6%8E%A5-%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B"><span class="toc-number">1.5.</span> <span class="toc-text">进行TCP连接(三次握手)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%A2%E6%88%B7%E7%AB%AF%E5%8F%91%E9%80%81HTTP%E8%AF%B7%E6%B1%82"><span class="toc-number">1.6.</span> <span class="toc-text">客户端发送HTTP请求</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%93%8D%E5%BA%94HTTP%E8%AF%B7%E6%B1%82"><span class="toc-number">1.7.</span> <span class="toc-text">服务器响应HTTP请求</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B5%8F%E8%A7%88%E5%99%A8%E6%98%BE%E7%A4%BAhtml%E9%A1%B5%E9%9D%A2"><span class="toc-number">1.8.</span> <span class="toc-text">浏览器显示html页面</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A1%B5%E9%9D%A2%E5%8A%A0%E8%BD%BD%E5%AE%8C%E6%88%90"><span class="toc-number">1.9.</span> <span class="toc-text">页面加载完成</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://polosec.github.io/2020/03/16/%E5%91%BD%E4%BB%A4%E6%B3%A8%E5%85%A5%E7%BB%95%E8%BF%87-URL%E8%A7%A3%E6%9E%90/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://polosec.github.io/2020/03/16/%E5%91%BD%E4%BB%A4%E6%B3%A8%E5%85%A5%E7%BB%95%E8%BF%87-URL%E8%A7%A3%E6%9E%90/&text=命令注入绕过&amp;URL解析"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://polosec.github.io/2020/03/16/%E5%91%BD%E4%BB%A4%E6%B3%A8%E5%85%A5%E7%BB%95%E8%BF%87-URL%E8%A7%A3%E6%9E%90/&title=命令注入绕过&amp;URL解析"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://polosec.github.io/2020/03/16/%E5%91%BD%E4%BB%A4%E6%B3%A8%E5%85%A5%E7%BB%95%E8%BF%87-URL%E8%A7%A3%E6%9E%90/&is_video=false&description=命令注入绕过&amp;URL解析"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=命令注入绕过&amp;URL解析&body=Check out this article: https://polosec.github.io/2020/03/16/%E5%91%BD%E4%BB%A4%E6%B3%A8%E5%85%A5%E7%BB%95%E8%BF%87-URL%E8%A7%A3%E6%9E%90/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://polosec.github.io/2020/03/16/%E5%91%BD%E4%BB%A4%E6%B3%A8%E5%85%A5%E7%BB%95%E8%BF%87-URL%E8%A7%A3%E6%9E%90/&title=命令注入绕过&amp;URL解析"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://polosec.github.io/2020/03/16/%E5%91%BD%E4%BB%A4%E6%B3%A8%E5%85%A5%E7%BB%95%E8%BF%87-URL%E8%A7%A3%E6%9E%90/&title=命令注入绕过&amp;URL解析"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://polosec.github.io/2020/03/16/%E5%91%BD%E4%BB%A4%E6%B3%A8%E5%85%A5%E7%BB%95%E8%BF%87-URL%E8%A7%A3%E6%9E%90/&title=命令注入绕过&amp;URL解析"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://polosec.github.io/2020/03/16/%E5%91%BD%E4%BB%A4%E6%B3%A8%E5%85%A5%E7%BB%95%E8%BF%87-URL%E8%A7%A3%E6%9E%90/&title=命令注入绕过&amp;URL解析"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://polosec.github.io/2020/03/16/%E5%91%BD%E4%BB%A4%E6%B3%A8%E5%85%A5%E7%BB%95%E8%BF%87-URL%E8%A7%A3%E6%9E%90/&name=命令注入绕过&amp;URL解析&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://polosec.github.io/2020/03/16/%E5%91%BD%E4%BB%A4%E6%B3%A8%E5%85%A5%E7%BB%95%E8%BF%87-URL%E8%A7%A3%E6%9E%90/&t=命令注入绕过&amp;URL解析"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2016-2021
+    Polo
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+ 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script> 
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script> 
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Umami Analytics -->
+
+<!-- Disqus Comments -->
+
+
+</body>
+</html>
