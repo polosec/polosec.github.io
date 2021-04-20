@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang=zh>
+<html lang=en>
 <head>
     <!-- so meta -->
     <meta charset="utf-8">
@@ -12,7 +12,7 @@
 <meta property="og:url" content="https://polosec.github.io/2020/05/14/flask-ssti-csrf/index.html">
 <meta property="og:site_name" content="Polo&#39;s Blog">
 <meta property="og:description" content="最近”闲的”没事研究了一下flask框架的防护问题，主要是ssti与csrf。10号前一直在搞用flask写的bms，算是荒废掉了。。先说一句废话，七牛CDN有个测试域名，一段时间后失效，失效后需要替换为自己备案后的域名进行CDN加速，在这里出现了一个问题，在hexo主题配置文件将URL换为自己的CDN域名后，用之前的域名上传的图片就找不到了（因为之前的域名已经被废弃，无法解析）这时候可以 hex">
-<meta property="og:locale" content="zh_CN">
+<meta property="og:locale" content="en_US">
 <meta property="og:image" content="http://cdn.polowong.top/static/images/csrf1.jpg">
 <meta property="og:image" content="http://cdn.polowong.top/static/images/csrf2.jpg">
 <meta property="og:image" content="http://cdn.polowong.top/static/images/csrf3.jpg">
@@ -67,13 +67,13 @@
     <span id="nav">
       <ul>
          
-          <li><a href="/">首页</a></li>
+          <li><a href="/">Home</a></li>
          
-          <li><a href="/about/">关于</a></li>
+          <li><a href="/about/">About</a></li>
          
-          <li><a href="/archives/">归档</a></li>
+          <li><a href="/archives/">Writing</a></li>
          
-          <li><a href="/projects_url">项目</a></li>
+          <li><a href="/projects_url">Projects</a></li>
         
       </ul>
     </span>
@@ -81,18 +81,18 @@
     <span id="actions">
       <ul>
         
-        <li><a class="icon" aria-label="上一篇 " href="/2020/05/14/DASCTF-misc/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Previous post " href="/2020/05/14/DASCTF-misc/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
         
         
-        <li><a class="icon" aria-label="下一篇 " href="/2020/05/01/SSL-TLS/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Next post " href="/2020/05/01/SSL-TLS/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
         
-        <li><a class="icon" aria-label="返回顶部 " href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
-        <li><a class="icon" aria-label="分享文章 " href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+        <li><a class="icon" aria-label="Back to top " href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post " href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
       </ul>
-      <span id="i-prev" class="info" style="display:none;">上一篇</span>
-      <span id="i-next" class="info" style="display:none;">下一篇</span>
-      <span id="i-top" class="info" style="display:none;">返回顶部</span>
-      <span id="i-share" class="info" style="display:none;">分享文章</span>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
     </span>
     <br/>
     <div id="share" style="display: none">
@@ -205,13 +205,13 @@
     <div id="nav-footer" style="display: none">
       <ul>
          
-          <li><a href="/">首页</a></li>
+          <li><a href="/">Home</a></li>
          
-          <li><a href="/about/">关于</a></li>
+          <li><a href="/about/">About</a></li>
          
-          <li><a href="/archives/">归档</a></li>
+          <li><a href="/archives/">Writing</a></li>
          
-          <li><a href="/projects_url">项目</a></li>
+          <li><a href="/projects_url">Projects</a></li>
         
       </ul>
     </div>
@@ -238,10 +238,10 @@
     </div>
 
     <div id="actions-footer">
-        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
-        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> 目录</a>
-        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
-        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
     </div>
 
   </div>
@@ -260,13 +260,13 @@
     <nav>
       <ul>
          
-          <li><a href="/">首页</a></li>
+          <li><a href="/">Home</a></li>
          
-          <li><a href="/about/">关于</a></li>
+          <li><a href="/about/">About</a></li>
          
-          <li><a href="/archives/">归档</a></li>
+          <li><a href="/archives/">Writing</a></li>
          
-          <li><a href="/projects_url">项目</a></li>
+          <li><a href="/projects_url">Projects</a></li>
         
       </ul>
     </nav>
@@ -297,7 +297,7 @@
   <script type="text/javascript">
   $(function() {
     // copy-btn HTML
-    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板!\">";
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
     btn += '<i class="far fa-clone"></i>';
     btn += '</span>'; 
     // mount it!
@@ -308,7 +308,7 @@
       }
     });
     clip.on('success', function(e) {
-      e.trigger.setAttribute('aria-label', "复制成功!");
+      e.trigger.setAttribute('aria-label', "Copied!");
       e.clearSelection();
     })
   })
