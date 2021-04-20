@@ -13,16 +13,16 @@
 <meta property="og:site_name" content="Polo&#39;s Blog">
 <meta property="og:description" content="前言： 近期在公司内部学了一点红队技能，虽然目前用不上，但是做个记录，顺便发牢骚。  致谢&amp;参考https:&#x2F;&#x2F;www.freebuf.com&#x2F;articles&#x2F;system&#x2F;261020.html https:&#x2F;&#x2F;blog.csdn.net&#x2F;sxhexin&#x2F;article&#x2F;details&#x2F;87914649 https:&#x2F;&#x2F;www.anquanke.com&#x2F;post&#x2F;id&#x2F;227477">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="https://polosec.github.io/2021/03/29/img/boards.png">
-<meta property="og:image" content="https://polosec.github.io/2021/03/29/img/1655.png">
-<meta property="og:image" content="https://polosec.github.io/2021/03/29/img/in1.png">
-<meta property="og:image" content="https://polosec.github.io/2021/03/29/img/%E5%8F%8D%E5%BC%B9.gif">
-<meta property="og:image" content="https://polosec.github.io/2021/03/29/img/cs.gif">
+<meta property="og:image" content="http://cdn.polowong.top/static/images/boards.png">
+<meta property="og:image" content="http://cdn.polowong.top/static/images/1655.png">
+<meta property="og:image" content="http://cdn.polowong.top/static/images/int1.png">
+<meta property="og:image" content="http://cdn.polowong.top/static/images/反弹.gif">
+<meta property="og:image" content="http://cdn.polowong.top/static/images/cs.gif">
 <meta property="article:published_time" content="2021-03-29T12:34:48.000Z">
-<meta property="article:modified_time" content="2021-04-13T18:33:44.023Z">
+<meta property="article:modified_time" content="2021-04-20T17:11:02.601Z">
 <meta property="article:author" content="Polo">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://polosec.github.io/2021/03/29/img/boards.png">
+<meta name="twitter:image" content="http://cdn.polowong.top/static/images/boards.png">
     
     
       
@@ -165,10 +165,12 @@
 
 <p>注意，这里需要翻墙，后面添加开发板下载相关配置时也需要翻墙，现在就翻着 别断了。</p>
 <h2 id="添加开发板"><a href="#添加开发板" class="headerlink" title="添加开发板"></a>添加开发板</h2><p>IDE中-工具-开发板管理，类型-contributed/贡献，选择</p>
-<p><img src="../img/boards.png" alt="boards"></p>
+<img src="http://cdn.polowong.top/static/images/boards.png">
+
 <p>然后选安装（翻墙）</p>
 <p>安装好后，选择这个16.5mhz的开发板。</p>
-<p><img src="../img/1655.png" alt="1655"></p>
+<img src="http://cdn.polowong.top/static/images/1655.png">
+
 <h2 id="更新-boot-loader"><a href="#更新-boot-loader" class="headerlink" title="更新 boot loader"></a>更新 boot loader</h2><p>更新 BootLoader的教程看 <a target="_blank" rel="noopener" href="https://blog.csdn.net/sxhexin/article/details/87914649%EF%BC%8C%E8%BF%99%E9%87%8C%E4%B8%8D%E5%86%8D%E8%B5%98%E8%BF%B0%EF%BC%8C%E8%B7%9F%E7%9D%80%E8%BF%99%E4%B8%AA%E6%95%99%E7%A8%8B%E8%B5%B0%E6%B2%A1%E9%97%AE%E9%A2%98%E7%9A%84%EF%BC%8C%E5%A6%82%E6%9E%9C%E4%BD%A0%E4%B9%8B%E5%89%8D%E6%9C%89%E8%A3%85%E7%9B%B8%E5%85%B3%E9%A9%B1%E5%8A%A8%EF%BC%8C%E8%AF%B7%E6%8A%8A%E9%A9%B1%E5%8A%A8%E5%8D%B8%E8%BD%BD%E5%B9%B2%E5%87%80%EF%BC%81%EF%BC%81%EF%BC%81">https://blog.csdn.net/sxhexin/article/details/87914649，这里不再赘述，跟着这个教程走没问题的，如果你之前有装相关驱动，请把驱动卸载干净！！！</a></p>
 <p>更新BootLoader是因为避免踩烧录完只能运行一次的坑！！</p>
 <p>BootLoader是大坑，一定要好好弄！</p>
@@ -183,13 +185,18 @@
 <p>我的思路是，将可执行exe文件上传至服务器，通过curl的方式下载并重定向至某个驱动器并执行。</p>
 <p>我本来想放到C盘，但是放到C盘，有可能存在权限问题（放在C:\Windows\Temp）目录下也有些问题，于是放到了D/E盘。</p>
 <p>将上述代码在IDE中输入后ctrl+u上传，然后插入attiny85 </p>
-<p><img src="../img/in1.png" alt="in1"></p>
+<img src="http://cdn.polowong.top/static/images/int1.png">
+
+
+
 <p>一定是先拔出来，出现这个 60seconds的时候插进去，出现下面这一串代表写入成功 并且会自动执行一次。</p>
 <p>然后拔出来 再插进去的时候 就有弹计算器的效果了。（小思考，如何在执行完exe后自动关闭cmd黑框？）</p>
 <p>效果如下：</p>
-<p><img src="../img/%E5%8F%8D%E5%BC%B9.gif" alt="反弹"></p>
+<img src="http://cdn.polowong.top/static/images/反弹.gif">
+
 <h2 id="CMD上线CS"><a href="#CMD上线CS" class="headerlink" title="CMD上线CS"></a>CMD上线CS</h2><p>嫖来了大佬的免杀方法2333 试一下exe上线cs</p>
-<p><img src="../img/cs.gif" alt="cs"></p>
+<img src="http://cdn.polowong.top/static/images/cs.gif">
+
 <p>小思考的答案是：命令后跟&amp; exit;</p>
 <p>23333 </p>
 <h1 id="杂谈"><a href="#杂谈" class="headerlink" title="杂谈"></a>杂谈</h1><p>5pyA6L+R5LiN5pivaHfkuYjvvIzorqTor4bkuIDkuKrlhazlj7jnmoRocuWnkOWnkO+8jOacgOi/keS5n+WcqGh35oub5Lq677yM6ZyA6KaB5LiA5Lqb5pyJ5omL5bCx6KGM55qE5bKX5L2N77yM5a+55rKh5Y67aHfov4cg5bm25LiU5oqA5pyv5LiN5oCO5LmI5qC355qE5ZCM5a2m5p2l6K+077yMNDAw5LiA5aSp55qE5b6F6YGH44CB5YyF5ZCD5L2P44CB5LiN6ZyA6KaB6Ieq5bex5Z6r6ZKx44CB6aG555uu546w5Zy65pyJ5Lq65bim77yM5oiR6KeJ5b6X5bey57uP5b6I5aW95ZWm44CC5aaC5p6c5oiR5aSn5LqM55qE5pe25YCZ5pyJ6L+Z56eN5py65Lya77yM5ZOq5oCV5LiN57uZ5oiR5bel6LWE77yM5oiR5Lmf6KaB5Y6744CC5oiR5L2c5Li65LiA5Liq5a2m55Sf77yM6Zmk5LqG5aSW5Ye66Ieq5bex5o6l6aG555uu77yM5a6e5Zyo5piv5oOz5LiN5Yiw6L+Y5pyJ5LuA5LmI5q+UaHfmm7Tlpb3nmoTog73nm7jlr7nku47nroDljZXlvIDlp4vmjqXop6blronlhajlrp7miJjnmoTlnLrmma/kuobjgILvvIhTUkPkuI3nrpfvvIxTUkPkuZ/pnIDopoHnm7jlvZPnmoTlronlhajln7rnoYDjgILvvInmiJHmiorov5nkuKrmtLvmjqjov4fljrvkuYvlkI7vvIzkuInkuKrluIjlvJ/kuZ/lvojnu5nlipvvvIzpgJrov4fkuobpnaLor5XjgILlj6/kuIfkuIfmsqHmg7PliLDor7flgYfnmoTml7blgJnlh7rpl67popjkuobvvIzlr7zlkZjor7TnjrDlnKjnmoTph43lv4PlupTor6XmmK/kuJPkuJror77lrabkuaDjgIHogIzkuI3mmK/mg7PnnYDlh7rljrvlrp7kuaDvvIzlubbkuJTmi7/miJHkuL7kvovlrZAyMzMz44CC5pyA5ZCO6L+Y6K+077yM5Y+q6KaB5L2g5Y675LqG5bCx57uZ5L2g6YCA5a2m77yM55yf5LiN5oiz44CC54S26ICM5pu05Y+v56yR55qE5piv77yM5p+Q6ICB5biI5ZyoMTfnuqfpgJrnn6XnvqTlj5Hkuoblj6bkuIDlrrbmnLrmnoTnmoRod+Wuo+S8oO+8jOW+hemBh+aIkeS5n+ivtOS4i++8jDMwMC00MDDkuIDlpKnvvIzkuI3ljIXlkIPkvY/vvIzmnInlhY3otLnln7norq3vvIzmoLnmja7ln7norq3ogIPmoLjnu5PmnpzliIbnuqLok53pmJ/vvIjvvJ/vvInvvIznhLblkI7miJHmiZPnlLXor53ov4fljrvpl67kuobkuIvvvIzmu6HlmLTot5/miJHosIjnkIbmg7PosIjpgZPlvrfosIjmioDmnK/jgIHlsLHor7TlrabnlJ/kuI3opoHogIHmg7PnnYDmjKPpkrHkupHkupHjgILmiJHkvLDorqEg5LiN57uZ5oiR6L+Z5LiJ5Liq5biI5byf5YGH55qE5Y6f5Zug77yM5bqU6K+l5piv5Yqo5LqG5LuW5Lus55qE6JuL57OV5LqG5ZCn77yM5LuO6YKj6L656LWw6IO95oq96ZKxMjMzM+OAguWtpumZouWvueaIkeW+iOWlveOAgeWQhOS9jemihuWvvOiAgeW4iOWSjOiUvOWPr+S6su+8jOWtpumZouS5n+e7meS6huaIkeaOqOWFjeWQjemine+8jOmhuuWIqeaOqOWFjeiHs1VFU1RD44CC5b+D5oCA5oSf5oGp5LmL5b+D77yM5oOz5o6o5biI5byf5LiA5oqK77yM5Y67aHfvvIzmsqHmg7PliLDnq5/nhLbkuI3nu5nlh4blgYfvvIznnJ/nmoTvvIzlv4Pph4zpnaLlh4nkuoblvojlpJrjgILkuI3or7TkuoZ+57un57ut5YaZ5q+V5Lia6K665paH5LqGfg==</p>
