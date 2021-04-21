@@ -485,6 +485,11 @@ h6,
 
 p {
   margin: 0 0 10.5px;
+  width: 100%;
+  word-wrap: break-word;
+  word-break: break-all;
+  overflow: hidden;
+
 }
 
 .lead {
