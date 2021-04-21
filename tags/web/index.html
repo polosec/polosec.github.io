@@ -39,6 +39,8 @@
   
   
   
+    <link href="//cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.3.5/dist/jquery.fancybox.min.css" rel="stylesheet">
+  
   
 <meta name="generator" content="Hexo 5.4.0"></head>
 
@@ -207,7 +209,7 @@
                 <a href="/2021/04/22/new-theme/" class="title">new theme</a>
               </p>
               <p class="item-date">
-                <time datetime="2021-04-21T19:06:00.000Z" itemprop="datePublished">2021-04-22</time>
+                <time datetime="2021-04-21T19:06:21.000Z" itemprop="datePublished">2021-04-22</time>
               </p>
             </div>
           </li>
@@ -291,17 +293,17 @@
         <ul>
           <li><a href="/tags">All</a></li>
           
-          <li><a href="/tags/c语言/">c语言</a></li>
-          
           <li><a href="/tags/web/">web</a></li>
           
           <li><a href="/tags/buu/">buu</a></li>
           
+          <li><a href="/tags/c语言/">c语言</a></li>
+          
           <li><a href="/tags/密码学/">密码学</a></li>
           
-          <li><a href="/tags/mysql/">mysql</a></li>
-          
           <li><a href="/tags/php/">php</a></li>
+          
+          <li><a href="/tags/mysql/">mysql</a></li>
           
           <li><a href="/tags/misc/">misc</a></li>
           
@@ -321,9 +323,9 @@
           
           <li><a href="/tags/0307xctf/">0307xctf</a></li>
           
-          <li><a href="/tags/取证/">取证</a></li>
-          
           <li><a href="/tags/反序列化/">反序列化</a></li>
+          
+          <li><a href="/tags/取证/">取证</a></li>
           
           <li><a href="/tags/流量分析/">流量分析</a></li>
           
@@ -670,6 +672,35 @@ window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
 
 
 
+
+  <script src="//cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.3.5/dist/jquery.fancybox.min.js"></script>
+  <script>
+  //利用 FancyBox 实现点击图片放大
+  $(document).ready(function() {
+    $('article img').not('[hidden]').not('.panel-body img').each(function() {
+      var $image = $(this);
+      var imageCaption = $image.attr('alt');
+      var $imageWrapLink = $image.parent('a');
+      if ($imageWrapLink.length < 1) {
+        var src = this.getAttribute('src');
+        var idx = src.lastIndexOf('?');
+        if (idx != -1) {
+          src = src.substring(0, idx);
+        }
+        $imageWrapLink = $image.wrap('<a href="' + src + '"></a>').parent('a');
+      }
+      $imageWrapLink.attr('data-fancybox', 'images');
+      if (imageCaption) {
+        $imageWrapLink.attr('data-caption', imageCaption);
+      }
+    });
+    $().fancybox({
+      selector: '[data-fancybox="images"]',
+      hash: false,
+      loop: false,
+    });
+  });
+  </script>
 
 
 
