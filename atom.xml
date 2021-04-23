@@ -6,7 +6,7 @@
   <link href="https://polosec.github.io/atom.xml" rel="self"/>
   
   <link href="https://polosec.github.io/"/>
-  <updated>2021-04-17T21:37:56.341Z</updated>
+  <updated>2021-04-23T15:53:52.795Z</updated>
   <id>https://polosec.github.io/</id>
   
   <author>
@@ -15,6 +15,27 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>实习&amp;季度总结</title>
+    <link href="https://polosec.github.io/2021/04/23/%E5%AE%9E%E4%B9%A0-%E5%AD%A3%E5%BA%A6%E6%80%BB%E7%BB%93/"/>
+    <id>https://polosec.github.io/2021/04/23/%E5%AE%9E%E4%B9%A0-%E5%AD%A3%E5%BA%A6%E6%80%BB%E7%BB%93/</id>
+    <published>2021-04-23T07:17:00.000Z</published>
+    <updated>2021-04-23T15:53:52.795Z</updated>
+    
+    <content type="html"><![CDATA[<p>123dddd</p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;p&gt;123dddd&lt;/p&gt;
+</summary>
+      
+    
+    
+    
+    
+  </entry>
   
   <entry>
     <title>命令执行结果外带</title>
@@ -423,32 +444,6 @@
     
     
     <category term="web" scheme="https://polosec.github.io/tags/web/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>命令执行绕过(ping ping ping)</title>
-    <link href="https://polosec.github.io/2020/06/20/ping-ping-ping/"/>
-    <id>https://polosec.github.io/2020/06/20/ping-ping-ping/</id>
-    <published>2020-06-20T13:14:50.000Z</published>
-    <updated>2020-06-20T13:37:33.955Z</updated>
-    
-    <content type="html"><![CDATA[<p>页面给了个ip，考虑ping命令的命令执行。<br>这里过滤的内容比较多，过滤了空格，而且有些空格绕过方法也用不了。<br>这里绕过空格用的是$IFS$9<br>接下来尝试cat flag<br>flag字段也被过滤了，尝试使用通配符也不行，*也不行，[]符号也被过滤了。<br>接下来尝试base64编码。<br>echo$IFS$1Y2F0IGZsYWcucGhw|base64$IFS$1-d|sh 可行<br>还有一种方法是cat <code>反引号里面的内容---</code> 或$() 会引用命令被执行后的结果。<br>?ip=127.0.0.1;cat$IFS$9<code>ls</code><br>还有一种方法就是拼接：<br>?ip=127.0.0.1;a=g;cat$IFS$9fla$a.php<br>这样也可以绕过。<br>补充空格绕过：{cat,1.txt}<br>关键字过滤绕过：反斜杠 ca\t、变量代换、编码、 echo xxxx | base64 -d|sh/bash、引号c’a’t<br>命令分隔与执行多条命令<br>1.&amp;<br>&amp; 表示将任务置于后台执行<br>2.&amp;&amp;<br>只有在 &amp;&amp; 左边的命令返回真（命令返回值 $? == 0），&amp;&amp; 右边的命令才 会被执行。<br>3.|<br>| 表示管道，上一条命令的输出，作为下一条命令的参数<br>4.||<br>只有在 || 左边的命令返回假（命令返回值 $? == 1），|| 右边的命令才 会被执行。<br>5.；<br>多行语句用换行区分代码快，单行语句一般要用到分号来区分代码块</p>]]></content>
-    
-    
-      
-      
-    <summary type="html">&lt;p&gt;页面给了个ip，考虑ping命令的命令执行。&lt;br&gt;这里过滤的内容比较多，过滤了空格，而且有些空格绕过方法也用不了。&lt;br&gt;这里绕过空格用的是$IFS$9&lt;br&gt;接下来尝试cat flag&lt;br&gt;flag字段也被过滤了，尝试使用通配符也不行，*也不行，[]符号也被过滤了。&lt;</summary>
-      
-    
-    
-    
-    
-    <category term="web" scheme="https://polosec.github.io/tags/web/"/>
-    
-    <category term="ctf" scheme="https://polosec.github.io/tags/ctf/"/>
-    
-    <category term="buuoj" scheme="https://polosec.github.io/tags/buuoj/"/>
     
   </entry>
   
