@@ -4,6 +4,19 @@
   
     
     <entry>
+      <title>Quick start  Captfencoder in Mac</title>
+      <link href="2021/10/08/Quick-start-Captfencoder-in-Mac/"/>
+      <url>2021/10/08/Quick-start-Captfencoder-in-Mac/</url>
+      
+        <content type="html"><![CDATA[<h1 id="Tools"><a href="#Tools" class="headerlink" title="Tools"></a>Tools</h1><p>Automator in mac<br>open automator,choose application,search shell on the top<img src="http://cdn.polowong.top/1633678583273wpowfu9o.png?imageslim" alt="paste image"><br>then type</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">export PATH&#x3D;$PATH:&#x2F;path&#x2F;to&#x2F;npm&#x2F;;cd &#x2F;path&#x2F;to&#x2F;npm&#x2F;apps ;npm start</span><br></pre></td></tr></table></figure><p>Automator doesn’t know the path of npm, so it should be exported frist.<img src="http://cdn.polowong.top/1633678772412ykmrga69.png?imageslim" alt="paste image"></p>]]></content>
+      
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>绿城杯流量分析</title>
       <link href="2021/10/07/%E7%BB%BF%E5%9F%8E%E6%9D%AF%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90/"/>
       <url>2021/10/07/%E7%BB%BF%E5%9F%8E%E6%9D%AF%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90/</url>
