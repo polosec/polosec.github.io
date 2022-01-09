@@ -4,6 +4,19 @@
   
     
     <entry>
+      <title>redis主从复制/smb扫描备忘</title>
+      <link href="2022/01/09/redis%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6-smb%E6%89%AB%E6%8F%8F%E5%A4%87%E5%BF%98/"/>
+      <url>2022/01/09/redis%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6-smb%E6%89%AB%E6%8F%8F%E5%A4%87%E5%BF%98/</url>
+      
+        <content type="html"><![CDATA[<p>redis主从复制rce版本要求redis4.x或者5.x，6.x不可以。<br>msf利用smb漏洞时出现</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[-] Exploit failed: RubySMB::Error::EncryptionError Communication error with the remote host: Socket read returned nil. The server supports encryption but was not able to handle the encrypted request.</span><br><span class="line">[*] Exploit completed, but no session was created.</span><br></pre></td></tr></table></figure><p>时可调整参数</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">set SMB::AlwaysEncrypt false</span><br><span class="line">set SMB::ProtocolVersion 1</span><br></pre></td></tr></table></figure><p>MSF搜索参数：-S 指定字符串 比如scanner， type指定模块类型。<img src="http://cdn.polowong.top/16417219897919u9naujv.png?imageslim" alt="paste image"><br>SMB漏洞利用：扫描端口，获得版本，利用漏洞。</p>]]></content>
+      
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>菜鸡的0基础免杀学习记录</title>
       <link href="2021/12/02/%E8%8F%9C%E9%B8%A1%E7%9A%840%E5%9F%BA%E7%A1%80%E5%85%8D%E6%9D%80%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/"/>
       <url>2021/12/02/%E8%8F%9C%E9%B8%A1%E7%9A%840%E5%9F%BA%E7%A1%80%E5%85%8D%E6%9D%80%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/</url>
