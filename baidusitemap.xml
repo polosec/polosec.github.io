@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>https://polosec.github.io/2022/03/01/DLL%E5%8A%AB%E6%8C%81%E5%9F%BA%E7%A1%80%E5%8F%8A%E7%BA%A2%E9%98%9F%E6%AD%A6%E5%99%A8%E5%8C%96/</loc>
+    <lastmod>2022-03-01</lastmod>
+  </url>
+  <url>
     <loc>https://polosec.github.io/2022/01/15/%E5%85%8D%E6%9D%80%E5%9F%BA%E7%A1%80%E4%B9%8B%E8%AE%A4%E8%AF%86shellcode%E5%8A%A0%E8%BD%BD%E5%99%A8/</loc>
     <lastmod>2022-01-15</lastmod>
   </url>
