@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>https://polosec.github.io/2022/03/31/Vulntarget-a-WriteUp/</loc>
+    <lastmod>2022-03-31</lastmod>
+  </url>
+  <url>
     <loc>https://polosec.github.io/2022/03/24/Vulntarget-b-WriteUp/</loc>
     <lastmod>2022-03-24</lastmod>
   </url>
