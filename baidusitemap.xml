@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>https://polosec.github.io/2022/05/07/%E4%BB%8E0%E8%A7%A3%E6%9E%90-ysoserial-URLDNS%E9%93%BE/</loc>
+    <lastmod>2022-05-07</lastmod>
+  </url>
+  <url>
     <loc>https://polosec.github.io/2022/04/14/vulntarget-d-WriteUp/</loc>
     <lastmod>2022-04-14</lastmod>
   </url>
@@ -279,6 +283,10 @@
   <url>
     <loc>https://polosec.github.io/2020/04/04/20200404%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</loc>
     <lastmod>2020-04-07</lastmod>
+  </url>
+  <url>
+    <loc>https://polosec.github.io/2020/04/06/20200406%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</loc>
+    <lastmod>2020-04-06</lastmod>
   </url>
   <url>
     <loc>https://polosec.github.io/2020/04/02/20200402%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</loc>

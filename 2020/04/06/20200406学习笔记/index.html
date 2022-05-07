@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>20200406学习笔记 | Polo&#39;s Blog</title>
+  <meta name="description" content="今天又睡了老久。。晚上整理一下其实今天整理这个一方面是不会，另一方面是看到心仪大学夏令营面试有问过这个问题（生日攻击），或许可能不会再问了，但知道总比不知道强！一下内容除webshell和php外皆为生日攻击衍生出来的问题（对我来说没掌握的）今日内容：MD5碰撞√，生日攻击√，哈希√，彩虹表√，盐√，webshell本质，php某方法√，幻数√，内存存储方式√参考：https:&#x2F;&#x2F;www.zhih">
+<meta property="og:type" content="article">
+<meta property="og:title" content="20200406学习笔记">
+<meta property="og:url" content="https://polosec.github.io/2020/04/06/20200406%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/index.html">
+<meta property="og:site_name" content="Polo&#39;s Blog">
+<meta property="og:description" content="今天又睡了老久。。晚上整理一下其实今天整理这个一方面是不会，另一方面是看到心仪大学夏令营面试有问过这个问题（生日攻击），或许可能不会再问了，但知道总比不知道强！一下内容除webshell和php外皆为生日攻击衍生出来的问题（对我来说没掌握的）今日内容：MD5碰撞√，生日攻击√，哈希√，彩虹表√，盐√，webshell本质，php某方法√，幻数√，内存存储方式√参考：https:&#x2F;&#x2F;www.zhih">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2020-04-06T14:37:21.000Z">
+<meta property="article:modified_time" content="2020-04-06T16:21:13.000Z">
+<meta property="article:author" content="Polo">
+<meta property="article:tag" content="web">
+<meta property="article:tag" content="buu">
+<meta property="article:tag" content="密码学">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="https://polosec.github.io/2020/04/06/20200406%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="Polo&#39;s Blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+    <link href="//cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.3.5/dist/jquery.fancybox.min.css" rel="stylesheet">
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/polosec" target="_blank">
+          <img class="img-circle img-rotate" src="http://cdn.polowong.top/1.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">Polo</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">CTFer&amp;Cybersec Researcher</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Beijing, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="Search" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="Type something..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav ">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">Home</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">Archives</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about">
+            
+            <i class="icon icon-cup-fill"></i>
+            
+            <span class="menu-title">About</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/polosec" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">Board</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>null</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/git/">git</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/web%E5%9F%BA%E7%A1%80/">web基础</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/wp/">wp</a><span class="category-list-count">5</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget-body">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/0307xctf/" rel="tag">0307xctf</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/awd/" rel="tag">awd</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/buu/" rel="tag">buu</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/buuoj/" rel="tag">buuoj</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c/" rel="tag">c++</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ctf/" rel="tag">ctf</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c%E8%AF%AD%E8%A8%80/" rel="tag">c语言</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/git/" rel="tag">git</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/" rel="tag">linux</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/" rel="tag">misc</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql/" rel="tag">mysql</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php/" rel="tag">php</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/web/" rel="tag">web</a><span class="tag-list-count">29</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%85%8D%E6%9D%80/" rel="tag">免杀</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%86%85%E7%BD%91%E6%B8%97%E9%80%8F/" rel="tag">内网渗透</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/" rel="tag">反序列化</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%8F%96%E8%AF%81/" rel="tag">取证</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AF%86%E7%A0%81%E5%AD%A6/" rel="tag">密码学</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%9D%82%E9%A1%B9/" rel="tag">杂项</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90/" rel="tag">流量分析</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BA%A2%E9%98%9F%E6%8A%80%E8%83%BD/" rel="tag">红队技能</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BD%91%E7%BB%9C/" rel="tag">网络</a><span class="tag-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/0307xctf/" style="font-size: 13.33px;">0307xctf</a> <a href="/tags/awd/" style="font-size: 13px;">awd</a> <a href="/tags/buu/" style="font-size: 13.5px;">buu</a> <a href="/tags/buuoj/" style="font-size: 13.5px;">buuoj</a> <a href="/tags/c/" style="font-size: 13px;">c++</a> <a href="/tags/ctf/" style="font-size: 13px;">ctf</a> <a href="/tags/c%E8%AF%AD%E8%A8%80/" style="font-size: 13px;">c语言</a> <a href="/tags/git/" style="font-size: 13px;">git</a> <a href="/tags/linux/" style="font-size: 13.17px;">linux</a> <a href="/tags/misc/" style="font-size: 13.83px;">misc</a> <a href="/tags/mysql/" style="font-size: 13.17px;">mysql</a> <a href="/tags/php/" style="font-size: 13.67px;">php</a> <a href="/tags/web/" style="font-size: 14px;">web</a> <a href="/tags/%E5%85%8D%E6%9D%80/" style="font-size: 13px;">免杀</a> <a href="/tags/%E5%86%85%E7%BD%91%E6%B8%97%E9%80%8F/" style="font-size: 13.17px;">内网渗透</a> <a href="/tags/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/" style="font-size: 13px;">反序列化</a> <a href="/tags/%E5%8F%96%E8%AF%81/" style="font-size: 13px;">取证</a> <a href="/tags/%E5%AF%86%E7%A0%81%E5%AD%A6/" style="font-size: 13.17px;">密码学</a> <a href="/tags/%E6%9D%82%E9%A1%B9/" style="font-size: 13px;">杂项</a> <a href="/tags/%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90/" style="font-size: 13px;">流量分析</a> <a href="/tags/%E7%BA%A2%E9%98%9F%E6%8A%80%E8%83%BD/" style="font-size: 13px;">红队技能</a> <a href="/tags/%E7%BD%91%E7%BB%9C/" style="font-size: 13.17px;">网络</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">Archive</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/05/">May 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/04/">April 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/03/">March 2022</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">January 2022</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/12/">December 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/11/">November 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">October 2021</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">September 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">May 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">April 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/03/">March 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">February 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">January 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/12/">December 2020</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">November 2020</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/10/">October 2020</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/06/">June 2020</a><span class="archive-list-count">8</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">May 2020</a><span class="archive-list-count">8</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/04/">April 2020</a><span class="archive-list-count">12</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/03/">March 2020</a><span class="archive-list-count">16</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2022/05/07/%E4%BB%8E0%E8%A7%A3%E6%9E%90-ysoserial-URLDNS%E9%93%BE/" class="title">从0解析 ysoserial URLDNS链</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-05-07T15:52:55.000Z" itemprop="datePublished">2022-05-07</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2022/04/14/vulntarget-d-WriteUp/" class="title">vulntarget-d WriteUp</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-04-14T14:53:01.000Z" itemprop="datePublished">2022-04-14</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2022/04/05/Vulntarget-c-WriteUp/" class="title">Vulntarget-c WriteUp</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-04-04T16:00:15.000Z" itemprop="datePublished">2022-04-05</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2022/03/31/Vulntarget-a-WriteUp/" class="title">Vulntarget-a WriteUp</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-03-31T15:11:45.000Z" itemprop="datePublished">2022-03-31</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2022/03/24/Vulntarget-b-WriteUp/" class="title">Vulntarget-b WriteUp</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-03-24T08:55:56.000Z" itemprop="datePublished">2022-03-24</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-20200406学习笔记" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      20200406学习笔记
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2020/04/06/20200406%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" class="article-date">
+	  <time datetime="2020-04-06T14:37:21.000Z" itemprop="datePublished">2020-04-06</time>
+	</a>
+</span>
+        
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link-link" href="/tags/buu/" rel="tag">buu</a>, <a class="article-tag-link-link" href="/tags/web/" rel="tag">web</a>, <a class="article-tag-link-link" href="/tags/%E5%AF%86%E7%A0%81%E5%AD%A6/" rel="tag">密码学</a>
+  </span>
+
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill" aria-hidden="true"></i>
+	    <span id="busuanzi_container_page_pv">
+			<span id="busuanzi_value_page_pv">0</span>
+		</span>
+	</span>
+
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2020/04/06/20200406%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/#comments" class="article-comment-link">Comments</a></span>
+        
+	
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">Word Count: 1.5k(words)</span>
+	
+	
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">Read Count: 5(minutes)</span>
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h2 id="今天又睡了老久。。晚上整理一下"><a href="#今天又睡了老久。。晚上整理一下" class="headerlink" title="今天又睡了老久。。晚上整理一下"></a>今天又睡了老久。。晚上整理一下</h2><p>其实今天整理这个一方面是不会，另一方面是看到心仪大学夏令营面试有问过这个问题（生日攻击），或许可能不会再问了，但知道总比不知道强！<br>一下内容除webshell和php外皆为生日攻击衍生出来的问题（对我来说没掌握的）<br>今日内容：MD5碰撞√，生日攻击√，哈希√，彩虹表√，盐√，webshell本质，php某方法√，幻数√，内存存储方式√<br>参考：<br><a target="_blank" rel="noopener" href="https://www.zhihu.com/question/20820286">https://www.zhihu.com/question/20820286</a><br><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/37165658">https://zhuanlan.zhihu.com/p/37165658</a><br><a target="_blank" rel="noopener" href="https://blog.csdn.net/M_mamba/article/details/103405022">https://blog.csdn.net/M_mamba/article/details/103405022</a><br><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/43994479">https://zhuanlan.zhihu.com/p/43994479</a><br><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/732d9d960411">https://www.jianshu.com/p/732d9d960411</a><br><a target="_blank" rel="noopener" href="https://blog.csdn.net/blade2001/article/details/6341078">https://blog.csdn.net/blade2001/article/details/6341078</a></p>
+<h2 id="hash"><a href="#hash" class="headerlink" title="hash"></a>hash</h2><p>哈希算法也成为散列算法，可以通过哈希算法单向求得某值。理想情况下，可以正向快速求得该值，并且不能通过该值还原出原数据；原数据即使变化很小，得到的数据变化也比较大。<br>哈希算法可用来验证传输过程中数据是否被篡改。<br>hash算法不理想的情况：存在冲突。即多个原始数据对应一个目标值：h(a)=h(b)=k。在数学上函数必然可逆，且hash函数值域有限，比如128bitMD5的值域为2<sup>128</sup>=16<sup>32</sup>(第一次我竟然算错了2333 ,2exp28和32exp16怎么也对不上。我太菜了)<br>哈希算法常见的有：MD5 SHA-1(Secure Hash Algorithm,SHA) SHA-2* SHA512。目前MD5,SHA-1已经不安全。<br>这样可能会导致一些问题，比如在分发session的时候如果用hash计算，如果两用户session值相同的话，会导致越权操作。<br>MD5的长度为128bit，sha1长度为160bit，sha256为256bit,sha512为512bit。</p>
+<h3 id="hash冲突处理方法"><a href="#hash冲突处理方法" class="headerlink" title="hash冲突处理方法"></a>hash冲突处理方法</h3><p>MD5算出来啥就是啥，不知道是不是冲突，此处讨论的冲突是存放的时候的冲突处理！</p>
+<h4 id="开放定址法"><a href="#开放定址法" class="headerlink" title="开放定址法"></a>开放定址法</h4><h5 id="线性探测法"><a href="#线性探测法" class="headerlink" title="线性探测法"></a>线性探测法</h5><h5 id="线性补偿探测法"><a href="#线性补偿探测法" class="headerlink" title="线性补偿探测法"></a>线性补偿探测法</h5><h5 id="线性随机法"><a href="#线性随机法" class="headerlink" title="线性随机法"></a>线性随机法</h5><h4 id="拉链法"><a href="#拉链法" class="headerlink" title="拉链法"></a>拉链法</h4><h4 id="多次hash"><a href="#多次hash" class="headerlink" title="多次hash"></a>多次hash</h4><h4 id="设立公共溢出区"><a href="#设立公共溢出区" class="headerlink" title="设立公共溢出区"></a>设立公共溢出区</h4><h2 id="幻数与内存存储方式"><a href="#幻数与内存存储方式" class="headerlink" title="幻数与内存存储方式"></a>幻数与内存存储方式</h2><p>其实内存存储方式是大一学的。。还是比较感谢王老师。。虽然老念ppt，但是问问题还是很热心的帮我解决。谢谢谢谢<br>幻数就是常用的数。MD5的四个幻数ABCD分别是（hex）：<br>A: 01 23 45 67<br>B: 89 ab cd ef<br>C: fe dc ba 98<br>D: 76 54 32 10<br>计算机硬件有两种储存数据的方式：大端字节序（big endian）和小端字节序（little endian）。<br>大端字节序：高位字节在前，低位字节在后，这是人类读写数值的方法。<br>小端字节序：低位字节在前，高位字节在后，即以0x1122形式储存。<br>比如用大端字节序存0x01234567的话就是 01 23 45 67<br>小端的话就是 67 45 23 01</p>
+<h2 id="生日攻击-amp-amp-彩虹表-amp-amp-salt"><a href="#生日攻击-amp-amp-彩虹表-amp-amp-salt" class="headerlink" title="生日攻击&amp;&amp;彩虹表&amp;&amp;salt"></a>生日攻击&amp;&amp;彩虹表&amp;&amp;salt</h2><p>生日问题：一个班级需要有多少人，才能保证每个同学的生日都不一样？<br>答案很出人意料。如果至少两个同学生日相同的概率不超过5%，那么这个班只能有7个人。事实上，一个23人的班级有50%的概率，至少两个同学生日相同；50人班级有97%的概率，70人的班级则是99.9%的概率。<br>由该问题引出的是取值空间与计算哈希值次数和碰撞概率的关系。数学推导我这就不写了。我数学比较菜，当时看了一会才看懂咋回事。。对不起孙老师<br>取值空间为365，70个人中至少两人生日重复的概率为99%。365就是取值空间，70就是哈希计算次数。<br>由生日攻击与哈希碰撞导出的问题是破解哈希值以及如何防御哈希破解。</p>
+<h3 id="哈希值破解"><a href="#哈希值破解" class="headerlink" title="哈希值破解"></a>哈希值破解</h3><p>由于哈希函数是单向的，所以破解方式照理来说应该是暴力破解或者手动算字典的哈希值，建立一个一一对应的关系然后查表。<br>对应方法：1.暴力破解2.字典3.彩虹表<br>这里重点说一下彩虹表，彩虹表并不是单纯的原文-密文一一对应的形式。<br>彩虹表前身–散列链<br>设加密函数为H(X)，则散列链存在一个约简函数R(X)，其定义域和值域与H(X)相反。<br>对于散列链和彩虹表详细的计算过程我还没看太明白，请教完老师再来写。<br>现在已知的是彩虹表是一种中和的方式来破解哈希值。<br>当k越大时，破解时间就越长，但彩虹表所占用的空间就越小；<br>相反，k越小时，彩虹表本身就越大，相应的破解时间就越短。</p>
+<h4 id="加salt抵抗彩虹表"><a href="#加salt抵抗彩虹表" class="headerlink" title="加salt抵抗彩虹表"></a>加salt抵抗彩虹表</h4><p>salt可以是一串随机数。<br>假设原文是abc，<br>不加salt加密后的数据为 DEF，加salt加密后的数据为GKD<br>彩虹表还原出DEF的概率相对加salt后的概率相对大一些。因为对GKD还原后的数据大概率就不是原数据abc了。<br>应用场景：<br>用户注册时：hash(password+salt)-&gt;DB,salt-&gt;DB<br>用户登录时 if(hash_in_db==hash(input_username+salt))<br>            return true;</p>
+<h2 id="php-file-get-contents"><a href="#php-file-get-contents" class="headerlink" title="php file_get_contents()"></a>php file_get_contents()</h2><p>file_get_contents()方法把整个文件读入到字符串中。</p>
+<h2 id="webshell"><a href="#webshell" class="headerlink" title="webshell"></a>webshell</h2><p>webshell是什么，shell是什么？<br>shell是用户与操作系统交互的工具、平台。webshell就是基于web的shell，可以用于网站管理等功能。<br>常见的webshell就是命令执行，比如php的 <?php @eval(_$GET['cmd']);?> 将这句话写入以PHP为后端的网站后，通过对该文件传参数<a target="_blank" rel="noopener" href="http://www.tst.com/1.php?cmd=whoami">www.tst.com/1.php?cmd=whoami</a><br>相当于在shell中执行whoami。当然，也可以用一些webshell管理工具方便操作，比如菜刀，蚁剑。<br>asp一句话： &lt;%eval request(“x”)%&gt; &lt;%execute request(“MH”)%&gt;<br>jsp一句话：&lt;% Runtime.getRuntime().exec(request.getParameter(“shell”)); %&gt;</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>Article Link</strong>
+      <p style="width: 100%;
+  word-wrap: break-word;
+  word-break: break-all;
+  overflow: hidden;">https://polosec.github.io/2020/04/06/20200406%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</p>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>Copyright Notice: </strong> All articles in this blog, unless otherwise stated, are under the<a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external"> CC BY 4.0 CN agreement</a>.Reprint please indicate the source!
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/polosec" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="http://cdn.polowong.top/1.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/polosec" target="_blank"><span class="text-dark">Polo</span><small class="ml-1x">CTFer&amp;Cybersec Researcher</small></a></h3>
+        <div>Wong</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+      <div id="uyan_frame"></div>
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2020/04/08/20200408%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" title="20200408学习笔记"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;Newer</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2020/04/04/20200404%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" title="20200404学习笔记"><span>Older&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>$</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,qzone"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>Maybe you could buy me a cup of coffee.</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/vx.png" alt="Scan Qrcode" title="Scan" />
+              </div>
+              <p class="text-muted mv">Scan this qrcode</p>
+              <p class="text-grey">Open alipay app scan this qrcode, buy me a coffee!</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/vx.png" alt="Scan Qrcode" title="Scan" />
+              </div>
+              <p class="text-muted mv">Scan this qrcode</p>
+              <p class="text-grey">Open wechat app scan this qrcode, buy me a coffee!</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> alipay</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> wechat payment</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/polosec" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	Theme by <a href="https://github.com/polosec" target="_blank"> polosec </a>base on <a href="https://github.com/polosec/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: 'Posts',
+            PAGES: 'Pages',
+            CATEGORIES: 'Categories',
+            TAGS: 'Tags',
+            UNTITLED: '(Untitled)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+   
+    
+    <script defer type="text/javascript" src="http://v2.uyan.cc/code/uyan.js?uid=[object Object]"></script>
+
+
+
+
+  <script src="//cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.3.5/dist/jquery.fancybox.min.js"></script>
+  <script>
+  //利用 FancyBox 实现点击图片放大
+  $(document).ready(function() {
+    $('article img').not('[hidden]').not('.panel-body img').each(function() {
+      var $image = $(this);
+      var imageCaption = $image.attr('alt');
+      var $imageWrapLink = $image.parent('a');
+      if ($imageWrapLink.length < 1) {
+        var src = this.getAttribute('src');
+        var idx = src.lastIndexOf('?');
+        if (idx != -1) {
+          src = src.substring(0, idx);
+        }
+        $imageWrapLink = $image.wrap('<a href="' + src + '"></a>').parent('a');
+      }
+      $imageWrapLink.attr('data-fancybox', 'images');
+      if (imageCaption) {
+        $imageWrapLink.attr('data-caption', imageCaption);
+      }
+    });
+    $().fancybox({
+      selector: '[data-fancybox="images"]',
+      hash: false,
+      loop: false,
+    });
+  });
+  </script>
+
+
+
+
+
+</body>
+</html>
