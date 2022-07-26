@@ -37,7 +37,7 @@
 <meta property="og:image" content="http://cdn.polowong.top/image-20220507235125482.png">
 <meta property="og:image" content="http://cdn.polowong.top/image-20220507235155590.png">
 <meta property="article:published_time" content="2022-05-07T15:52:55.000Z">
-<meta property="article:modified_time" content="2022-05-07T15:53:01.990Z">
+<meta property="article:modified_time" content="2022-07-26T03:36:22.294Z">
 <meta property="article:author" content="Polo">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="http://cdn.polowong.top/image-20220507223626277.png">
@@ -348,7 +348,7 @@
     <div class="article-entry marked-body" itemprop="articleBody">
       
         <h1 id="什么是ysoserial"><a href="#什么是ysoserial" class="headerlink" title="什么是ysoserial"></a>什么是ysoserial</h1><p>ysoserial是一款Java反序列化利用工具，可以理解为payload生成器，而Java反序列化中的payload通常是一条利用链，叫做gadget chain，这就和PHP 反序列化构造利用链是类似的道理，如果了解过PHP 反序列化的话相信不是太难理解利用链的概念，再抽象一点，就像在Flask+jinja2模板注入中，通过变量到基类，然后从基类到子类一步一步找到执行系统命令/文件读取的函数，这也算得上是一种利用链。</p>
-<p>ysoserial地址：<a target="_blank" rel="noopener" href="https://github.com/frohoff/ysoserial">https://github.com/frohoff/ysoserial</a> （salute</p>
+<p>ysoserial地址：<a target="_blank" rel="noopener" href="https://github.com/frohoff/ysoserial">https://github.com/frohoff/ysoserial</a> （salute!</p>
 <p>在ysoserial根据组件或者环境不同内置了数条利用链，其中urldns这条利用链使用的组件是Java原生的类与方法，应该适用于所有情况。</p>
 <p>urldns链生成的payload执行后会产生一个dns query，如果在dnslog平台看到了该请求则可以认为存在Java反序列化漏洞。</p>
 <h1 id="部分Java基础知识"><a href="#部分Java基础知识" class="headerlink" title="部分Java基础知识"></a>部分Java基础知识</h1><p>在讲具体代码之前还需要说一下部分用到的Java知识</p>
