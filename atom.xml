@@ -6,7 +6,7 @@
   <link href="https://polosec.github.io/atom.xml" rel="self"/>
   
   <link href="https://polosec.github.io/"/>
-  <updated>2022-10-12T04:35:07.438Z</updated>
+  <updated>2022-10-15T16:59:56.482Z</updated>
   <id>https://polosec.github.io/</id>
   
   <author>
@@ -15,6 +15,30 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Flask内存马的检测与清除</title>
+    <link href="https://polosec.github.io/2022/10/16/Flask%E5%86%85%E5%AD%98%E9%A9%AC%E7%9A%84%E6%A3%80%E6%B5%8B%E4%B8%8E%E6%B8%85%E9%99%A4/"/>
+    <id>https://polosec.github.io/2022/10/16/Flask%E5%86%85%E5%AD%98%E9%A9%AC%E7%9A%84%E6%A3%80%E6%B5%8B%E4%B8%8E%E6%B8%85%E9%99%A4/</id>
+    <published>2022-10-15T16:59:21.000Z</published>
+    <updated>2022-10-15T16:59:56.482Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="Demo"><a href="#Demo" class="headerlink" title="Demo"></a>Demo</h1><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> flask <span class="keyword">import</span> Flask, request, render_template_string,current_app</span><br><span class="line"></span><br><span class="line">app = Flask(__name__)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@app.route(<span class="params"><span class="string">&#x27;/&#x27;</span></span>)</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">hello_world</span>():</span>  <span class="comment"># put application&#x27;s code here</span></span><br><span class="line">    person = <span class="string">&#x27;knave&#x27;</span></span><br><span class="line">    <span class="keyword">if</span> request.args.get(<span class="string">&#x27;name&#x27;</span>):</span><br><span class="line">        person = request.args.get(<span class="string">&#x27;name&#x27;</span>)</span><br><span class="line">    template = <span class="string">&#x27;&lt;h1&gt;Hi, %s.&lt;/h1&gt;&#x27;</span> % person</span><br><span class="line">    <span class="keyword">return</span> render_template_string(template)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    app.run()</span><br></pre></td></tr></table></figure><h1 id="Flask-内存马生成"><a href="#Flask-内存马生成" class="headerlink" title="Flask 内存马生成"></a>Flask 内存马生成</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">url_for.__globals__[&#39;__builtins__&#39;][&#39;eval&#39;](&quot;app.add_url_rule(&#39;&#x2F;shell&#39;, &#39;shell&#39;, lambda :__import__(&#39;os&#39;).popen(_request_ctx_stack.top.request.args.get(&#39;cmd&#39;, &#39;whoami&#39;)).read())&quot;,&#123;&#39;_request_ctx_stack&#39;:url_for.__globals__[&#39;_request_ctx_stack&#39;],&#39;app&#39;:url_for.__globals__[&#39;current_app&#39;]&#125;)</span><br></pre></td></tr></table></figure><h1 id="Flask内存马检测"><a href="#Flask内存马检测" class="headerlink" title="Flask内存马检测"></a>Flask内存马检测</h1><h2 id="情景1-代码自带内存马"><a href="#情景1-代码自带内存马" class="headerlink" title="情景1 代码自带内存马"></a>情景1 代码自带内存马</h2><p><img src="http://cdn.polowong.top/image-20221016005717629.png" alt="image-20221016005717629"></p><p>类似于这种直接执行命令的，再复杂一点的base64编码之类的，看到之后直接清除掉即可。</p><h2 id="情景2-通过ssti种植内存马"><a href="#情景2-通过ssti种植内存马" class="headerlink" title="情景2 通过ssti种植内存马"></a>情景2 通过ssti种植内存马</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">url_for.__globals__[<span class="string">&#x27;current_app&#x27;</span>].url_map</span><br><span class="line">打印当前所有路由，可用来结合流量观察是否有内存马</span><br></pre></td></tr></table></figure><p>rule的意思是通过URL访问的地址，如/shell，后面-&gt;跟的是entrypoint，可以理解为处理到达该请求的函数是什么，比如rule ‘/‘的entrypoint是hello_world,那么当访问首页的时候就会转到函数hello_world去进行处理。</p><p><img src="http://cdn.polowong.top/image-20221016001751973.png" alt="image-20221016001751973"></p><h1 id="flask内存马清除"><a href="#flask内存马清除" class="headerlink" title="flask内存马清除"></a>flask内存马清除</h1><p>修改源代码，新建一个同名路由（如/shell），即可抵消新写入路由的影响，并且修复ssti，只需要过滤花括号就可以了。</p><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> flask <span class="keyword">import</span> Flask, request, render_template_string,current_app</span><br><span class="line"></span><br><span class="line">app = Flask(__name__)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@app.route(<span class="params"><span class="string">&#x27;/&#x27;</span></span>)</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">hello_world</span>():</span>  <span class="comment"># put application&#x27;s code here</span></span><br><span class="line">    person = <span class="string">&#x27;knave&#x27;</span></span><br><span class="line">    blacklist=<span class="string">&#x27;&#123;&#x27;</span><span class="comment">#彻底杜绝ssti</span></span><br><span class="line">    <span class="keyword">if</span> request.args.get(<span class="string">&#x27;name&#x27;</span>):</span><br><span class="line">        person = request.args.get(<span class="string">&#x27;name&#x27;</span>)</span><br><span class="line">        <span class="keyword">if</span> blacklist <span class="keyword">in</span> person:<span class="comment">#关键字检测</span></span><br><span class="line">            <span class="keyword">return</span> <span class="string">&quot;fxxk hacker&quot;</span></span><br><span class="line">    template = <span class="string">&#x27;&lt;h1&gt;Hi, %s.&lt;/h1&gt;&#x27;</span> % person</span><br><span class="line">    <span class="keyword">return</span> render_template_string(template)</span><br><span class="line"><span class="meta">@app.route(<span class="params"><span class="string">&#x27;/shell&#x27;</span></span>)</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">test</span>():</span></span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;123&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    app.run()</span><br></pre></td></tr></table></figure><p>再次使用payload打一下，情况如下</p><p><img src="http://cdn.polowong.top/image-20221016005113292.png" alt="image-20221016005113292"></p><h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a href="https://xz.aliyun.com/t/10933#toc-4">https://xz.aliyun.com/t/10933#toc-4</a></p><p><a href="https://www.anquanke.com/post/id/279160#h3-11">https://www.anquanke.com/post/id/279160#h3-11</a></p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h1 id=&quot;Demo&quot;&gt;&lt;a href=&quot;#Demo&quot; class=&quot;headerlink&quot; title=&quot;Demo&quot;&gt;&lt;/a&gt;Demo&lt;/h1&gt;&lt;figure class=&quot;highlight python&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;p</summary>
+      
+    
+    
+    
+    
+    <category term="awd" scheme="https://polosec.github.io/tags/awd/"/>
+    
+    <category term="rdg" scheme="https://polosec.github.io/tags/rdg/"/>
+    
+  </entry>
   
   <entry>
     <title>实景防御赛Linux库文件劫持技术浅析</title>
@@ -420,26 +444,6 @@
     
     
     <category term="红队技能" scheme="https://polosec.github.io/tags/%E7%BA%A2%E9%98%9F%E6%8A%80%E8%83%BD/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>绿城杯AWD总结</title>
-    <link href="https://polosec.github.io/2021/10/15/%E7%BB%BF%E5%9F%8E%E6%9D%AFAWD%E6%80%BB%E7%BB%93/"/>
-    <id>https://polosec.github.io/2021/10/15/%E7%BB%BF%E5%9F%8E%E6%9D%AFAWD%E6%80%BB%E7%BB%93/</id>
-    <published>2021-10-14T17:07:20.000Z</published>
-    <updated>2021-10-14T17:13:11.000Z</updated>
-    
-    <content type="html"><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>这次打绿城杯代价挺大的，改签机票提前住了一晚宾馆，在高铁站打了一天初赛；进了线下学校不报销路费，来回平均一个人1500块，一共去了四个人。最后的结果是上午CTF一分没拿，下午AWD打到了第九名，总体排名还是没有排到前9，只给了优胜奖。撇去自身实力原因外，我想吐槽组委会：为什么本来说只有AWD结果上午打CTF?说是CTF/AWD分值一比一，是否严格履行？你线下AWD搞个CTF是什么意思？防止PY上午不禁止去厕所，下午AWD却禁止去厕所，谁AWD还有空去PY？消息通知混乱，到了郑州才知道要做核酸，获奖队伍少，奖金少，无现金，只有E卡。我愿称之为全国最穷国家网络安全宣传周活动。<br>下面说我在比赛中返的一些错误。上午CTF，本人菜，没啥好说的。</p><h1 id="致命"><a href="#致命" class="headerlink" title="致命"></a>致命</h1><p>AWD流程环节出现严重问题。赛前演练四个人的配合中都没有演练到文件监控脚本的使用，导致被别人种了不死马掉大分。在监控不到流量、pwn题下线、web一直被打的情况下当时没有想到不死马这个事情，是我疏忽了。上了文件监控脚本后再也没失分。（自动删除不死马及任何新上传的文件，无crontab，这里需要注意的是，<strong>比赛的时候我忘记crontab路径了，只能看当前user，但shell的权限大部分是www-data需要加强记忆</strong>）</p><h1 id="严重"><a href="#严重" class="headerlink" title="严重"></a>严重</h1><p>脚本编写能力过差。当队友通过流量抓取到漏洞利用方式时，经我验证后应该迅速写出批量利用脚本，在这个地方卡住了，导致写脚本写的比较慢，应该是丢掉了许多分数。</p><p>无法自动提交flag。安恒的HTTPS流量不知道为啥抓不到，没有办法用脚本自动提交flag。</p><p>无法进一步利用已知漏洞种植不死马。这导致丢了很多分数</p><p>赛时脚本结构混乱，应将功能点分开，RCE利用和种马应同时尝试进行，利用马getflag的操作应该在另一个文件中。多线程尚未熟练掌握</p><p>AOIAWD赛前未成功部署，仅靠watchbird总是感觉力不从心。</p><h1 id="轻微"><a href="#轻微" class="headerlink" title="轻微"></a>轻微</h1><p>赛时紧张，对待队友的态度有时过激。</p><h1 id="改进"><a href="#改进" class="headerlink" title="改进"></a>改进</h1><p>1.提高脚本编写能力，掌握多线程，优化脚本结构</p><p>2.在AWD演练中尝试使用RCE漏洞种植不死马并getflag。</p><p>3.本地部署AOIAWD</p><p>4.crontab路径熟记，防止有人写crontab。</p><p>5.模拟时严格演练流程，优化分工。</p><p>6.应正确对待队友，克制自己的情绪。</p><h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>这次我有点拉跨，不过队友的表现很好，能各司其职的负责我所分配的认为（流量、赛题监控、备份与恢复、杀毒、流量告警等）我认为我的队友第一次打线下AWD能做到这种程度比我强太多了。下次AWD一定拿下！</p>]]></content>
-    
-    
-      
-      
-    <summary type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;这次打绿城杯代价挺大的，改签机票提前住了一晚宾馆，在高铁站打了一天初赛；进了线下学校不报销路费，来回平均一个人1500块，一共去了四个人。最</summary>
-      
-    
-    
-    
     
   </entry>
   
