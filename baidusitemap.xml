@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>https://polosec.github.io/2022/10/16/BUGKU-PAR-%E5%BA%94%E6%80%A5%E5%8A%A0%E5%9B%BA/</loc>
+    <lastmod>2022-10-17</lastmod>
+  </url>
+  <url>
     <loc>https://polosec.github.io/2022/10/16/Flask%E5%86%85%E5%AD%98%E9%A9%AC%E7%9A%84%E6%A3%80%E6%B5%8B%E4%B8%8E%E6%B8%85%E9%99%A4/</loc>
     <lastmod>2022-10-15</lastmod>
   </url>
