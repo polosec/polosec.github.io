@@ -6,7 +6,7 @@
   <link href="https://polosec.github.io/atom.xml" rel="self"/>
   
   <link href="https://polosec.github.io/"/>
-  <updated>2022-10-23T14:53:13.199Z</updated>
+  <updated>2022-11-14T13:55:25.487Z</updated>
   <id>https://polosec.github.io/</id>
   
   <author>
@@ -15,6 +15,28 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>四川省信息安全技术大赛 AWD部分WriteUp</title>
+    <link href="https://polosec.github.io/2022/11/14/%E5%9B%9B%E5%B7%9D%E7%9C%81%E4%BF%A1%E6%81%AF%E5%AE%89%E5%85%A8%E6%8A%80%E6%9C%AF%E5%A4%A7%E8%B5%9B-AWD%E9%83%A8%E5%88%86WriteUp/"/>
+    <id>https://polosec.github.io/2022/11/14/%E5%9B%9B%E5%B7%9D%E7%9C%81%E4%BF%A1%E6%81%AF%E5%AE%89%E5%85%A8%E6%8A%80%E6%9C%AF%E5%A4%A7%E8%B5%9B-AWD%E9%83%A8%E5%88%86WriteUp/</id>
+    <published>2022-11-14T13:52:55.000Z</published>
+    <updated>2022-11-14T13:55:25.487Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="写在前面"><a href="#写在前面" class="headerlink" title="写在前面"></a>写在前面</h1><p>有一年多没打过awd了，这次awd的题目正好遇到了会的，一道PHP一道python还有一个java，队伍里面正好有个java佬，直接起飞。</p><p>初始分七万，15分钟一轮，一个flag一百分，最后打了22w多分，我们14w分的时候第二名才11w，具体最后差我们多少不太清楚。</p><p>题外话：敢欺负我师弟？无所谓，我会出手。（</p><p>我主要做的php和python题，所以就说下这两道题怎么做的</p><h1 id="PHP"><a href="#PHP" class="headerlink" title="PHP"></a>PHP</h1><p>由于前30分钟是加固时间，所以可以不慌不忙的把php修好。</p><p>php这道题拿到手SSH上去之后首先做的就是对网站进行整站备份，为了加快scp/sftp传输速度，直接tar压缩整站。</p><p>源代码搞下来之后用D盾、河马进行webshell查杀，使用seay进行自动代码审计，一共找到了<strong>两三个读flag点，一个文件上传点</strong>。</p><p>在复原的时候还是尽量按照AWD赛时的思路去还原，争取还原选手赛时最真实的思路。</p><p>备份下源代码之后我们尝试开启waf的流量记录功能或者weblogger，但是我们自己魔改后的waf开不起来，并且担心主办方check原版waf的路径，所以最后没有开waf。</p><p>weblogger部署之后站点无法正常访问，遂放弃，本次AWD PHP题所有的漏洞点均为人工审计得出。</p><p>接下来先随意看一下目录有没有隐藏文件或者敏感文件，在根目录发现db.sql，直接删掉</p><p><img src="http://cdn.polowong.top/image-20221114211911607.png" alt="image-20221114211911607"></p><p>接下来根据经验去查看uploads目录是否有可疑文件</p><p><img src="http://cdn.polowong.top/image-20221114211950195.png" alt="image-20221114211950195"></p><p>在检查完之后还需要做的就是连接数据库进行备份，这里我疏忽了忘记了备份，不过问题不大，应该是没有人能成功打进来我们的靶机进行提权或者破坏，不过无法确定，因为这次的平台没有给每道题的状态，如靶机是否down，每轮是否被check等，呵呵。</p><p>进入数据库之后要做的就是修改网站后台密码，这也是常识了，一般来说网站后台密码是弱口令，试了下123456还是admin来着就进去了。</p><p>这里改密码出了点问题，我以为密码是MD5之后的值 但是我md5之后的结果和网站存储的结果不太一样，所以后面我改掉之后自己的网站也没有再上去了，只要保证别人登不进去后台就可以，我自己需要的话可以在改回去默认的密码。</p><p>网站后台改完基本上数据库也OK了，接下来进行代码审计</p><h2 id="命令执行与任意SQL执行"><a href="#命令执行与任意SQL执行" class="headerlink" title="命令执行与任意SQL执行"></a>命令执行与任意SQL执行</h2><h3 id="manage-comment-del-php"><a href="#manage-comment-del-php" class="headerlink" title="manage_comment_del.php"></a>manage_comment_del.php</h3><p><img src="http://cdn.polowong.top/image-20221114212500151.png" alt="image-20221114212500151"></p><p>这个点有命令执行，但是我无法执行命令，因为当时加固阶段网站被waf搞down了，所以我直接修了</p><p><img src="http://cdn.polowong.top/image-20221114212544836.png" alt="image-20221114212544836"></p><p><img src="http://cdn.polowong.top/image-20221114212641835.png" alt="image-20221114212641835"></p><p>这里的修复方式同理，不再赘述。</p><h3 id="Manage-rce-php"><a href="#Manage-rce-php" class="headerlink" title="Manage_rce.php"></a><strong>Manage_rce.php</strong></h3><p><img src="http://cdn.polowong.top/image-20221114212809933.png" alt="image-20221114212809933"></p><p><img src="http://cdn.polowong.top/image-20221114213001674.png" alt="image-20221114213001674"></p><p>修复方式也很简单 直接把对应的代码删掉</p><h3 id="manage-sql-php"><a href="#manage-sql-php" class="headerlink" title="manage_sql.php"></a>manage_sql.php</h3><p>这题给👴🏻整乐了，看到SQL注入都不load_file是吧，说句题外话，在打网站后台漏洞的时候我根本没打过rce，直接打SQL语句这个点，过了很久了大部分人还没修，乐。</p><p><img src="http://cdn.polowong.top/image-20221114213126545.png" alt="image-20221114213126545"></p><p>把TRUE改成FALSE就可以修复了。</p><h2 id="任意文件上传"><a href="#任意文件上传" class="headerlink" title="任意文件上传"></a>任意文件上传</h2><h3 id="user-upload-php"><a href="#user-upload-php" class="headerlink" title="user_upload.php"></a>user_upload.php</h3><p><img src="http://cdn.polowong.top/image-20221114213328286.png" alt="image-20221114213328286"></p><p>没啥过滤，修复方法如下</p><p><img src="http://cdn.polowong.top/image-20221114213441556.png" alt="image-20221114213441556"></p><p>PHP题基本就到这里了，后面或许出了新洞，没有再审计了，一直在干flask内存马。</p><h1 id="Python"><a href="#Python" class="headerlink" title="Python"></a>Python</h1><p>python这题给了一个blog系统，是flask写的，那么我首先想到的就是模板注入。</p><p>代码看了半天也没啥收获，其实这里我的思路有点问题，我忘记直接去搜render_template_string了。直接搜的话可以在加固阶段直接定位到漏洞点。在加固阶段这题也没看出来啥，代码太多了，上去网站功能也很多，前两个小时就没怎么管这道题。</p><p>后面我们java和php题都搞完了之后发现有扣分，估计就是python题出问题了，好巧不巧根目录给了web日志</p><p><img src="http://cdn.polowong.top/image-20221114213804022.png" alt="image-20221114213804022"></p><p>那么就可以充分发挥流量人的特长，看日志。</p><p>日志中有大量扫描器等垃圾流量，试了试不太行，最后发现扣分的时候一直有向/auth/reset路由发送请求，遂进入代码查看</p><p><img src="http://cdn.polowong.top/image-20221114213936187.png" alt="image-20221114213936187"></p><p>看最后的渲染方法是什么，flask人狂喜，已经可以定位漏洞点就在这里了，我首先做的是修复，其次是批量攻击</p><p>这题修也非常简单，我直接把花括号过滤了,传了花括号直接返回</p><p><img src="http://cdn.polowong.top/image-20221114214124190.png" alt="image-20221114214124190"></p><p>下面需要做的就是对这题进行利用，知道这个漏洞点之后我自己试了一下，但是并没有回显SSTI打过去的payload，比较奇怪，我以为是自己payload的问题，遂写了几句话看一下别人payload</p><p><img src="http://cdn.polowong.top/image-20221114214314454.png" alt="image-20221114214314454"></p><p>最后看到payload就是最简单的ssti payload，由于备份没有存所以展示不了了。可以去看hackbar最简单的那个。</p><p>既然确定了是在这里利用漏洞，那么回显的flag在哪里？</p><p>我从burp直接看了render后的结果，然后翻了一下源代码发现回显结果是以注释的形式体现，所以这题也就解出来了，最后写脚本批量交，每一轮能打四千多分。</p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h1 id=&quot;写在前面&quot;&gt;&lt;a href=&quot;#写在前面&quot; class=&quot;headerlink&quot; title=&quot;写在前面&quot;&gt;&lt;/a&gt;写在前面&lt;/h1&gt;&lt;p&gt;有一年多没打过awd了，这次awd的题目正好遇到了会的，一道PHP一道python还有一个java，队伍里面正好有个java</summary>
+      
+    
+    
+    
+    
+    <category term="awd" scheme="https://polosec.github.io/tags/awd/"/>
+    
+  </entry>
   
   <entry>
     <title>2022巅峰极客_ez_forensic</title>
@@ -427,26 +449,6 @@
       
     <summary type="html">&lt;p&gt;PKU的一道简单flask web题 感觉挺有意思的&lt;br&gt;代码如下&lt;/p&gt;
 &lt;figure class=&quot;highlight python&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br</summary>
-      
-    
-    
-    
-    
-  </entry>
-  
-  <entry>
-    <title>广东省强网杯运维赛部分WP</title>
-    <link href="https://polosec.github.io/2021/11/15/%E5%B9%BF%E4%B8%9C%E7%9C%81%E5%BC%BA%E7%BD%91%E6%9D%AF%E8%BF%90%E7%BB%B4%E8%B5%9B%E9%83%A8%E5%88%86WP/"/>
-    <id>https://polosec.github.io/2021/11/15/%E5%B9%BF%E4%B8%9C%E7%9C%81%E5%BC%BA%E7%BD%91%E6%9D%AF%E8%BF%90%E7%BB%B4%E8%B5%9B%E9%83%A8%E5%88%86WP/</id>
-    <published>2021-11-15T12:45:56.000Z</published>
-    <updated>2021-11-15T13:41:17.000Z</updated>
-    
-    <content type="html"><![CDATA[<p>上周末打了强网杯，某赛道打了第三名拿了二等奖，上午是运维赛，下午是awd。<br>上午的运维赛出的还可以，我觉得难度相对低一点，一共12道题，到最后基本有一半的人能做出来6-8道左右，本赛道第三-八名全部是8道题。这次拿奖得亏了有pwn👴去修题，我web应急响应做的不如别人多。</p><p>吐槽：下午的AWD纯脑瘫，参赛手册写的是AWDP，赛制介绍则是AWD。不一致也就算了，下午AWD只给一道巨难的pwn是什么意思？最后放hint连exp都快放完了，最后只有高校组有1-2支队伍在打，其他赛道全在罚坐。</p><h1 id="web运维"><a href="#web运维" class="headerlink" title="web运维"></a>web运维</h1><h2 id="反序列化"><a href="#反序列化" class="headerlink" title="反序列化"></a>反序列化</h2><p>有一个存在反序列化漏洞的页面，大体意思就是传入参数之后反序列化进行命令执行，题目本身给了waf，只不过关键词比较少。如 blacklist=’\php|flag|system|&#39;;自己加一些关键字就好了</p><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$pattern</span> = <span class="string">&quot;\/\*|\*|\.\.\/|\.\/|union|into|load_file|outfile|dumpfile|sub|hex|file_put_contents|file_get_contents|fwrite|curl|system|eval|shell_exec|cat|tac|more|flag|base64|assert|passthru|readfile|php\:\/\/|file\:\/\/|fread|create\_function|php|script|\&lt;\?php|\&#x27;|\&quot;|\(|\)|\&amp;&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="variable">$back_list</span> = explode(<span class="string">&quot;|&quot;</span>,<span class="variable">$pattern</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">foreach</span>(<span class="variable">$back_list</span> <span class="keyword">as</span> <span class="variable">$hack</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span>(preg_match(<span class="string">&quot;/<span class="subst">$hack</span>/i&quot;</span>, <span class="variable">$query</span>))  <span class="comment">// 假设用户输入的参数是 $query</span></span><br><span class="line">        <span class="keyword">die</span>(<span class="string">&quot;hack detected!&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p>多加了几个关键字这题的check就过了</p><h2 id="不死马"><a href="#不死马" class="headerlink" title="不死马"></a>不死马</h2><p> ls -all 看了一下有.2.php，我直接 rm -rf 删完之后这个check点还是没有过，之后又ll看了下发现是不死马。<br> 杀不死马有2种思路，第一种是写脚本无限循环删除，python或者shell或者php脚本都可以，第二种是重启php-fpm服务。这次给的权限比较高，是root，可以直接重启。但是在大部分awd比赛中可能没有重启服务的权限，所以第一种思路是必行的。<br> 附脚本<br> <figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"> <span class="keyword">while</span> :</span><br><span class="line"><span class="keyword">do</span></span><br><span class="line">rm -rf .3.php;</span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;remove success&quot;</span>;</span><br><span class="line"><span class="keyword">done</span></span><br></pre></td></tr></table></figure><br>上传上去之后chmod u+x 1.sh 然后 nohup ./1.sh &amp;挂着跑就可以了。</p><h2 id="phpinfo信息泄露"><a href="#phpinfo信息泄露" class="headerlink" title="phpinfo信息泄露"></a>phpinfo信息泄露</h2><p>没啥好说的，删了就行。</p><h2 id="后门"><a href="#后门" class="headerlink" title="后门"></a>后门</h2><p>把源码搞下来放到D盾查杀，查到了后门，直接删掉就好，还有XXE，文件也是直接删掉就好。</p><h1 id="应急响应"><a href="#应急响应" class="headerlink" title="应急响应"></a>应急响应</h1><h2 id="挖矿"><a href="#挖矿" class="headerlink" title="挖矿"></a>挖矿</h2><p>web就那么几道题我是妹想到的，我以为后面还会放题，专门问了主办方，主办方说一次放完，好吧，那估计是要在其他地方找patch点了。top看了一下，有一个进程的cpu利用率过高，在/home/ctf/mxxx目录下（具体目录名称记不清了）是一个elf文件，同目录下还有json的配置文件，直觉告诉我是挖矿。挖矿程序常在tmp目录写点东西，这里的操作就是首先干掉挖矿进程，然后删掉挖矿程序以及tmp目录下对应的内容，然后查看crontab防止再次下载与自启动。</p><h2 id="crontab"><a href="#crontab" class="headerlink" title="crontab"></a>crontab</h2><p>crontab这题我应该是妹做出来，异常点是ctf用户的crontab，我是root用户。看了 /var/spool/cron/crontabs没看到啥东西,就没在看。赛后师傅说了下 crontab -user -l 也可以看指定用户的crontab。。学到了</p><h2 id="外连socket"><a href="#外连socket" class="headerlink" title="外连socket"></a>外连socket</h2><p>netstat -antlp 之后发现有向9999端口外连的行为，然后ps aux 和ps ef 之后看到了命令类似 sh -c python3 -c “__import__(‘os’).system(‘xxxxxx’)”。可以确定是这些进程建立了socket连接，但是找不到具体是谁起了这些进程…就很无奈，杀也杀不掉，这里我的处理方法是把python3的软连接给干掉了。因为通过观察进程发现除了这些外连的没有用py3起的进程。这里其实是有个so文件被修改了，后面pwn的队友修复的。</p><h2 id="ssh公钥"><a href="#ssh公钥" class="headerlink" title="ssh公钥"></a>ssh公钥</h2><p>ssh 免密登录存放的公钥在~/.ssh/authorized_keys文件里面，由于我们是私钥登录，但是里面有三个公钥，我们只保留了我们私钥对应的公钥，其他公钥全给删了。</p><h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>这次运维赛相对基础，就当温习一下应急响应了。毕竟只正经做过一次：）</p>]]></content>
-    
-    
-      
-      
-    <summary type="html">&lt;p&gt;上周末打了强网杯，某赛道打了第三名拿了二等奖，上午是运维赛，下午是awd。&lt;br&gt;上午的运维赛出的还可以，我觉得难度相对低一点，一共12道题，到最后基本有一半的人能做出来6-8道左右，本赛道第三-八名全部是8道题。这次拿奖得亏了有pwn👴去修题，我web应急响应做的不如别</summary>
       
     
     
