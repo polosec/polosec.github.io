@@ -17,13 +17,13 @@
   <meta http-equiv="window-target" content="_top" />
   
   
-  <title>玄机-应急响应-redis-mysql-BT3-权限维持 | Polo&#39;s Blog</title>
-  <meta name="description" content="redis ER考点：redis主从复制getshell、github溯源、linux ER基础 题目123451,黑客攻击成功的ip flag&amp;#123;127.0.0.1&amp;#125;2,黑客第一次上传的恶意文件  flag&amp;#123;xxxxxxxx&amp;#125;3,黑客反弹shell的ip flag&amp;#123;ip&amp;#125;4,黑客的用户名和溯源分析后的flag flag格式 flag&amp;#1">
+  <title>玄机应急响应靶场-redis-mysql-BT3-权限维持 | Polo&#39;s Blog</title>
+  <meta name="description" content="前言EDISEC的应急响应靶场，题目质量很好，比较贴合实战。 投稿可以给邀请码哦。靶场地址:https:&#x2F;&#x2F;xj.edisec.net&#x2F;challenges redis ER考点：redis主从复制getshell、github溯源、linux ER基础 题目123451,黑客攻击成功的ip flag&amp;#123;127.0.0.1&amp;#125;2,黑客第一次上传的恶意文件  flag&amp;#123;xx">
 <meta property="og:type" content="article">
-<meta property="og:title" content="玄机-应急响应-redis-mysql-BT3-权限维持">
+<meta property="og:title" content="玄机应急响应靶场-redis-mysql-BT3-权限维持">
 <meta property="og:url" content="https://polosec.github.io/2023/12/22/%E7%8E%84%E6%9C%BA-ER-01/index.html">
 <meta property="og:site_name" content="Polo&#39;s Blog">
-<meta property="og:description" content="redis ER考点：redis主从复制getshell、github溯源、linux ER基础 题目123451,黑客攻击成功的ip flag&amp;#123;127.0.0.1&amp;#125;2,黑客第一次上传的恶意文件  flag&amp;#123;xxxxxxxx&amp;#125;3,黑客反弹shell的ip flag&amp;#123;ip&amp;#125;4,黑客的用户名和溯源分析后的flag flag格式 flag&amp;#1">
+<meta property="og:description" content="前言EDISEC的应急响应靶场，题目质量很好，比较贴合实战。 投稿可以给邀请码哦。靶场地址:https:&#x2F;&#x2F;xj.edisec.net&#x2F;challenges redis ER考点：redis主从复制getshell、github溯源、linux ER基础 题目123451,黑客攻击成功的ip flag&amp;#123;127.0.0.1&amp;#125;2,黑客第一次上传的恶意文件  flag&amp;#123;xx">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="http://cdn.polowong.top/image-20231222170618501.png">
 <meta property="og:image" content="http://cdn.polowong.top/image-20231222170542900.png">
@@ -46,7 +46,7 @@
 <meta property="og:image" content="http://cdn.polowong.top/image-20231222205528811.png">
 <meta property="og:image" content="http://cdn.polowong.top/image-20231222205751243.png">
 <meta property="article:published_time" content="2023-12-22T13:02:39.000Z">
-<meta property="article:modified_time" content="2023-12-22T13:06:05.466Z">
+<meta property="article:modified_time" content="2023-12-22T13:34:35.507Z">
 <meta property="article:author" content="Polo">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="http://cdn.polowong.top/image-20231222170618501.png">
@@ -231,7 +231,7 @@
                 
               </p>
               <p class="item-title">
-                <a href="/2023/12/22/%E7%8E%84%E6%9C%BA-ER-01/" class="title">玄机-应急响应-redis-mysql-BT3-权限维持</a>
+                <a href="/2023/12/22/%E7%8E%84%E6%9C%BA-ER-01/" class="title">玄机应急响应靶场-redis-mysql-BT3-权限维持</a>
               </p>
               <p class="item-date">
                 <time datetime="2023-12-22T13:02:39.000Z" itemprop="datePublished">2023-12-22</time>
@@ -319,7 +319,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      玄机-应急响应-redis-mysql-BT3-权限维持
+      玄机应急响应靶场-redis-mysql-BT3-权限维持
     </h1>
   
 
@@ -346,17 +346,19 @@
         <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2023/12/22/%E7%8E%84%E6%9C%BA-ER-01/#comments" class="article-comment-link">Comments</a></span>
         
 	
-		<span class="post-wordcount hidden-xs" itemprop="wordCount">Word Count: 894(words)</span>
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">Word Count: 979(words)</span>
 	
 	
-		<span class="post-readcount hidden-xs" itemprop="timeRequired">Read Count: 3(minutes)</span>
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">Read Count: 4(minutes)</span>
 	
 
       </div>
     </div>
     <div class="article-entry marked-body" itemprop="articleBody">
       
-        <h1 id="redis-ER"><a href="#redis-ER" class="headerlink" title="redis ER"></a>redis ER</h1><p>考点：redis主从复制getshell、github溯源、linux ER基础</p>
+        <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>EDISEC的应急响应靶场，题目质量很好，比较贴合实战。</p>
+<p>投稿可以给邀请码哦。靶场地址:<a target="_blank" rel="noopener" href="https://xj.edisec.net/challenges">https://xj.edisec.net/challenges</a></p>
+<h1 id="redis-ER"><a href="#redis-ER" class="headerlink" title="redis ER"></a>redis ER</h1><p>考点：redis主从复制getshell、github溯源、linux ER基础</p>
 <h2 id="题目"><a href="#题目" class="headerlink" title="题目"></a>题目</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">1,黑客攻击成功的ip flag&#123;127.0.0.1&#125;</span><br><span class="line">2,黑客第一次上传的恶意文件  flag&#123;xxxxxxxx&#125;</span><br><span class="line">3,黑客反弹shell的ip flag&#123;ip&#125;</span><br><span class="line">4,黑客的用户名和溯源分析后的flag flag格式 flag&#123;黑客的用户-关键字符串&#125; 注关键字符串 xxx-xxx-xxx-flag</span><br><span class="line">5,黑客篡改的命令 flag格式为：flag&#123;一个md5字符串&#125;</span><br></pre></td></tr></table></figure>
 
 <h2 id="1"><a href="#1" class="headerlink" title="1"></a>1</h2><p> 13在爆破，20在主从复制，这两个ip交了都对</p>
@@ -377,7 +379,8 @@
 <p><img src="http://cdn.polowong.top/image-20231222171138662.png" alt="image-20231222171138662"></p>
 <p>常见的考点了</p>
 <p><img src="http://cdn.polowong.top/image-20231222171152663.png" alt="image-20231222171152663"></p>
-<h1 id="mysql-ER"><a href="#mysql-ER" class="headerlink" title="mysql ER"></a>mysql ER</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">1.黑客第一次写入的shell flag&#123;关键字符串&#125; </span><br><span class="line">2.黑客反弹shell的ip flag&#123;ip&#125;</span><br><span class="line">3.黑客提权文件的完整路径 md5 flag&#123;md5&#125; 注 &#x2F;xxx&#x2F;xxx&#x2F;xxx&#x2F;xxx&#x2F;xxx.xx</span><br><span class="line">4.黑客获取的权限 flag&#123;whoami后的值&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="mysql-ER"><a href="#mysql-ER" class="headerlink" title="mysql ER"></a>mysql ER</h1><p>考点：读配置文件，寻找webshell</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">1.黑客第一次写入的shell flag&#123;关键字符串&#125; </span><br><span class="line">2.黑客反弹shell的ip flag&#123;ip&#125;</span><br><span class="line">3.黑客提权文件的完整路径 md5 flag&#123;md5&#125; 注 &#x2F;xxx&#x2F;xxx&#x2F;xxx&#x2F;xxx&#x2F;xxx.xx</span><br><span class="line">4.黑客获取的权限 flag&#123;whoami后的值&#125;</span><br></pre></td></tr></table></figure>
 
 <h2 id="1-1"><a href="#1-1" class="headerlink" title="1"></a>1</h2><p>/var/www/html/sh.php</p>
 <p><img src="http://cdn.polowong.top/image-20231222171614746.png" alt="image-20231222171614746"></p>
@@ -387,7 +390,8 @@
 <p>flag{b1818bde4e310f3d23f1005185b973e7}</p>
 <p><img src="http://cdn.polowong.top/image-20231222172012044.png" alt="image-20231222172012044"></p>
 <h2 id="4-1"><a href="#4-1" class="headerlink" title="4"></a>4</h2><p>mysql用户权限 udf之后不用想肯定是mysql</p>
-<h2 id="蓝队的小心思3"><a href="#蓝队的小心思3" class="headerlink" title="蓝队的小心思3"></a>蓝队的小心思3</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">1. 审计日志，攻击者下载恶意木马文件的 ip是多少 flag&#123;ip&#125;</span><br><span class="line">2. 审计流量包，木马文件连接密码是什么? flag&#123;xxx&#125;</span><br><span class="line">3. 审计流量包，攻击者反弹的IP和端口是什么? flag&#123;ip:port&#125;</span><br><span class="line">4. 攻击者尝试了提权，请写出攻击者上传的恶意文件中的flag flag&#123;xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx&#125;</span><br><span class="line">5. 攻击者在服务器内权限维持请求外部地址和恶意文件的地址 flag&#123;http:&#x2F;&#x2F;xxxxxxxxxx&#x2F;xx.xxx&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="蓝队的小心思3"><a href="#蓝队的小心思3" class="headerlink" title="蓝队的小心思3"></a>蓝队的小心思3</h2><p>考点：中间件日志分析，加密webshell分析，redis主从复制rce</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">1. 审计日志，攻击者下载恶意木马文件的 ip是多少 flag&#123;ip&#125;</span><br><span class="line">2. 审计流量包，木马文件连接密码是什么? flag&#123;xxx&#125;</span><br><span class="line">3. 审计流量包，攻击者反弹的IP和端口是什么? flag&#123;ip:port&#125;</span><br><span class="line">4. 攻击者尝试了提权，请写出攻击者上传的恶意文件中的flag flag&#123;xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx&#125;</span><br><span class="line">5. 攻击者在服务器内权限维持请求外部地址和恶意文件的地址 flag&#123;http:&#x2F;&#x2F;xxxxxxxxxx&#x2F;xx.xxx&#125;</span><br></pre></td></tr></table></figure>
 
 <p>1.</p>
 <p>cat /var/log/apache/acc* </p>
@@ -405,9 +409,11 @@
 <p>根目录 cat module.so | grep flag即可</p>
 <h2 id="5-1"><a href="#5-1" class="headerlink" title="5"></a>5</h2><p>/etc/crontab</p>
 <p><a target="_blank" rel="noopener" href="http://192.168.150.199:88/shell.php">http://192.168.150.199:88/shell.php</a></p>
-<h1 id="权限维持-linux权限维持-隐藏"><a href="#权限维持-linux权限维持-隐藏" class="headerlink" title="权限维持-linux权限维持-隐藏"></a>权限维持-linux权限维持-隐藏</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">ssh root@env.xj.edisec.net -p  密码  xjqxwcyc</span><br><span class="line">1.黑客隐藏的隐藏的文件 完整路径md5</span><br><span class="line">2.黑客隐藏的文件反弹shell的ip+端口 &#123;ip:port&#125;</span><br><span class="line">3.黑客提权所用的命令 完整路径的md5 flag&#123;md5&#125; </span><br><span class="line">4.黑客尝试注入恶意代码的工具完整路径md5</span><br><span class="line">5.使用命令运行 .&#x2F;x.xx 执行该文件  将查询的 Exec****** 值 作为flag提交 flag&#123;&#x2F;xxx&#x2F;xxx&#x2F;xxx&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="权限维持-linux权限维持-隐藏"><a href="#权限维持-linux权限维持-隐藏" class="headerlink" title="权限维持-linux权限维持-隐藏"></a>权限维持-linux权限维持-隐藏</h1><p>考点：动态链接库劫持、linux ER基础</p>
+<p>题目</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">ssh root@env.xj.edisec.net -p  密码  xjqxwcyc</span><br><span class="line">1.黑客隐藏的隐藏的文件 完整路径md5</span><br><span class="line">2.黑客隐藏的文件反弹shell的ip+端口 &#123;ip:port&#125;</span><br><span class="line">3.黑客提权所用的命令 完整路径的md5 flag&#123;md5&#125; </span><br><span class="line">4.黑客尝试注入恶意代码的工具完整路径md5</span><br><span class="line">5.使用命令运行 .&#x2F;x.xx 执行该文件  将查询的 Exec****** 值 作为flag提交 flag&#123;&#x2F;xxx&#x2F;xxx&#x2F;xxx&#125;</span><br></pre></td></tr></table></figure>
 
-<h2 id="1-2"><a href="#1-2" class="headerlink" title="1"></a>1</h2><p>libprocesshider隐藏进程，文件名在processhider.c中</p>
+<h2 id="1-2"><a href="#1-2" class="headerlink" title="1"></a>1</h2><p>libprocesshider隐藏进程，文件名在processhider中</p>
 <p><img src="http://cdn.polowong.top/image-20231222200444377.png" alt="image-20231222200444377"></p>
 <p>文件名是1.py</p>
 <p>绝对路径是/tmp/.temp/libprocesshider/1.py</p>
